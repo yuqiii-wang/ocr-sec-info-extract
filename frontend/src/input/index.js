@@ -8,7 +8,7 @@ import './css/Input.css';
 const InputComponent = () => {
 
     const { answerLoading, isMainAskDone, setAnswerLoading, referenceCodeSepOffset,
-        setSummaryResults, setIsMainAskDone } = useContext(GlobalAppContext);
+        setSummaryResults, setIsMainAskDone, isOnInputShow, setIsOnInputShow } = useContext(GlobalAppContext);
 
   const handlePostRequest = async () => {
     try {
@@ -27,11 +27,11 @@ const InputComponent = () => {
   };
 
   return (
-    <Container className="input-card border rounded">
+    <Container className={`"input-card ${isOnInputShow ? 'active' : ''}`}
+    >
       <Row className="justify-content-start align-items-end" 
-      style={{ height: `${Math.max(6.5, 12-referenceCodeSepOffset)}rem`, margin: "1%" }}>
-        <Col >
-              <Form style={{ flexGrow: 1 }}>
+      style={{ height: `${Math.min(32, 12+referenceCodeSepOffset)}rem`, margin: "1%" }}>
+              <Form >
               <Form.Label>Upload a file</Form.Label>
                 <FileUploadComponent />
               </Form>
@@ -44,7 +44,6 @@ const InputComponent = () => {
                     )}
                 </Button>
               </div>
-        </Col>
       </Row>
     </Container>
   );

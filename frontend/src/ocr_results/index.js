@@ -8,7 +8,7 @@ const ReferenceComponent = () => {
 
     return (
         <Container className="image-reference-container border rounded"
-        style={{height: `${Math.max(6.5, 28-referenceCodeSepOffset)}rem` }}>
+        style={{height: `${Math.max(8, 28-referenceCodeSepOffset)}rem` }}>
                 {solutionLoading ? (
                     <Spinner
                         as="span"

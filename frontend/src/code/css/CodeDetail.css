@@ -1,13 +1,22 @@
-.input-card {
-    height: "10rem";
-    margin-top: "3px";
-    display: "flex";
+.code-card-container {
+    margin-bottom: 0.1rem;
     opacity: 0; /* Initially hidden */
   transform: translateX(-100%); /* Slide out of view */
   transition: opacity 0.5s ease, transform 0.5s ease; /* Animation properties */
 }
 
-.input-card.active {
+/* Active Container */
+.code-card-container.active {
     opacity: 1; /* Show container */
     transform: translateX(0); /* Move container into view */
   }
+
+.code-card-content-container {
+    margin-bottom: 0.1rem;
+}
+
+.code-btn-container {
+    opacity: 0.6;
+    background-color: #67d1f8;
+    cursor: not-allowed;
+}

@@ -1,0 +1,36 @@
+.triangle-btn-container {
+    display: flex;
+  }
+  
+  /* General Styles for Triangular Buttons */
+.triangle-btn {
+    width: 2rem;
+    height: 2rem;
+    border-style: solid;
+    background-color: transparent;
+    cursor: pointer;
+    transition: border-color 0.3s ease; /* Smooth transition on hover */
+    outline: none; /* Remove button outline */
+  }
+
+  /* Left Triangle Button */
+  .triangle-left {
+    clip-path: polygon(100% 50%, 0 0, 0 100%); /* Triangle pointing left */
+    background-color: aliceblue;
+    color: aliceblue;
+  }
+  
+  .triangle-left:hover {
+    border-color: transparent darkgrey transparent transparent; /* Dark grey on hover */
+  }
+  
+  /* Right Triangle Button */
+  .triangle-right {
+    color: aliceblue;
+    clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Triangle pointing right */
+  }
+  
+  .triangle-right:hover {
+    border-color: transparent transparent transparent darkgrey; /* Dark grey on hover */
+  }
+  
