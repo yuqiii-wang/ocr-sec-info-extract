@@ -17,17 +17,18 @@ const FileUploadComponent = () => {
       const formData = new FormData();
       formData.append('file', file);
       setFileFormData(formData);
-      setFileData(URL.createObjectURL(file));
       setFileName(file.name);
 
       sendUploadFile();
   };
 
   const sendUploadFile = () => {
+    
     fetch('http://localhost:5000/process/fileupload', {
         method: 'POST',
         body: fileFormData,
-      })
+        mode: "cors"
+        })
         .then((response) => response.json())
         .then((data) => {
           setError('');
@@ -42,6 +43,7 @@ const FileUploadComponent = () => {
   const handleInputFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+        setFileData(file);
       handleFileUpload(file);
     }
   };

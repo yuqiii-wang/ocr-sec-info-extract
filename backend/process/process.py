@@ -1,9 +1,11 @@
 from typing import List, Union
 import zipfile
 from flask import Flask, request, jsonify, send_file, make_response
-import os
-from config import LOCAL_INPUT_IMAGE_DIR
+import os, io, zipfile, base64
+from backend.config import LOCAL_INPUT_IMAGE_DIR
+from backend.OCREngine import OCREngine
 
+ocr_engine = OCREngine()
 
 def process_upload_file(file):
     
@@ -14,14 +16,29 @@ def process_upload_file(file):
     file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, file.filename)
     file.save(file_path)
 
-    # Get file detail
-    file_detail = {
-        'file_name': file.filename,
-        'file_size': len(file.read()),
-        'content_type': file.content_type
+    return jsonify({"file_path": file_path}), 200
+
+def process_ocr(file_path):
+
+    text_bounding_boxes = ocr_engine.process_ocr(file_path)
+    json_output_path = ocr_engine.parse_ocr(text_bounding_boxes)
+    image_output_path = ocr_engine.draw_ocr(text_bounding_boxes)
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zip_file:
+        with open(image_output_path, "br") as filehanlde:
+            file_content = filehanlde.read()
+            zip_file.writestr(os.path.split(image_output_path)[-1], file_content)
+
+    
+    # Seek to the beginning of the stream
+    zip_buffer.seek(0)
+    encoded_zip = base64.b64encode(zip_buffer.getvalue()).decode('utf-8')
+    
+    # Create a JSON response containing the encoded zip file
+    response_data = {
+        "status": "success",
+        "solution_reference": json_output_path,
+        "zip_file": encoded_zip
     }
-
-    # To avoid file.read() affecting file.save(), the position should be reset
-    file.seek(0)
-
-    return jsonify(file_detail), 200
+    return jsonify(response_data), 200

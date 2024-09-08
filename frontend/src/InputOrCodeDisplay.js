@@ -13,12 +13,6 @@ const InputOrCodeDisplayWrapper = () => {
     const { isOnInputShow, setIsOnInputShow } = useContext(GlobalAppContext);
 
   return (
-    <div style={{display: "d-flex", justifyContent: 'flex-center'}}>
-        {isOnInputShow ? (
-            <TriangleRightButton></TriangleRightButton>
-        ):(
-            <TriangleLeftButton></TriangleLeftButton>
-        )}
       <Container className="border rounded"
       style={{width: "100%"}}>
         {isOnInputShow ? 
@@ -26,7 +20,6 @@ const InputOrCodeDisplayWrapper = () => {
             :(<CodeComponent></CodeComponent>)
         }
       </Container>
-      </div>
   );
 }
 
