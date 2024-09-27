@@ -1,34 +1,57 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 from flask_cors import CORS
-import os
+import os, flask
 from backend.process.process import (process_upload_file,
                                      process_ocr)
 
 # Create a Flask application instance
 app = Flask(__name__)
-CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
+CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
+                    r'/process/fileupload': {"origins": "http://localhost:3000"}},
+                    headers='Content-Type')
 app_dir = os.path.dirname(os.path.abspath(__file__))
+
+@app.after_request
+def apply_caching(response):
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/process/fileupload', methods=['POST'])
-def upload():
-    print(request.form)
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
+def fileupload():
     
+    if 'file' not in request.files:
+        resp = make_response(jsonify({'error': 'No file part in the request'}))
+        return resp
+
     file = request.files['file']
     if file.filename == '':
-        return "No selected file", 400
+        resp = make_response(jsonify({'error': 'No filename found.'}))
+        return resp
 
-    return process_upload_file(file)
+    if not '.png' in file.filename and not '.jpe' in file.filename:
+        resp = make_response(jsonify({'error': 'No must input image of .png or .jpg.'}))
+        return resp
+    
+    fileUuid = request.args.get("fileUuid")
 
-@app.route('/process/submit', methods=['GET'])
+    resp = make_response(process_upload_file(file, fileUuid))
+
+    return resp
+
+
+@app.route('/process/submit', methods=['POST'])
 def submit():
-    file_path = request.args.get("file_path")
-    return process_ocr(file_path)
+    data = request.get_json()
+    file_path = data.get("filepath")
+    resp = make_response(process_ocr(file_path))
+    return resp
     
 @app.route('/process/extract', methods=['POST'])
 def extract():

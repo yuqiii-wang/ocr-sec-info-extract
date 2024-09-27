@@ -1,6 +1,6 @@
 import React, {useState, useContext, useEffect, useRef, useCallback, } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, } from "react-bootstrap";
-import ImageReferenceDetails from "./ImageReferenceDetails";
+import ReferenceDetailComponent from "./ReferenceDetail";
 import { GlobalAppContext } from "../GlobalAppContext";
 
 const ReferenceComponent = () => {
@@ -18,7 +18,7 @@ const ReferenceComponent = () => {
                         aria-hidden="true"
                     />
                 ) : (
-                    <ImageReferenceDetails />
+                    <ReferenceDetailComponent />
                 )}
         </Container>
     );

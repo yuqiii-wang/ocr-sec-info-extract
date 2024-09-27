@@ -15,6 +15,9 @@ function GlobalAppContextManager({ children }) {
     const [referenceCodeSepOffset, setReferenceCodeSepOffset] = useState(0);
     const [referenceImageResults, setReferenceImageResults] = useState([]);
     const [isOnInputShow, setIsOnInputShow] = useState(true);
+    const [thisFileUuid, setThisFileUuid] = useState("");
+    const [thisFilepath, setThisFilepath] = useState("");
+    const [inputError, setInputError] = useState("");
 
     return (
       <GlobalAppContext.Provider value={{answerLoading, setAnswerLoading,
@@ -26,7 +29,10 @@ function GlobalAppContextManager({ children }) {
                                         isSolutionExecutionDone, setIsSolutionExecutionDone,
                                         referenceCodeSepOffset, setReferenceCodeSepOffset,
                                         referenceImageResults, setReferenceImageResults,
-                                        isOnInputShow, setIsOnInputShow
+                                        isOnInputShow, setIsOnInputShow,
+                                        thisFileUuid, setThisFileUuid,
+                                        thisFilepath, setThisFilepath,
+                                        inputError, setInputError
                                         }}>
         {children}
       </GlobalAppContext.Provider>

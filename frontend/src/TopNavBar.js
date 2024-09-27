@@ -11,14 +11,11 @@ function TopNavBar() {
         <Navbar.Brand href="#home">
           <img src={logo} alt="Logo" width="30" height="30" className="d-inline-block align-top" />{" "}
         </Navbar.Brand>
-        <Navbar.Brand href="#home">QA-RLHF</Navbar.Brand>
+        <Navbar.Brand href="#home">OCR to Scripts</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="#search">Search</Nav.Link>
-            <Nav.Link href="#audit">Audit</Nav.Link>
-            <Nav.Link href="#training">Training</Nav.Link>
-            <Nav.Link href="#about">About</Nav.Link>            
+            <Nav.Link href="#home">Home</Nav.Link>     
           </Nav>
         </Navbar.Collapse>
       </Container>

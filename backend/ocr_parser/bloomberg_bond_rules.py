@@ -20,7 +20,7 @@ REGEX_RULES = {
     "1st Settle Date": r"1st Settle Date[; ]*[\w\/]+",
 }
 
-def parse_bloomberg_bond_ocr(bounding_boxes:list[TextBoundingBox]) -> list[TextBoundingBox]:
+def parse_bloomberg_bond_ocr(bounding_boxes:list[TextBoundingBox]) -> tuple[list[TextBoundingBox], dict]:
     bounding_box_str = SEP.join([boudning_box.text for boudning_box in bounding_boxes])
     logger.info(bounding_box_str)
     found_bounding_boxes = []
