@@ -15,7 +15,15 @@ const InputComponent = () => {
         setIsOnInputShow, setReferenceImageResults,
         inputError, setInputError } = useContext(GlobalAppContext);
 
-    const handlePostRequest = async (event) => {
+    useEffect(() => {
+        
+    });
+
+    const handleSubmitRequest = async (event) => {
+        await processSubmitRequest(event);
+    }
+
+    const processSubmitRequest = async (event) => {
 
         try {
             if (thisFileUuid === "" ) {
@@ -46,7 +54,7 @@ const InputComponent = () => {
                     const referenceResults = data;
                     const images = await extractResponseImages(referenceResults);
                     setReferenceImageResults(images);
-                    console.log(referenceImageResults);
+                    console.log(images);
             }
             setAnswerLoading(false);
             })
@@ -78,7 +86,7 @@ const InputComponent = () => {
               </Form>
               {inputError && <Alert variant="danger" onClose={() => setInputError(null)} dismissible>{inputError}</Alert>}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop:"1%" }}>
-                <Button variant="primary" type="submit" onClick={handlePostRequest} disabled={answerLoading}>
+                <Button variant="primary" type="submit" onClick={handleSubmitRequest} disabled={answerLoading}>
                     {answerLoading ? (
                         <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
                         ) : (

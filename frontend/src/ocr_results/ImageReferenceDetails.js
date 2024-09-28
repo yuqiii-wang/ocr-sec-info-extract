@@ -5,23 +5,11 @@ import ImageReferenceDetail from './ImageReferenceDetail';
 
 const ImageReferenceDetails = () => {
     const {solutionLoading, referenceImageResults, setReferenceImageResults} = useContext(GlobalAppContext);
-    const [localReferenceImageResults, setLocalReferenceImageResults] = useState([]);
 
     const handleDeleteRow = (imageName) => {
-        setLocalReferenceImageResults(localReferenceImageResults.filter(image => image.name !== imageName));
-        setReferenceImageResults(localReferenceImageResults.filter(image => image.name !== imageName));
-        console.log(localReferenceImageResults);
+        setReferenceImageResults(referenceImageResults.filter(image => image.name !== imageName));
+        console.log(referenceImageResults);
     };
-    
-    useEffect(() => {
-        if (referenceImageResults.length == 0) return; // If clicked is false, skip the effect
-
-        const fetchData = async () => {
-            setLocalReferenceImageResults(referenceImageResults);
-        }
-        fetchData();
-
-      }, [localReferenceImageResults]);
 
   return (
     <React.Fragment >
@@ -33,7 +21,7 @@ const ImageReferenceDetails = () => {
         </Row>
       ) : (
         <Row>
-          {localReferenceImageResults.map((image , index) => (
+          {referenceImageResults.map((image , index) => (
                 <ImageReferenceDetail 
                 image={image}
                 key={image.name}

@@ -41,6 +41,5 @@ export async function extractResponseImages (referenceResults) {
     } catch (error) {
       console.error('Error fetching or unzipping the files:', error);
     }
-    console.log(imagesData);
     return imagesData;
   };

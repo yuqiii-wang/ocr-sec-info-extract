@@ -12,7 +12,6 @@ const ReferenceDetailComponent = () => {
     return (
         <div>
             <Container className="reference-detail-list-container"
-                style={{ height: `${Math.max(3.2, 28 - referenceCodeSepOffset)}rem` }}
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}>
                 {referenceImageResults != null ? (
