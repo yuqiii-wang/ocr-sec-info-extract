@@ -1,38 +1,30 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Spinner, Card } from 'react-bootstrap';
 import { GlobalAppContext } from "../GlobalAppContext";
+import "./css/ocr_results.css";
 
-const ImageReferenceDetail = ({image, onDelete}) => {
-    const {solutionLoading, referenceImageResults} = useContext(GlobalAppContext);
-    const [localReferenceImageResults, setLocalReferenceImageResults] = useState([])
+const ImageReferenceDetail = ({image, key, onDelete}) => {
+    const {solutionLoading, referenceImageResults,
+        referenceOCRJsonResults, setReferenceOCRJsonResults,
+        referenceCodeSepOffset
+    } = useContext(GlobalAppContext);
 
     const [hover, setHover] = useState(false);
-    
-    useEffect(() => {
-        if (referenceImageResults.length == 0) return; // If clicked is false, skip the effect
-
-        const fetchData = async () => {
-            setLocalReferenceImageResults(referenceImageResults);
-        }
-        fetchData();
-                    
-      }, [localReferenceImageResults]);
 
   return (
-            <Row className='position-relative'
+        <Row className='reference-detail'
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}>
-            <Col md={8} >
-            <Card>
-                <Card.Img variant="top" src={image.src} />
-            </Card>
+            <Col md={7} >
+                <Card.Img className='reference-detail' src={image.src} />
             </Col>
             <Col md={4}>
-                <p>json result. </p>
+                {referenceOCRJsonResults != "" 
+                    ? (<pre>{referenceOCRJsonResults}</pre>)
+                    : (<p>Empty results</p>)}
             </Col>
             {hover && (
-        <div
-          className="position-absolute"
+        <Col md={1}
           onClick={onDelete}
           style={{
             top: '5px',
@@ -48,7 +40,7 @@ const ImageReferenceDetail = ({image, onDelete}) => {
           }}
         >
           <span style={{ fontWeight: 'bold', color: 'black' }}>&times;</span>
-        </div>
+        </Col>
       )}
             </Row>
   );

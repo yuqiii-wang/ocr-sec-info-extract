@@ -9,7 +9,7 @@ REGEX_RULES = {
     "ISIN": r"ISIN[; ]*[A-Z0-9]{12}",
     "Currency": r"Currency[; ]*[A-Z]{3}",
     "Country": r"Country[; ]*[\w ]+",
-    "Moody": r"Moody[; ]*[\w\+\-]+",
+    "Moody": r"Moody's[; ]*[\w\+\-]+",
     "S&P": r"S&P[; ]*[\w\+\-]+",
     "Fitch": r"Fitch[; ]*[\w\+\-]+",
     "Coupon": r"Coupon[^s][; ]*[fF\d\.]+",

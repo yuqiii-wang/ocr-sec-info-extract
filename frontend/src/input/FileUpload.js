@@ -5,7 +5,7 @@ import { GlobalAppContext } from "../GlobalAppContext";
 
 const FileUploadComponent = () => {
     const { setThisFileUuid, setThisFilepath,
-        inputError, setInputError
+        inputError, setInputError, setIsSolutionShowDone
     } = useContext(GlobalAppContext);
 
     const [fileData, setFileData] = useState(null);
@@ -68,6 +68,9 @@ const FileUploadComponent = () => {
         .catch((error) => {
             // Handle error response
             setInputError(error);
+        })
+        .finally (() => {
+            setIsSolutionShowDone(false);
         });
     };
 

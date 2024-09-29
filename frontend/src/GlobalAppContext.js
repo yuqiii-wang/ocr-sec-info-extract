@@ -14,6 +14,7 @@ function GlobalAppContextManager({ children }) {
     const [isSolutionExecutionDone, setIsSolutionExecutionDone] = useState(false);
     const [referenceCodeSepOffset, setReferenceCodeSepOffset] = useState(0);
     const [referenceImageResults, setReferenceImageResults] = useState([]);
+    const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState("");
     const [isOnInputShow, setIsOnInputShow] = useState(true);
     const [thisFileUuid, setThisFileUuid] = useState("");
     const [thisFilepath, setThisFilepath] = useState("");
@@ -29,6 +30,7 @@ function GlobalAppContextManager({ children }) {
                                         isSolutionExecutionDone, setIsSolutionExecutionDone,
                                         referenceCodeSepOffset, setReferenceCodeSepOffset,
                                         referenceImageResults, setReferenceImageResults,
+                                        referenceOCRJsonResults, setReferenceOCRJsonResults,
                                         isOnInputShow, setIsOnInputShow,
                                         thisFileUuid, setThisFileUuid,
                                         thisFilepath, setThisFilepath,

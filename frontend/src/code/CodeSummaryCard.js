@@ -5,7 +5,6 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import { GlobalAppContext } from "../GlobalAppContext";
 
 const SummaryCard = ({ initialSummary }) => {
-    const { isSolutionConcludeDone } = useContext(GlobalAppContext)
 
     const [summary, setSummary] = useState(initialSummary);
     const [isEditing, setIsEditing] = useState(false);

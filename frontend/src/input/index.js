@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
-import axios from "axios";
 import FileUploadComponent from "./FileUpload";
 import { extractResponseImages } from "../others/ImageHandlingUtils"
 import {GlobalAppContext} from "../GlobalAppContext";
@@ -12,12 +11,9 @@ const InputComponent = () => {
         referenceCodeSepOffset, thisFileUuid, thisFilepath,
         referenceImageResults, setThisFileUuid, setSummaryResults, 
         setIsMainAskDone, isOnInputShow, setThisFilepath,
-        setIsOnInputShow, setReferenceImageResults,
+        setIsOnInputShow, setReferenceImageResults, setIsSolutionShowDone,
+        referenceOCRJsonResults, setReferenceOCRJsonResults,
         inputError, setInputError } = useContext(GlobalAppContext);
-
-    useEffect(() => {
-        
-    });
 
     const handleSubmitRequest = async (event) => {
         await processSubmitRequest(event);
@@ -54,7 +50,9 @@ const InputComponent = () => {
                     const referenceResults = data;
                     const images = await extractResponseImages(referenceResults);
                     setReferenceImageResults(images);
-                    console.log(images);
+                    const solutionJsonString = JSON.stringify(data.solution_reference, null, 2);
+                    setReferenceOCRJsonResults(solutionJsonString);
+                    setIsSolutionShowDone(true);
             }
             setAnswerLoading(false);
             })

@@ -1,9 +1,22 @@
 .image-reference-container {
-    height: "10rem";
-    margin-top: "3px";
+    overflow-y: auto;
 }
 
 .reference-detail-list-container {
     overflow-y: auto;
-    height: 25rem;
+}
+
+.reference-detail-container  {
+    overflow-y: auto;
+}
+
+.reference-detail  {
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+}
+
+.reference-convert-btn  {
+    position: absolute;
+    left: 82%;
 }
