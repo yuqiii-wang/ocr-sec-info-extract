@@ -4,14 +4,15 @@ from flask import Flask, request, jsonify, send_file, make_response
 import os, io, zipfile, base64
 from backend.config import LOCAL_INPUT_IMAGE_DIR
 from backend.OCREngine import OCREngine
+from backend.shell_script_converter.shell_script_BBG_converter import convert_to_shell_script_BBG
 
 ocr_engine = OCREngine()
 
 def process_upload_file(file, fileUuid):
-    
+
     if file.filename == '':
         return {'error': 'No selected file'}
-    
+
     split_filename = file.filename.split(".")
     uudi_file_name = split_filename[0] + "_" + fileUuid + "." + split_filename[-1]
 
@@ -48,3 +49,9 @@ def process_ocr(file_path:str):
         "zip_file": encoded_zip
     }
     return jsonify(response_data)
+
+def process_convert(ocr_json, converter=convert_to_shell_script_BBG):
+    shell_scripts = converter(ocr_json)
+    return jsonify({
+        "shell_scripts": shell_scripts
+    })

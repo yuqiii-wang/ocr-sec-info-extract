@@ -15,6 +15,7 @@ function GlobalAppContextManager({ children }) {
     const [referenceCodeSepOffset, setReferenceCodeSepOffset] = useState(0);
     const [referenceImageResults, setReferenceImageResults] = useState([]);
     const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState("");
+    const [referenceShellScriptResults, setReferenceShellScriptResults] = useState("");
     const [isOnInputShow, setIsOnInputShow] = useState(true);
     const [thisFileUuid, setThisFileUuid] = useState("");
     const [thisFilepath, setThisFilepath] = useState("");
@@ -31,6 +32,7 @@ function GlobalAppContextManager({ children }) {
                                         referenceCodeSepOffset, setReferenceCodeSepOffset,
                                         referenceImageResults, setReferenceImageResults,
                                         referenceOCRJsonResults, setReferenceOCRJsonResults,
+                                        referenceShellScriptResults, setReferenceShellScriptResults,
                                         isOnInputShow, setIsOnInputShow,
                                         thisFileUuid, setThisFileUuid,
                                         thisFilepath, setThisFilepath,

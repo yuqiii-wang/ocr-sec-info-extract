@@ -6,17 +6,20 @@ import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
 import shell from 'react-syntax-highlighter/dist/esm/languages/hljs/shell';
 import { CodeContext } from "./CodeContext";
 import './css/CodeDetail.css'
+import { GlobalAppContext } from "../GlobalAppContext";
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 SyntaxHighlighter.registerLanguage('shell', shell);
 
 
-const CodeCard = ({ language = 'javascript' }) => {
-    const { code, setCode, isEditingCode } = useContext(CodeContext)
-
+const CodeCard = ({ language = 'shell' }) => {
+    const { referenceShellScriptResults, setReferenceShellScriptResults,
+        referenceCodeSepOffset} = useContext(GlobalAppContext);
+    const { 
+        isEditingCode } = useContext(CodeContext);
 
     const handleCodeChange = (event) => {
-        setCode(event.target.value);
+        setReferenceShellScriptResults(event.target.value);
     };
 
     const handleExecutionRequest = () => { }
@@ -25,9 +28,11 @@ const CodeCard = ({ language = 'javascript' }) => {
             <div>
             {isEditingCode ? (
                 <textarea
-                    value={code}
+                    value={referenceShellScriptResults}
                     onChange={handleCodeChange}
-                    style={{ width: '100%', fontFamily: 'monospace', padding: '10px', borderRadius: '5px' }}
+                    style={{ width: '100%', fontFamily: 'monospace', 
+                        padding: '10px', borderRadius: '5px',
+                        height: `${Math.min(28, 4 + referenceCodeSepOffset)}rem` }}
                 />
             ) : (
                 <SyntaxHighlighter
@@ -35,7 +40,7 @@ const CodeCard = ({ language = 'javascript' }) => {
                     style={github}
                     customStyle={{ overflow: 'auto', textAlign: 'left' }}
                 >
-                    {code}
+                    {referenceShellScriptResults}
                 </SyntaxHighlighter>
             )}
             </div>

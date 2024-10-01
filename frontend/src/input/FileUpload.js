@@ -101,7 +101,7 @@ const FileUploadComponent = () => {
 
     const handleDrop = (event) => {
         event.preventDefault();
-        const file = event.target.files[0];
+        const file = event.dataTransfer.files[0];
         handleFileUpload(file);
         setDragging(false);
     };

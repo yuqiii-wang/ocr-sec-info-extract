@@ -23,7 +23,7 @@ const CodeDetailComponent = ({ code }) => {
     return (
         <div>
             <div className="code-card-content-container"
-                style={{ width: '100%', height: `${Math.min(31, 6 + referenceCodeSepOffset)}rem` }}>
+                style={{ width: '100%', height: `${Math.min(29, 9 + referenceCodeSepOffset)}rem` }}>
                 <Tabs
                     id="code-tabs"
                     activeKey={key}
@@ -49,7 +49,7 @@ const CodeDetailComponent = ({ code }) => {
                         className={!isSolutionConcludeDone ? "code-btn-container" : ""}
                         style={{ display: "flex", marginLeft: "1%", marginRight: "1%" }}
                         onClick={handleEditToggle}>
-                        Edit
+                        {isEditingCode ? "Save" : "Edit"}
                     </Button>
                     <Button
                         variant="primary"
