@@ -2,3 +2,11 @@
     margin-top: "3px";
     display: "flex";
 }
+
+
+.code-triangle-left-btn {
+    position: absolute;
+    top: 0;
+  bottom: 0;
+  right: 0;
+}

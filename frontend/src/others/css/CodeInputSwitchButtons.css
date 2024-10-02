@@ -16,22 +16,40 @@
 
   /* Left Triangle Button */
   .triangle-left {
-    clip-path: polygon(100% 50%, 0 0, 0 100%); /* Triangle pointing left */
+    width: 2rem;
+    height: 2rem;
+    clip-path: polygon(100% 100%, 100% 0%, 0% 50%); /* Triangle pointing left */
     background-color: aliceblue;
     color: aliceblue;
+    left: 30rem;
+    top: 0rem;
+    position: static;
   }
   
   .triangle-left:hover {
-    border-color: transparent darkgrey transparent transparent; /* Dark grey on hover */
+    border-color: transparent darkgrey transparent; /* Dark grey on hover */
   }
   
   /* Right Triangle Button */
   .triangle-right {
+    width: 2rem;
+    height: 2rem;
     color: aliceblue;
-    clip-path: polygon(0 50%, 100% 0, 100% 100%); /* Triangle pointing right */
+    clip-path: polygon(0% 100%, 0% 0%, 100% 50%); /* Triangle pointing right */
+    background-color: aliceblue;
   }
-  
+
   .triangle-right:hover {
-    border-color: transparent transparent transparent darkgrey; /* Dark grey on hover */
+    border-color: transparent darkgrey transparent; /* Dark grey on hover */
   }
-  
+
+.triangle-switch-btn {
+    position: relative;
+    padding: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 1rem 1rem 1rem 1rem;
+    background: none;
+}
+

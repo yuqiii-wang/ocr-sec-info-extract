@@ -8,8 +8,8 @@ const TriangleLeftButton = () => {
     const { isOnInputShow, setIsOnInputShow } = useContext(GlobalAppContext);
 
   return (
-    <div className="triangle-btn-container">
-      <Button className="triangle-btn triangle-left"
+    <div>
+      <div className="triangle-switch-btn triangle-left"
       onClick={() => setIsOnInputShow(true)}
       />
     </div>
@@ -20,8 +20,8 @@ const TriangleRightButton = () => {
     const { isOnInputShow, setIsOnInputShow } = useContext(GlobalAppContext);
 
     return (
-    <div className="triangle-btn-container">
-        <Button className="triangle-btn triangle-right"
+    <div>
+        <div className="triangle-switch-btn triangle-right"
         onClick={() => setIsOnInputShow(false)}/>
     </div>
     );

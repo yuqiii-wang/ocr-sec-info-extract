@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
+import { TriangleLeftButton, TriangleRightButton } from "../others/CodeInputSwitchButtons";
 import FileUploadComponent from "./FileUpload";
 import { extractResponseImages } from "../others/ImageHandlingUtils"
 import {GlobalAppContext} from "../GlobalAppContext";
@@ -79,7 +80,11 @@ const InputComponent = () => {
       <Row className="justify-content-start align-items-end" 
       style={{ height: `${Math.min(32, 12+referenceCodeSepOffset)}rem`, margin: "1%" }}>
               <Form >
-              <Form.Label>Upload a file</Form.Label>
+                <div className="input-top-wrapper">
+                    <Form.Label>Upload a file</Form.Label>
+                    <TriangleRightButton></TriangleRightButton>
+                </div>
+              
                 <FileUploadComponent />
               </Form>
               {inputError && <Alert variant="danger" onClose={() => setInputError(null)} dismissible>{inputError}</Alert>}

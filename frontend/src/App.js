@@ -17,17 +17,7 @@ function App() {
             <TopNavBar />
             <ReferenceComponent></ReferenceComponent>
             <ComponentSepLine></ComponentSepLine>
-            <div style={{ display: "d-flex", justifyContent: 'flex-center' }}>
-
                 <InputOrCodeDisplayWrapper></InputOrCodeDisplayWrapper>
-
-                {isOnInputShow ? (
-                    <TriangleRightButton></TriangleRightButton>
-                ) : (
-                    <TriangleLeftButton></TriangleLeftButton>
-                )}
-            </div>
-
         </React.Fragment>
     );
 }

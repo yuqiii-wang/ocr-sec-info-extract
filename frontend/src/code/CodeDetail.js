@@ -1,7 +1,5 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Tab, Tabs } from "react-bootstrap";
-import Tooltip from "react-bootstrap/Tooltip";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import { GlobalAppContext } from "../GlobalAppContext";
 import { CodeContext } from "./CodeContext";
 

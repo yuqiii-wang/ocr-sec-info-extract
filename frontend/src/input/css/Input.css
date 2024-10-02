@@ -11,3 +11,10 @@
     opacity: 1; /* Show container */
     transform: translateX(0); /* Move container into view */
   }
+
+.input-top-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}

@@ -13,8 +13,7 @@ const InputOrCodeDisplayWrapper = () => {
     const { isOnInputShow, setIsOnInputShow } = useContext(GlobalAppContext);
 
   return (
-      <Container className="border rounded"
-      style={{width: "100%"}}>
+      <Container className="border rounded">
         {isOnInputShow ? 
             (<InputComponent></InputComponent>)
             :(<CodeComponent></CodeComponent>)
