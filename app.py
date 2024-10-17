@@ -6,7 +6,9 @@ from backend.process.process import (process_upload_file,
                                      process_convert)
 
 # Create a Flask application instance
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder='frontend/build',
+            static_folder='frontend/build/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                     r'/process/fileupload': {"origins": "http://localhost:3000"},
