@@ -1,10 +1,13 @@
 from typing import List, Union
 import zipfile
-from flask import Flask, request, jsonify, send_file, make_response
-import os, io, zipfile, base64
+from flask import Flask, copy_current_request_context, request, jsonify, send_file, make_response
+import os, io, zipfile, base64, time
+
+from flask_socketio import SocketIO,emit
 from backend.config import LOCAL_INPUT_IMAGE_DIR
 from backend.OCREngine import OCREngine
 from backend.shell_script_converter.shell_script_BBG_converter import convert_to_shell_script_BBG
+from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
 ocr_engine = OCREngine()
 
@@ -55,3 +58,20 @@ def process_convert(ocr_json, converter=convert_to_shell_script_BBG):
     return jsonify({
         "shell_scripts": shell_scripts
     })
+
+def process_execute(shell_scripts:list[str], socketio:SocketIO):
+    dummy_log_str = load_dummy_log(shell_scripts)
+    for dummy_log_line in dummy_log_str.split('\n')[:10]:
+        socketio.emit('message', {'data': f'{dummy_log_line}'})
+        time.sleep(0.1)
+    time.sleep(3)
+    for dummy_log_line in dummy_log_str.split('\n')[10:]:
+        socketio.emit('message', {'data': f'{dummy_log_line}'})
+        time.sleep(0.1)
+    socketio.emit('end', {'data': 'End of log'})
+
+def load_audit_all():
+    pass
+
+def load_audit(index):
+    pass

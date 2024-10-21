@@ -14,15 +14,13 @@ SyntaxHighlighter.registerLanguage('shell', shell);
 
 const CodeCard = ({ language = 'shell' }) => {
     const { referenceShellScriptResults, setReferenceShellScriptResults,
-        referenceCodeSepOffset} = useContext(GlobalAppContext);
+        referenceCodeSepOffset } = useContext(GlobalAppContext);
     const { 
         isEditingCode } = useContext(CodeContext);
 
     const handleCodeChange = (event) => {
         setReferenceShellScriptResults(event.target.value);
     };
-
-    const handleExecutionRequest = () => { }
 
     return (
             <div>

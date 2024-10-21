@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
 import { TriangleLeftButton, TriangleRightButton } from "../others/CodeInputSwitchButtons";
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FileUploadComponent from "./FileUpload";
 import { extractResponseImages } from "../others/ImageHandlingUtils"
 import {GlobalAppContext} from "../GlobalAppContext";
@@ -89,6 +91,11 @@ const InputComponent = () => {
               </Form>
               {inputError && <Alert variant="danger" onClose={() => setInputError(null)} dismissible>{inputError}</Alert>}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop:"1%" }}>
+              <OverlayTrigger placement="top" overlay={
+                    <Tooltip id="button-tooltip">
+                        Submit this file/image for OCR parsing
+                    </Tooltip>
+                } >
                 <Button variant="primary" type="submit" onClick={handleSubmitRequest} disabled={answerLoading}>
                     {answerLoading ? (
                         <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
@@ -96,6 +103,7 @@ const InputComponent = () => {
                         'Submit'
                     )}
                 </Button>
+                </OverlayTrigger>
               </div>
       </Row>
     </Container>

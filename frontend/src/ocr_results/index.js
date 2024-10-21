@@ -1,13 +1,16 @@
 import React, { useState, useContext, useEffect, useRef, useCallback, } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, } from "react-bootstrap";
 import ReferenceDetailComponent from "./ReferenceDetail";
+import LogReferenceDetail from './LogReferenceDetail';
 import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 
 
 const ReferenceComponent = () => {
     const { answerLoading, detailResults, isSolutionShowDone,
-        referenceImageResults, referenceCodeSepOffset } = useContext(GlobalAppContext);
+        referenceImageResults, referenceCodeSepOffset,
+        isOnLoadingExecutionLog,
+        isDoneLoadingExecutionLog, } = useContext(GlobalAppContext);
 
     return (
         <Container className="image-reference-container border rounded"
@@ -20,6 +23,8 @@ const ReferenceComponent = () => {
                     role="status"
                     aria-hidden="true"
                 />
+            ) : (isOnLoadingExecutionLog || isDoneLoadingExecutionLog) ? (
+                <LogReferenceDetail />
             ) : (
                 <ReferenceDetailComponent />
             )}

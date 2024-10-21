@@ -7,14 +7,18 @@ import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 
 const ReferenceDetailComponent = () => {
-    const { referenceResults, referenceImageResults, 
-        solutionId, isSolutionShowDone, referenceOCRJsonResults,
-        referenceShellScriptResults, setReferenceShellScriptResults,
-        setExecutionLoading, referenceCodeSepOffset, setIsOnInputShow,
+    const { referenceImageResults,
+        isSolutionShowDone, referenceOCRJsonResults,
+        setReferenceShellScriptResults,
+        referenceCodeSepOffset, setIsOnInputShow,
         setIsSolutionConcludeDone } = useContext(GlobalAppContext);
 
     const [hover, setHover] = useState(false);
     const [conversionError, setConversionError] = useState("");
+
+    const addATextBlock = () => {
+    }
+
 
     const handleConvert = () => {
         setIsSolutionConcludeDone(true);
@@ -65,6 +69,17 @@ const ReferenceDetailComponent = () => {
             {referenceImageResults != null ? (
                 <ImageReferenceDetails />
             ) : ("")}
+            <OverlayTrigger placement="top" overlay={
+                    <Tooltip id="button-tooltip">
+                        Add a new text block
+                    </Tooltip>
+                } >
+                    <Button variant="primary" type="submit" className="reference-add-btn"
+                    style={{ top: `${Math.max(8, 26.5 - referenceCodeSepOffset)}rem` }}
+                        onClick={addATextBlock}>
+                        Add
+                    </Button>
+                </OverlayTrigger>
             <OverlayTrigger placement="top" overlay={
                     <Tooltip id="button-tooltip">
                         Convert OCR results into shell scripts.

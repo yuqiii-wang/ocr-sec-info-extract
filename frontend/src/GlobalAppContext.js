@@ -20,6 +20,9 @@ function GlobalAppContextManager({ children }) {
     const [thisFileUuid, setThisFileUuid] = useState("");
     const [thisFilepath, setThisFilepath] = useState("");
     const [inputError, setInputError] = useState("");
+    const [isOnLoadingExecutionLog, setIsOnLoadingExecutionLog] = useState(false);
+    const [isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog] = useState(false);
+    const [isOnAuditPage, setIsOnAuditPage] = useState(false);
 
     return (
       <GlobalAppContext.Provider value={{answerLoading, setAnswerLoading,
@@ -36,7 +39,10 @@ function GlobalAppContextManager({ children }) {
                                         isOnInputShow, setIsOnInputShow,
                                         thisFileUuid, setThisFileUuid,
                                         thisFilepath, setThisFilepath,
-                                        inputError, setInputError
+                                        inputError, setInputError,
+                                        isOnLoadingExecutionLog, setIsOnLoadingExecutionLog,
+                                        isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog,
+                                        isOnAuditPage, setIsOnAuditPage
                                         }}>
         {children}
       </GlobalAppContext.Provider>
