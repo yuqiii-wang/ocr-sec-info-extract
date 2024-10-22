@@ -1,7 +1,7 @@
 from paddleocr import PaddleOCR
 from PIL import Image, ImageDraw, ImageFont
 import cv2
-import os, json
+import os
 
 from backend.config import LOCAL_INPUT_IMAGE_DIR, LOCAL_OCR_IMAGE_DIR
 from backend.ocr_parser.bloomberg_bond_rules import parse_bloomberg_bond_ocr
@@ -35,9 +35,13 @@ class OCREngine:
         text_bounding_boxes = []
         for idx in range(len(result)):
             res = result[idx]
+            if res is None:
+                continue
             for line in res:
                 text = line[1][0]
                 score = line[1][1]
+                if score < 0.85:
+                    continue
                 box = [(point[0], point[1]) for point in line[0]]
                 text_bounding_boxes.append(TextBoundingBox(text, box, score))
         return text_bounding_boxes
@@ -47,4 +51,4 @@ class OCREngine:
 
 if __name__=="__main__":
     ocrEngine = OCREngine()
-    found_bounding_boxes, found_items = ocrEngine.process_ocr("bond_bloomberg.png")
+    text_bounding_boxes = ocrEngine.process_ocr("bond_bloomberg.png")

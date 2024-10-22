@@ -4,10 +4,14 @@ from flask import Flask, request, jsonify, render_template, make_response
 from flask_cors import CORS
 import os, flask, json
 from flask_socketio import SocketIO
+from backend.config import setup_logger
 from backend.process.process import (process_execute, 
                                      process_upload_file,
                                      process_ocr,
-                                     process_convert)
+                                     process_convert,
+                                     load_audit,
+                                     load_audit_all
+                                     )
 
 # Create a Flask application instance
 app = Flask(__name__, 
@@ -21,6 +25,8 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                     headers='Content-Type')
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
+
+setup_logger(app)
 
 @app.after_request
 def allow_cors(response):
@@ -45,7 +51,7 @@ def fileupload():
         resp = make_response(jsonify({'error': 'No filename found.'}))
         return resp
 
-    if not '.png' in file.filename and not '.jpe' in file.filename:
+    if not '.png' in file.filename and not '.jpg' in file.filename:
         resp = make_response(jsonify({'error': 'No must input image of .png or .jpg.'}))
         return resp
 
@@ -75,6 +81,18 @@ def convert():
     data = request.get_json()
     ocr_json = json.loads(data.get("ocr_json"))
     resp = make_response(process_convert(ocr_json))
+    return resp
+
+@app.route('/audit/load/time', methods=['GET'])
+def audit_load_by_time():
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
+    resp = make_response(load_audit(start_time, end_time))
+    return resp
+
+@app.route('/audit/load/all', methods=['GET'])
+def audit_load_all():
+    resp = make_response(load_audit_all())
     return resp
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # OCR Bond Info Setup
 
-![example.png](example.png)
+![example.png](./example.png)
 
 ## How to Start
 

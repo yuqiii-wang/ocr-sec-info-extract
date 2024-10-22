@@ -33,7 +33,7 @@ function TopNavBar() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="" onClick={handleHomeClick}>Home</Nav.Link>
-                        <Nav.Link href="audit" onClick={handleAuditClick}>Audit</Nav.Link>
+                        <Nav.Link href="" onClick={handleAuditClick}>Audit</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>
