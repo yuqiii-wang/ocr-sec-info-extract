@@ -23,6 +23,11 @@ function GlobalAppContextManager({ children }) {
     const [isOnLoadingExecutionLog, setIsOnLoadingExecutionLog] = useState(false);
     const [isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog] = useState(false);
     const [isOnAuditPage, setIsOnAuditPage] = useState(false);
+    const [isOnAboutPage, setIsOnAboutPage] = useState(false);
+    const [isOnHomeStartPage, setIsOnHomeStartPage] = useState(true);
+    const [isOnConfigClassifierPage, setIsOnConfigClassifierPage] = useState(false);
+    const [isOnConfigNERPage, setIsOnConfigNERPage] = useState(false);
+    const [isOnConfigHandlerPage, setIsOnConfigHandlerPage] = useState(false);
 
     return (
       <GlobalAppContext.Provider value={{answerLoading, setAnswerLoading,
@@ -42,7 +47,12 @@ function GlobalAppContextManager({ children }) {
                                         inputError, setInputError,
                                         isOnLoadingExecutionLog, setIsOnLoadingExecutionLog,
                                         isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog,
-                                        isOnAuditPage, setIsOnAuditPage
+                                        isOnAuditPage, setIsOnAuditPage,
+                                        isOnAboutPage, setIsOnAboutPage,
+                                        isOnHomeStartPage, setIsOnHomeStartPage,
+                                        isOnConfigClassifierPage, setIsOnConfigClassifierPage,
+                                        isOnConfigNERPage, setIsOnConfigNERPage,
+                                        isOnConfigHandlerPage, setIsOnConfigHandlerPage
                                         }}>
         {children}
       </GlobalAppContext.Provider>

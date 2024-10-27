@@ -1,5 +1,5 @@
 import re
-from backend.ocr_parser.text_bounding_box import TextBoundingBox
+from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 import logging
 
 logger = logging.getLogger('BBG_RULES')

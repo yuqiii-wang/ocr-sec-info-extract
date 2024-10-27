@@ -18,3 +18,19 @@
     align-items: center;
     width: 100%;
 }
+
+.input-text-wrapper {
+    display: 'flex';
+    justify-content: 'center';
+    flex-direction: row;
+    align-items: 'center';
+    height: 100%;
+}
+
+.input-text {
+    width: 100%;
+}
+
+.input-text-ask_btn {
+    margin-left: '1rem';
+}

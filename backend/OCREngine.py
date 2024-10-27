@@ -4,8 +4,8 @@ import cv2
 import os
 
 from backend.config import LOCAL_INPUT_IMAGE_DIR, LOCAL_OCR_IMAGE_DIR
-from backend.ocr_parser.bloomberg_bond_rules import parse_bloomberg_bond_ocr
-from backend.ocr_parser.text_bounding_box import TextBoundingBox
+from backend.parser_dispatchers.ocr_parsers.bloomberg_bond_rules import parse_bloomberg_bond_ocr
+from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 
 class OCREngine:
 

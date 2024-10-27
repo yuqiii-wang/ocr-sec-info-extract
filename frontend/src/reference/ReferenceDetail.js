@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import { Container, Row, Col, Form, Button, InputGroup, Card } from "react-bootstrap";
+import React, { useState, useContext, } from "react";
+import { Container, Button, } from "react-bootstrap";
 import ImageReferenceDetails from "./ImageReferenceDetails";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";

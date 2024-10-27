@@ -1,6 +1,8 @@
 import os
-from backend.ocr_parser.bloomberg_bond_rules import parse_bloomberg_bond_ocr
-from backend.ocr_parser.bloomberg_mbs_rules import parse_bloomberg_mbs_ocr
+from backend.parser_dispatchers.ocr_parsers.bloomberg_bond_rules import parse_bloomberg_bond_ocr
+from backend.parser_dispatchers.ocr_parsers.bloomberg_mbs_rules import parse_bloomberg_mbs_ocr
+from backend.parser_dispatchers.text_parsers.unsettle_trade_rules import parse_unsettle_trade_msg
+from backend.parser_dispatchers.text_parsers.ytd_trade_extract_rules import parse_ytd_trade_extract_msg
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCAL_INPUT_IMAGE_DIR=os.path.join(current_dir, "local_files", "input_images")
@@ -9,17 +11,23 @@ LOCAL_OCR_TMP_IMAGE_DIR=os.path.join(current_dir, "local_files", "tmp_images")
 
 TEXT_LABEL_MAP = {
     "bond_bloomberg": 0,
-    "mbs_bloomberg":  1
+    "mbs_bloomberg":  1,
+    "unsettle_trade":  2,
+    "extract_ytd_trades":  3,
 }
 
-LABEL_OCR_PARSER_MAP = {
+LABEL_PARSER_MAP = {
     0: parse_bloomberg_bond_ocr,
-    1: parse_bloomberg_mbs_ocr
+    1: parse_bloomberg_mbs_ocr,
+    2: parse_unsettle_trade_msg,
+    3: parse_ytd_trade_extract_msg
 }
 
 LABEL_SCRIPT_MAP = {
     0: parse_bloomberg_bond_ocr,
-    1: parse_bloomberg_mbs_ocr
+    1: parse_bloomberg_mbs_ocr,
+    2: parse_unsettle_trade_msg,
+    3: parse_ytd_trade_extract_msg
 }
 
 

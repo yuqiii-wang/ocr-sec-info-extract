@@ -1,23 +1,31 @@
 import "./App.css";
 import TopNavBar from "./TopNavBar";
-import ReferenceComponent from "./ocr_results";
+import ReferenceComponent from "./reference";
 import ComponentSepLine from "./others/ComponentSepLine";
 import InputOrCodeDisplayWrapper from "./InputOrCodeDisplay";
 import AuditChartByTimeCategory from "./audit/AuditChartByTimeCategory";
-import { TriangleLeftButton, TriangleRightButton } from "./others/CodeInputSwitchButtons";
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
-import { GlobalAppContext, GlobalAppContextManager } from "./GlobalAppContext";
+import ConfigIndexComponent from "./config/Index";
+import AboutPage from "./about/About";
+import React, {  useContext, } from "react";
+import { GlobalAppContext } from "./GlobalAppContext";
 
 function App() {
 
-    const { isOnAuditPage } = useContext(GlobalAppContext);
+    const { isOnAuditPage, isOnAboutPage,
+        isOnConfigClassifierPage,
+        isOnConfigNERPage,
+        isOnConfigHandlerPage
+     } = useContext(GlobalAppContext);
 
     return (
         <React.Fragment>
             <TopNavBar />
-            {isOnAuditPage ? (
+            {(isOnConfigClassifierPage || isOnConfigNERPage || isOnConfigHandlerPage) ? (
+                <ConfigIndexComponent></ConfigIndexComponent>
+            ) : (isOnAuditPage) ? (
                 <AuditChartByTimeCategory></AuditChartByTimeCategory>
+            ) : isOnAboutPage ? (
+                <AboutPage></AboutPage>
             ) : (
                 <React.Fragment>
                     <ReferenceComponent></ReferenceComponent>

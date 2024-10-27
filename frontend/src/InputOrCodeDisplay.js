@@ -1,7 +1,7 @@
 import "./App.css";
 import TopNavBar from "./TopNavBar";
 import InputComponent from "./input";
-import ReferenceComponent from "./ocr_results";
+import ReferenceComponent from "./reference";
 import ComponentSepLine from "./others/ComponentSepLine";
 import CodeComponent from "./code";
 import {TriangleLeftButton, TriangleRightButton} from "./others/CodeInputSwitchButtons";

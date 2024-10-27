@@ -1,0 +1,12 @@
+.svg-container {
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    min-height: 90vh; /* Make the container at least as tall as the viewport */
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+  
+.svg-container.visible {
+    opacity: 1;
+}

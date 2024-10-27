@@ -1,0 +1,23 @@
+.audit-chart-container {
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.audit-chart-header-container {
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.audit-page-container {
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.audit-time-container {
+    display: flex; /* Use flexbox */
+    justify-content: end; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}

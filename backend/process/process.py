@@ -5,11 +5,11 @@ import os, io, zipfile, base64, time
 from logging import getLogger
 from flask_socketio import SocketIO,emit
 from backend.classifier.utils import trim_text, store_text
-from backend.config import LOCAL_INPUT_IMAGE_DIR, LABEL_OCR_PARSER_MAP
+from backend.config import LOCAL_INPUT_IMAGE_DIR, LABEL_PARSER_MAP, TEXT_LABEL_MAP
 from backend.OCREngine import OCREngine
-from backend.classifier.classifier import DT_Classifier
-from backend.ocr_parser.image_seg_by_color import ImageSegByColor
-from backend.ocr_parser.text_bounding_box import TextBoundingBox
+from backend.classifier.classifier import DT_Classifier, train_dt_model
+from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
+from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 from backend.shell_script_converter.shell_script_BBG_converter import convert_to_shell_script_BBG
 from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
@@ -35,6 +35,10 @@ def process_upload_file(file, fileUuid):
             "fileUuid": fileUuid,
             "filepath": file_path}
 
+def process_text_query(text_query: str):
+    label_func_pred = dt_classifier.predict(text_query)
+    return text_query
+
 def load_and_store_ocr_results(filename:str, text_bounding_boxes:list[TextBoundingBox]):
     all_text = ""
     for text_bounding_box in text_bounding_boxes:
@@ -51,7 +55,7 @@ def process_ocr(file_path:str):
     # text_bounding_boxes = imageSegByColor_engine.reseg_image_by_color(file_path, text_bounding_boxes)
     trimmed_text = load_and_store_ocr_results(filename, text_bounding_boxes)
     label_func_pred = dt_classifier.predict(trimmed_text)
-    proc_func = LABEL_OCR_PARSER_MAP[label_func_pred]
+    proc_func = LABEL_PARSER_MAP[label_func_pred]
     logger.info(f"Loaded func is {proc_func.__name__}")
     found_bounding_boxes, found_item_json = ocr_engine.parse_ocr(text_bounding_boxes, proc_func)
     image_output_path = ocr_engine.draw_ocr(filename, found_bounding_boxes)
@@ -90,6 +94,13 @@ def process_execute(shell_scripts:list[str], socketio:SocketIO):
         socketio.emit('message', {'data': f'{dummy_log_line}'})
         time.sleep(0.1)
     socketio.emit('end', {'data': 'End of log'})
+
+def load_config_classifier_all():
+    return jsonify({"classifier_config": TEXT_LABEL_MAP})
+
+def train_classifier():
+    acc_str = train_dt_model()
+    return jsonify({"accuracy": f"{acc_str}"})
 
 def load_audit_all():
     return jsonify({"message": "ok"})

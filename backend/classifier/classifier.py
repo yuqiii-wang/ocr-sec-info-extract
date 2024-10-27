@@ -40,11 +40,11 @@ def train_dt_model():
     y_pred = tfidf_dt_clf.predict(X_test)
 
     accuracy = accuracy_score(y_test, y_pred)
+    accuracy_str = f"{accuracy * 100:.2f}%"
     print(f"Accuracy: {accuracy * 100:.2f}%")
 
     # Save the model to a file using pickle
     with open(classifier_dt_model_path, 'wb') as file:
         pickle.dump(tfidf_dt_clf, file)
 
-if __name__=="__main__":
-    train_dt_model()
+    return accuracy_str

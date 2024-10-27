@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from backend.config import LOCAL_OCR_TMP_IMAGE_DIR
-from backend.ocr_parser.text_bounding_box import TextBoundingBox
+from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 
 
 VAR_THRESHOLD = 64**2  # assume pixel diff of 8

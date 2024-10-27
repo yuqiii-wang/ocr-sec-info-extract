@@ -10,7 +10,10 @@ from backend.process.process import (process_execute,
                                      process_ocr,
                                      process_convert,
                                      load_audit,
-                                     load_audit_all
+                                     load_audit_all,
+                                     load_config_classifier_all,
+                                     process_text_query,
+                                     train_classifier
                                      )
 
 # Create a Flask application instance
@@ -21,7 +24,11 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                     r'/process/fileupload': {"origins": "http://localhost:3000"},
                     r'/process/execute': {"origins": "http://localhost:3000"},
-                    r'/process/convert': {"origins": "http://localhost:3000"}},
+                    r'/process/ask': {"origins": "http://localhost:3000"},
+                    r'/process/convert': {"origins": "http://localhost:3000"},
+                    r'/config/load/classifier': {"origins": "http://localhost:3000"},
+                    r'/config/train/classifier': {"origins": "http://localhost:3000"},
+},
                     headers='Content-Type')
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +45,13 @@ def allow_cors(response):
 @app.route('/#home')
 def index():
     return render_template('index.html')
+
+@app.route('/process/ask', methods=['POST'])
+def ask():
+    data = request.get_json()
+    msg = data.get("msg")
+    resp = make_response(process_text_query(msg))
+    return resp
 
 @app.route('/process/fileupload', methods=['POST'])
 def fileupload():
@@ -93,6 +107,16 @@ def audit_load_by_time():
 @app.route('/audit/load/all', methods=['GET'])
 def audit_load_all():
     resp = make_response(load_audit_all())
+    return resp
+
+@app.route('/config/load/classifier', methods=['GET'])
+def config_load_all():
+    resp = make_response(load_config_classifier_all())
+    return resp
+
+@app.route('/config/train/classifier', methods=['POST'])
+def config_train_classifier():
+    resp = make_response(train_classifier())
     return resp
 
 if __name__ == "__main__":

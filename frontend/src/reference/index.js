@@ -1,5 +1,6 @@
-import React, { useState, useContext, useEffect, useRef, useCallback, } from "react";
-import { Container, Row, Col, Form, Button, Card, Spinner, } from "react-bootstrap";
+import React, { useContext, } from "react";
+import { Container, Spinner, } from "react-bootstrap";
+import TextAsk from "../input/TextAsk";
 import ReferenceDetailComponent from "./ReferenceDetail";
 import LogReferenceDetail from './LogReferenceDetail';
 import { GlobalAppContext } from "../GlobalAppContext";
@@ -7,8 +8,8 @@ import "./css/ocr_results.css";
 
 
 const ReferenceComponent = () => {
-    const { answerLoading, detailResults, isSolutionShowDone,
-        referenceImageResults, referenceCodeSepOffset,
+    const { answerLoading, detailResults, isOnHomeStartPage,
+        referenceImageResults, referenceCodeSepOffset, 
         isOnLoadingExecutionLog,
         isDoneLoadingExecutionLog, } = useContext(GlobalAppContext);
 
@@ -23,6 +24,8 @@ const ReferenceComponent = () => {
                     role="status"
                     aria-hidden="true"
                 />
+            ) : isOnHomeStartPage ? (
+                <TextAsk />
             ) : (isOnLoadingExecutionLog || isDoneLoadingExecutionLog) ? (
                 <LogReferenceDetail />
             ) : (
