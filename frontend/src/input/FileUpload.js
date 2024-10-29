@@ -1,93 +1,125 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import { Form, Row, Col, Image, Alert, CloseButton } from 'react-bootstrap';
 import { GlobalAppContext } from "../GlobalAppContext";
 
+
 const FileUploadComponent = () => {
-    const { setThisFileUuid, setThisFilepath,
+    const { setThisFileUuids, setThisFilepaths,
         inputError, setInputError, setIsSolutionShowDone
     } = useContext(GlobalAppContext);
 
-    const [fileData, setFileData] = useState(null);
-    const [fileName, setFileName] = useState('');
+    const [fileListData, setFileListData] = useState([]);
     const [dragging, setDragging] = useState(false);
+    const fileMoreInputRef = useRef(null);
 
-    const handleFileUpload = (file) => {
-
-        if (!file.type.startsWith('image/')) {
-            setInputError('Only image files are supported.');
-            return;
+    const handleInputLabel = () => {
+        if (fileMoreInputRef.current) {
+            fileMoreInputRef.current.setAttribute(
+            'value',
+            fileListData.length > 0 ? 'Add More Files' : 'Choose File'
+          );
         }
+      };
 
-        const formData = new FormData();
-        if (file instanceof File || file instanceof Blob) {
-            setFileData(URL.createObjectURL(file));
-            setFileName(file.name);
-            formData.append('file', file);
-        } else {
-            setInputError('Uploaded file is invalid');
-            return;
-        }
+    const handleFileUpload = (files) => {
+        const sessionUuid = uuid();
+        let fileIdx = 0;
+        let fileListTmpData = [];
+        let fileNameTmpList = [];
+        for (let file of files) {
 
-        const fileUuid = uuid();
-
-        fetch('/process/fileupload?fileUuid=' + fileUuid, {
-            method: 'POST',
-            body: formData,
-            mode: "cors",
-            headers: new Headers({
-                'Accept': 'application/json',
-            })
-        })
-        .then( response => {
-            if (response == undefined) {
-                handleRemoveFile();
-                throw new Error("file upload response is null.");
-            } else if (!response.ok) {
-                handleRemoveFile();
-                throw new Error('file upload response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-
-            if (data == undefined) {
-                handleRemoveFile();
-                throw new Error("file upload response has no data json.");
+            if (!file.type.startsWith('image/')) {
+                setInputError('Only image files are supported.');
+                return;
             }
 
-            if (data["error"] != undefined) {
-                handleRemoveFile();
-                setInputError(data.error);
+            const formData = new FormData();
+            if (file instanceof File || file instanceof Blob) {
+                formData.append('file', file);
             } else {
-                setFileName(data["filename"]);
-                setThisFileUuid(data["fileUuid"]);
-                setThisFilepath(data["filepath"]);
+                setInputError('Uploaded file is invalid');
+                return;
             }
-        })
-        .catch((error) => {
-            // Handle error response
-            setInputError(error);
-        })
-        .finally (() => {
-            setIsSolutionShowDone(false);
-        });
+
+            fetch('/process/fileupload?fileUuid=' + sessionUuid + "_" + fileIdx, {
+                method: 'POST',
+                body: formData,
+                mode: "cors",
+                headers: new Headers({
+                    'Accept': 'application/json',
+                })
+            })
+            .then( response => {
+                if (response == undefined) {
+                    throw new Error("file upload response is null.");
+                } else if (!response.ok) {
+                    throw new Error('file upload response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data == undefined) {
+                    throw new Error("file upload response has no data json.");
+                }
+
+                if (data["error"] != undefined) {
+                    handleRemoveFile();
+                    setInputError(data.error);
+                } else {
+                    setThisFileUuids(data["fileUuid"]);
+                    setThisFilepaths(data["filepath"]);
+                }
+            })
+            .catch((error) => {
+                // Handle error response
+                setInputError(error);
+            })
+            .finally (() => {
+                setIsSolutionShowDone(false);
+            });
+        }
+
+        if (files.length) {
+            const newImages = files.map((file) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve({
+                    src: reader.result,
+                    name: file.name
+                    });
+                reader.readAsDataURL(file);
+              });
+            });
+            Promise.all(newImages).then((imageData) => {
+                setFileListData((prevImages) => [...prevImages, ...imageData]);
+            });
+          }
+
+        console.log(fileListTmpData);
     };
 
     const handleFormFileUpload = (event) => {
         event.preventDefault();
-        const file = event.target.files[0];
-        handleFileUpload(file);
+        const files = [];
+        for (let file of event.target.files) {
+            files.push(file);
+        }
+        handleFileUpload(files);
     }
 
     const handlePaste = (event) => {
         const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        const fileList = [];
         for (const item of items) {
             if (item.kind === 'file') {
                 const file = item.getAsFile();
-                handleFileUpload(file);
+                fileList.push(file);
             }
         }
+        handleFileUpload(fileList);
     };
 
     const handleDragOver = (event) => {
@@ -101,14 +133,16 @@ const FileUploadComponent = () => {
 
     const handleDrop = (event) => {
         event.preventDefault();
-        const file = event.dataTransfer.files[0];
-        handleFileUpload(file);
+        const fileList = [];
+        for (let file of event.dataTransfer.files) {
+            fileList.push(file)
+        }
+        handleFileUpload(fileList);
         setDragging(false);
     };
 
-    const handleRemoveFile = () => {
-        setFileData(null);
-        setFileName('');
+    const handleRemoveFile = (filename) => {
+        setFileListData((prevImages) => prevImages.filter((image) => image.name !== filename));
     };
 
     return (
@@ -125,16 +159,21 @@ const FileUploadComponent = () => {
             }}
         >
             <Form.Group controlId="formFile" className="mb-3" encType="multipart/form-data">
-                <Form.Control type="file" onChange={handleFormFileUpload} />
+                <Form.Control type="file" onChange={(e) => {
+                                handleFormFileUpload(e);
+                                handleInputLabel();}} 
+                            ref={fileMoreInputRef}
+                            multiple
+                />
             </Form.Group>
 
-            {fileData && (
-                <Row className="mt-3" style={{ position: 'relative' }}>
+            <Row className="mt-3" style={{ position: 'relative' }}>
+                {fileListData.length > 0 && fileListData.map((image, idx) => (
                     <Col xs={1}>
                         <div style={{ position: 'relative' }}>
-                            <Image src={fileData} thumbnail />
+                            <Image src={image.src} thumbnail />
                             <CloseButton
-                                onClick={handleRemoveFile}
+                                onClick={() => handleRemoveFile(image.name)}
                                 style={{
                                     position: 'absolute',
                                     backgroundColor: 'white',
@@ -143,13 +182,11 @@ const FileUploadComponent = () => {
                             />
                         </div>
                     </Col>
-                    <Col>
-                        <h5>{fileName}</h5>
-                    </Col>
+                ))}
                 </Row>
-            )}
+            
 
-            {!fileData && (
+            {!fileListData.length && (
                 <p className="text-center">
                     Drag and drop a file here or click to upload.
                 </p>

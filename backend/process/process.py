@@ -99,8 +99,8 @@ def load_config_classifier_all():
     return jsonify({"classifier_config": TEXT_LABEL_MAP})
 
 def train_classifier():
-    acc_str = train_dt_model()
-    return jsonify({"accuracy": f"{acc_str}"})
+    perf_metrics = train_dt_model()
+    return jsonify(perf_metrics)
 
 def load_audit_all():
     return jsonify({"message": "ok"})

@@ -14,6 +14,7 @@ TEXT_LABEL_MAP = {
     "mbs_bloomberg":  1,
     "unsettle_trade":  2,
     "extract_ytd_trades":  3,
+    "cefts_bond":  4,
 }
 
 LABEL_PARSER_MAP = {

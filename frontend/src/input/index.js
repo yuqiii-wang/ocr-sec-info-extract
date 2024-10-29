@@ -11,9 +11,9 @@ import './css/Input.css';
 const InputComponent = () => {
 
     const { answerLoading, isMainAskDone, setAnswerLoading,
-        referenceCodeSepOffset, thisFileUuid, thisFilepath,
-        referenceImageResults, setThisFileUuid, setSummaryResults, 
-        setIsMainAskDone, isOnInputShow, setThisFilepath,
+        referenceCodeSepOffset, thisFileUuids, thisFilepaths,
+        referenceImageResults, setThisFileUuids, setSummaryResults, 
+        setIsMainAskDone, isOnInputShow, setThisFilepaths,
         setIsOnInputShow, setReferenceImageResults, setIsSolutionShowDone,
         referenceOCRJsonResults, setReferenceOCRJsonResults,
         inputError, setInputError } = useContext(GlobalAppContext);
@@ -25,13 +25,13 @@ const InputComponent = () => {
     const processSubmitRequest = async (event) => {
 
         try {
-            if (thisFileUuid === "" ) {
+            if (thisFileUuids === "" ) {
                 setInputError("Not found a file to submit for OCR process.");
             }
             setAnswerLoading(true);
             const response = fetch("/process/submit", {
                 method: 'POST',
-                body: JSON.stringify({"filepath": thisFilepath}),
+                body: JSON.stringify({"filepath": thisFilepaths}),
                 mode: "cors",
                 headers: new Headers({
                     'Accept': 'application/json',
@@ -71,8 +71,8 @@ const InputComponent = () => {
             setInputError(error);
         } finally {
             setIsMainAskDone(true);
-            setThisFileUuid("");
-            setThisFilepath("");
+            setThisFileUuids("");
+            setThisFilepaths("");
         }
   };
 

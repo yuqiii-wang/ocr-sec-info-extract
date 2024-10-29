@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.pipeline import make_pipeline
 import pickle
 import os
@@ -40,11 +40,18 @@ def train_dt_model():
     y_pred = tfidf_dt_clf.predict(X_test)
 
     accuracy = accuracy_score(y_test, y_pred)
-    accuracy_str = f"{accuracy * 100:.2f}%"
-    print(f"Accuracy: {accuracy * 100:.2f}%")
+    precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+    f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+    perf_metrics = {
+        "accuracy": f"{accuracy * 100:.2f}%",
+        "precision": f"{precision * 100:.2f}%",
+        "recall": f"{recall * 100:.2f}%",
+        "f1": f"{f1 * 100:.2f}%",
+    }
 
     # Save the model to a file using pickle
     with open(classifier_dt_model_path, 'wb') as file:
         pickle.dump(tfidf_dt_clf, file)
 
-    return accuracy_str
+    return perf_metrics

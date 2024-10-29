@@ -17,8 +17,8 @@ function GlobalAppContextManager({ children }) {
     const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState("");
     const [referenceShellScriptResults, setReferenceShellScriptResults] = useState("");
     const [isOnInputShow, setIsOnInputShow] = useState(true);
-    const [thisFileUuid, setThisFileUuid] = useState("");
-    const [thisFilepath, setThisFilepath] = useState("");
+    const [thisFileUuids, setThisFileUuids] = useState("");
+    const [thisFilepaths, setThisFilepaths] = useState("");
     const [inputError, setInputError] = useState("");
     const [isOnLoadingExecutionLog, setIsOnLoadingExecutionLog] = useState(false);
     const [isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog] = useState(false);
@@ -42,8 +42,8 @@ function GlobalAppContextManager({ children }) {
                                         referenceOCRJsonResults, setReferenceOCRJsonResults,
                                         referenceShellScriptResults, setReferenceShellScriptResults,
                                         isOnInputShow, setIsOnInputShow,
-                                        thisFileUuid, setThisFileUuid,
-                                        thisFilepath, setThisFilepath,
+                                        thisFileUuids, setThisFileUuids,
+                                        thisFilepaths, setThisFilepaths,
                                         inputError, setInputError,
                                         isOnLoadingExecutionLog, setIsOnLoadingExecutionLog,
                                         isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog,
