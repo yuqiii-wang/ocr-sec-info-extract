@@ -1,5 +1,6 @@
-unsettle 1234567890
-pls unsettle 1234567891
-could you unsettle 1234567821
-unsettle 1234564821, thx
-unsettle 1234562821 to rebook
+ccc93221-5288-45a4-94f4-5e9ccd912a5e<SEP>unsettle 1234567890</SEP>
+ccc93222-5288-45a4-94f4-5e9ccd912a5e<SEP>pls unsettle 1234567891</SEP>
+ccc93223-5288-45a4-94f4-5e9ccd912a5e<SEP>could you unsettle 1234567821</SEP>
+ccc93224-5288-45a4-94f4-5e9ccd912a5e<SEP>unsettle 1234564821, thx</SEP>
+ccc93225-5288-45a4-94f4-5e9ccd912a5e<SEP>unsettle 1234562821 to rebook</SEP>
+c8a46a38-3302-46a8-a7f7-626f5ce51c8f<SEP>unsettle a trade 1234567890</SEP>

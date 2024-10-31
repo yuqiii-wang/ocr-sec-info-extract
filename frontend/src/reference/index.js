@@ -8,7 +8,7 @@ import "./css/ocr_results.css";
 
 
 const ReferenceComponent = () => {
-    const { answerLoading, detailResults, isOnHomeStartPage,
+    const { answerLoading, detailResults, isOnHomeAskPage,
         referenceImageResults, referenceCodeSepOffset, 
         isOnLoadingExecutionLog,
         isDoneLoadingExecutionLog, } = useContext(GlobalAppContext);
@@ -24,7 +24,7 @@ const ReferenceComponent = () => {
                     role="status"
                     aria-hidden="true"
                 />
-            ) : isOnHomeStartPage ? (
+            ) : isOnHomeAskPage ? (
                 <TextAsk />
             ) : (isOnLoadingExecutionLog || isDoneLoadingExecutionLog) ? (
                 <LogReferenceDetail />

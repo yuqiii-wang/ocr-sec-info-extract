@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
-import { TriangleLeftButton, TriangleRightButton } from "../others/CodeInputSwitchButtons";
+import CancelToRestartButton from "../others/CancelToRestartButton";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FileUploadComponent from "./FileUpload";
@@ -11,14 +11,15 @@ import './css/Input.css';
 const InputComponent = () => {
 
     const { answerLoading, isMainAskDone, setAnswerLoading,
-        referenceCodeSepOffset, thisFileUuids, thisFilepaths,
-        referenceImageResults, setThisFileUuids, setSummaryResults, 
-        setIsMainAskDone, isOnInputShow, setThisFilepaths,
-        setIsOnInputShow, setReferenceImageResults, setIsSolutionShowDone,
-        referenceOCRJsonResults, setReferenceOCRJsonResults,
+        referenceCodeSepOffset, thisFileUuids, uploadedFilenames,
+        referenceImageResults, setThisFileUuids,  
+        setIsMainAskDone, isOnInputShow, setUploadedFilenames,
+        setTaskLabel, setReferenceImageResults, setIsSolutionShowDone,
+        setIsOnHomeAskPage, setReferenceOCRJsonResults,
         inputError, setInputError } = useContext(GlobalAppContext);
 
     const handleSubmitRequest = async (event) => {
+        setIsOnHomeAskPage(false);
         await processSubmitRequest(event);
     }
 
@@ -31,7 +32,7 @@ const InputComponent = () => {
             setAnswerLoading(true);
             const response = fetch("/process/submit", {
                 method: 'POST',
-                body: JSON.stringify({"filepath": thisFilepaths}),
+                body: JSON.stringify({"filenames": uploadedFilenames}),
                 mode: "cors",
                 headers: new Headers({
                     'Accept': 'application/json',
@@ -53,11 +54,11 @@ const InputComponent = () => {
                     const referenceResults = data;
                     const images = await extractResponseImages(referenceResults);
                     setReferenceImageResults(images);
-                    const solutionJsonString = JSON.stringify(data.solution_reference, null, 2);
-                    setReferenceOCRJsonResults(solutionJsonString);
+                    setReferenceOCRJsonResults(data.solution_reference);
                     setIsSolutionShowDone(true);
-            }
-            setAnswerLoading(false);
+                    setTaskLabel(data.task_label);
+                }
+                setAnswerLoading(false);
             })
             .catch((postErr) => {
             // Handle error response
@@ -71,20 +72,19 @@ const InputComponent = () => {
             setInputError(error);
         } finally {
             setIsMainAskDone(true);
-            setThisFileUuids("");
-            setThisFilepaths("");
+            setThisFileUuids([]);
+            setUploadedFilenames([]);
         }
   };
 
   return (
-    <Container className={`"input-card ${isOnInputShow ? 'active' : ''}`}
-    >
+    <Container className={`"input-card ${isOnInputShow ? 'active' : ''}`} >
       <Row className="justify-content-start align-items-end" 
       style={{ height: `${Math.min(32, 12+referenceCodeSepOffset)}rem`, margin: "1%" }}>
               <Form >
                 <div className="input-top-wrapper">
                     <Form.Label>Upload a file</Form.Label>
-                    <TriangleRightButton></TriangleRightButton>
+                    <CancelToRestartButton></CancelToRestartButton>
                 </div>
               
                 <FileUploadComponent />
@@ -107,7 +107,7 @@ const InputComponent = () => {
               </div>
       </Row>
     </Container>
-  );
+    );
 };
 
 export default InputComponent;

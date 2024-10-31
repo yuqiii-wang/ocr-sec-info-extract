@@ -9,9 +9,9 @@ import logo from "./logo.svg";
 
 function TopNavBar() {
 
-    const { setIsOnAuditPage, setIsOnAboutPage,
+    const { setIsOnHomePage, setIsOnAuditPage, setIsOnAboutPage,
         setIsOnConfigClassifierPage, setIsOnConfigNERPage,
-        setIsOnConfigHandlerPage
+        setIsOnConfigHandlerPage, setIsOnConfigApprovalPage
      } = useContext(GlobalAppContext);
 
     const handleRefresh = () => {
@@ -19,6 +19,7 @@ function TopNavBar() {
     };
 
     const handleAuditClick = () => {
+        setIsOnHomePage(false);
         setIsOnAuditPage(true);
         setIsOnAboutPage(false);
         setIsOnConfigClassifierPage(false);
@@ -27,14 +28,16 @@ function TopNavBar() {
     };
 
     const handleAboutClick = () => {
-        setIsOnAboutPage(true);
+        setIsOnHomePage(false);
         setIsOnAuditPage(false);
+        setIsOnAboutPage(true);
         setIsOnConfigClassifierPage(false);
         setIsOnConfigNERPage(false);
         setIsOnConfigHandlerPage(false);
     };
 
     const handleHomeClick = () => {
+        setIsOnHomePage(true);
         setIsOnAuditPage(false);
         setIsOnAboutPage(false);
         setIsOnConfigClassifierPage(false);
@@ -43,14 +46,29 @@ function TopNavBar() {
     };
 
     const handleConfigSelect = (eventKey) => {
+        setIsOnHomePage(false);
         setIsOnAuditPage(false);
         setIsOnAboutPage(false);
         if (eventKey === 'Classifier Training') {
             setIsOnConfigClassifierPage(true);
+            setIsOnConfigNERPage(false);
+            setIsOnConfigHandlerPage(false);
+            setIsOnConfigApprovalPage(false);
         } else if (eventKey === 'NER Engine Training') {
+            setIsOnConfigClassifierPage(false);
             setIsOnConfigNERPage(true);
+            setIsOnConfigHandlerPage(false);
+            setIsOnConfigApprovalPage(false);
         } else if (eventKey === 'Script Generator Setup') {
+            setIsOnConfigClassifierPage(false);
+            setIsOnConfigNERPage(false);
             setIsOnConfigHandlerPage(true);
+            setIsOnConfigApprovalPage(false);
+        } else if (eventKey === 'Approval Setup') {
+            setIsOnConfigClassifierPage(false);
+            setIsOnConfigNERPage(false);
+            setIsOnConfigHandlerPage(false);
+            setIsOnConfigApprovalPage(true);
         }
     }
 
@@ -69,6 +87,7 @@ function TopNavBar() {
                                 <NavDropdown.Item eventKey="Classifier Training">Classifier Training</NavDropdown.Item>
                                 <NavDropdown.Item eventKey="NER Engine Training">NER Engine Training</NavDropdown.Item>
                                 <NavDropdown.Item eventKey="Script Generator Setup">Script Generator Setup</NavDropdown.Item>
+                                <NavDropdown.Item eventKey="Approval Setup">Approval Setup</NavDropdown.Item>
                         </NavDropdown>
                         <Nav.Link href="" onClick={handleAuditClick}>Audit</Nav.Link>
                         <Nav.Link href="" onClick={handleAboutClick}>About</Nav.Link>

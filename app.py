@@ -1,6 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 import threading
-from flask import Flask, request, jsonify, render_template, make_response
+from flask import Flask, session, request, jsonify, render_template, make_response
 from flask_cors import CORS
 import os, flask, json
 from flask_socketio import SocketIO
@@ -13,7 +13,8 @@ from backend.process.process import (process_execute,
                                      load_audit_all,
                                      load_config_classifier_all,
                                      process_text_query,
-                                     train_classifier
+                                     train_classifier,
+                                     process_remove_file
                                      )
 
 # Create a Flask application instance
@@ -22,7 +23,8 @@ app = Flask(__name__,
             static_folder='frontend/build/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
-                    r'/process/fileupload': {"origins": "http://localhost:3000"},
+                    r'/process/file/upload': {"origins": "http://localhost:3000"},
+                    r'/process/file/remove': {"origins": "http://localhost:3000"},
                     r'/process/execute': {"origins": "http://localhost:3000"},
                     r'/process/ask': {"origins": "http://localhost:3000"},
                     r'/process/convert': {"origins": "http://localhost:3000"},
@@ -30,8 +32,10 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                     r'/config/train/classifier': {"origins": "http://localhost:3000"},
 },
                     headers='Content-Type')
+app.secret_key = 'your_secret_key_here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 setup_logger(app)
 
@@ -46,6 +50,16 @@ def allow_cors(response):
 def index():
     return render_template('index.html')
 
+@app.route('/new/session', methods=['GET'])
+def new_session():
+    session_uuid = request.args.get('session_uuid')
+    session.pop('session_uuid', None)
+    session.pop('session_image_filenames', None)
+    session['session_uuid'] = session_uuid
+    session['session_image_filenames'] = []
+    resp = make_response(jsonify({"message": "ok"}))
+    return resp
+
 @app.route('/process/ask', methods=['POST'])
 def ask():
     data = request.get_json()
@@ -53,31 +67,37 @@ def ask():
     resp = make_response(process_text_query(msg))
     return resp
 
-@app.route('/process/fileupload', methods=['POST'])
-def fileupload():
-    
+@app.route('/process/file/remove', methods=['POST'])
+def remove_file():
+    data = request.get_json()
+    filename = data.get("filename")
+    if 'session_image_filenames' in session:
+        session['session_image_filenames'].remove(filename)
+    resp = make_response(process_remove_file(filename))
+    return resp
+
+@app.route('/process/file/upload', methods=['POST'])
+def file_upload():
     if 'file' not in request.files:
         resp = make_response(jsonify({'error': 'No file part in the request'}))
         return resp
-
     file = request.files['file']
     if file.filename == '':
         resp = make_response(jsonify({'error': 'No filename found.'}))
         return resp
-
     if not '.png' in file.filename and not '.jpg' in file.filename:
         resp = make_response(jsonify({'error': 'No must input image of .png or .jpg.'}))
         return resp
-
     fileUuid = request.args.get("fileUuid")
+    session['session_image_filenames'].append(file.filename)
     resp = make_response(process_upload_file(file, fileUuid))
     return resp
 
 @app.route('/process/submit', methods=['POST'])
 def submit():
     data = request.get_json()
-    file_path = data.get("filepath")
-    resp = make_response(process_ocr(file_path))
+    filenames = data["filenames"]
+    resp = make_response(process_ocr(filenames))
     return resp
 
 @app.route('/process/execute', methods=['POST'])
@@ -89,12 +109,12 @@ def execute():
     websocket_thread.join()
     resp = make_response(jsonify({"message": "ok"}))
     return resp
-    
+
 @app.route('/process/convert', methods=['POST'])
 def convert():
     data = request.get_json()
-    ocr_json = json.loads(data.get("ocr_json"))
-    resp = make_response(process_convert(ocr_json))
+    ocr_jsons = data.get("ocr_jsons")
+    resp = make_response(process_convert(ocr_jsons))
     return resp
 
 @app.route('/audit/load/time', methods=['GET'])

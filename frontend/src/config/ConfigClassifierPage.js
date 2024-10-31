@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import "./css/Config.css";
 
 const ConfigClassifierPage = () => {
 
     const [trainingLabels, setTrainingLabels] = useState([]);
     const [trainingResults, setTrainingResults] = useState("");
+    const [isOnClassifierTraining, setIsOnClassifierTraining] = useState(false);
     const [loadConfigClassifierError, setLoadConfigClassifierError] = useState([]);
 
     useEffect(() => {
@@ -50,6 +51,7 @@ const ConfigClassifierPage = () => {
 
     const handleTrainingRequest = () => {
         try {
+            setIsOnClassifierTraining(true);
             const response = fetch("/config/train/classifier", {
                 method: 'POST',
                 mode: "cors",
@@ -81,7 +83,7 @@ const ConfigClassifierPage = () => {
         } catch (error) {
             setLoadConfigClassifierError(error);
         } finally {
-            ;
+            setTimeout(() => setIsOnClassifierTraining(false), 200);
         }
     }
 
@@ -96,7 +98,11 @@ const ConfigClassifierPage = () => {
         <Col className='justify-content-center' xs={4}>
         <Row>
         <Col className='justify-content-center' xs={4}>
-          <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>Train</Button>
+          <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>
+            {isOnClassifierTraining ? (
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+            ) : "Train"}
+          </Button>
           </Col>
         <p>Classifier training labels</p>
           </Row>
@@ -107,7 +113,9 @@ const ConfigClassifierPage = () => {
       </ul>
         </Col>
         <Col xs={8}>
-          {trainingResults != "" 
+          {isOnClassifierTraining ? (
+            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+          ) : trainingResults != "" 
                     ? (<pre>{trainingResults}</pre>)
                     : (<p>Training results will show here.</p>)}
         </Col>

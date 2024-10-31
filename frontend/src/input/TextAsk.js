@@ -4,7 +4,12 @@ import {GlobalAppContext} from "../GlobalAppContext";
 import './css/Input.css';
 
 const TextAsk = () => {
-    const { setIsOnHomeStartPage
+    const { setIsOnHomeAskPage, setIsJustStart,
+        setReferenceTextNerJsonResults,
+        setReferenceTextNerPosResults,
+        setReferenceSrcTextResults,
+        setTaskLabel, setIsMainAskDone,
+        setAnswerLoading, setIsSolutionShowDone
     } = useContext(GlobalAppContext);
 
     const [inputValue, setInputValue] = useState('');
@@ -16,8 +21,8 @@ const TextAsk = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
+            setAnswerLoading(true);
             const response = await fetch("/process/ask", {
                 method: 'POST',
                 headers: new Headers({
@@ -34,20 +39,28 @@ const TextAsk = () => {
                     throw new Error('file upload response was not ok.');
                 }
                 return response.json();
+            })
+            .then( data => {
+                setReferenceTextNerJsonResults(data["ner_results"]);
+                setReferenceTextNerPosResults(data["ner_pos"]);
+                setReferenceSrcTextResults(data["msg"]);
+                setTaskLabel(data["task_label"]);
+                setIsSolutionShowDone(true);
             });
-    
         } catch (error) {
             console.error('Error sending message');
         } finally {
-            setIsOnHomeStartPage(false);
-            // Optionally clear the input after submission
+            setIsOnHomeAskPage(false);
+            setIsJustStart(false);
+            setIsMainAskDone(true);
+            setAnswerLoading(false);
             setInputValue('');
         }
     };
 
     useEffect(() => {
         const interval = setInterval(() => {
-        setDots((prevDots) => (prevDots.length === 3 ? '' : prevDots + '.'));
+            setDots((prevDots) => (prevDots.length === 3 ? '' : prevDots + '.'));
         }, 500); // Adjust the interval time if necessary
         return () => clearInterval(interval);
     }, []);
@@ -87,10 +100,12 @@ const TextAsk = () => {
             </Col>
             <Col className="col-1">
                 <Button type="submit" variant="primary" className='input-text-ask-btn'
-                onClick={handleSubmit}>Ask</Button>
-                </Col>
+                    onClick={handleSubmit}>
+                        Ask
+                </Button>
+            </Col>
             </Row>
-            </Container>
+        </Container>
     );
 };
 

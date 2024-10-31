@@ -3,11 +3,7 @@ import { Container, Row, Col, Form, Spinner, Card } from 'react-bootstrap';
 import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 
-const ImageReferenceDetail = ({image, key, onDelete}) => {
-    const {solutionLoading, referenceImageResults,
-        referenceOCRJsonResults, setReferenceOCRJsonResults,
-        referenceCodeSepOffset
-    } = useContext(GlobalAppContext);
+const ImageReferenceDetail = ({image, ocr_json, onDelete}) => {
 
     const [hover, setHover] = useState(false);
 
@@ -19,9 +15,9 @@ const ImageReferenceDetail = ({image, key, onDelete}) => {
                 <Card.Img className='reference-detail' src={image.src} />
             </Col>
             <Col md={4}>
-                {referenceOCRJsonResults != "" 
-                    ? (<pre>{referenceOCRJsonResults}</pre>)
-                    : (<p>Empty results</p>)}
+                {ocr_json != "" 
+                    ? (<pre>{ocr_json}</pre>)
+                    : ("")}
             </Col>
             {hover && (
         <Col md={1}

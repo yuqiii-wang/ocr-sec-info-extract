@@ -2,12 +2,11 @@ import React, { useState, useContext, useEffect, useRef, useCallback } from "rea
 import { Container, Row, Col, Form, Button, Card, Tab, Tabs } from "react-bootstrap";
 import { GlobalAppContext } from "../GlobalAppContext";
 import { CodeContext } from "./CodeContext";
+import CancelToRestartButton from "../others/CancelToRestartButton";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import './css/CodeDetail.css'
 import CodeCard from "./CodeCard";
-import SummaryCard from "./CodeSummaryCard";
-import CodeErrorCard from "./CodeErrorCard";
 
 const CodeDetailComponent = ({ code }) => {
     const { isSolutionConcludeDone, referenceCodeSepOffset, isOnLoadingExecutionLog,
@@ -65,23 +64,12 @@ const CodeDetailComponent = ({ code }) => {
 
     return (
         <div>
+            <div className="refresh-btn-container">
+            <CancelToRestartButton></CancelToRestartButton>
+            </div>
             <div className="code-card-content-container"
-                style={{ width: '100%', height: `${Math.min(29, 9 + referenceCodeSepOffset)}rem` }}>
-                <Tabs
-                    id="code-tabs"
-                    activeKey={key}
-                    onSelect={(k) => setKey(k)}
-                >
-                    <Tab eventKey="code" title="Code">
-                        <CodeCard code={code} />
-                    </Tab>
-                    <Tab eventKey="error" title="Error">
-                        <CodeErrorCard />
-                    </Tab>
-                    <Tab eventKey="summary" title="Summary">
-                        <SummaryCard />
-                    </Tab>
-                </Tabs>
+                style={{ width: '100%', height: `${Math.min(29, 8 + referenceCodeSepOffset)}rem` }}>
+                <CodeCard code={code} />
             </div>
             <Card.Footer style={{ display: "flex", justifyContent: "flex-end" }}>
                 <React.Fragment>

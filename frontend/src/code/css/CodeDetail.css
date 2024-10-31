@@ -23,3 +23,9 @@
     background-color: #67d1f8;
     cursor: not-allowed;
 }
+
+.refresh-btn-container {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
