@@ -1,5 +1,4 @@
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import { Card, Button, Tab, Tabs } from 'react-bootstrap';
+import React, { useState, useContext } from "react";
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { github } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';

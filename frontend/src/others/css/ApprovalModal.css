@@ -1,0 +1,12 @@
+
+.approval-switch-header {
+    display: flex; /* Use flexbox */
+    justify-content: space-between; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.approval-email-btn {
+    display: flex; /* Use flexbox */
+    justify-content: end; /* Center horizontally */
+    margin-top: 1rem;
+}

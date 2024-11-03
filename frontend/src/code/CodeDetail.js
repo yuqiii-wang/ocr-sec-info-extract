@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import { Container, Row, Col, Form, Button, Card, Tab, Tabs } from "react-bootstrap";
+import React, { useState, useContext } from "react";
+import { Button, Card } from "react-bootstrap";
 import { GlobalAppContext } from "../GlobalAppContext";
 import { CodeContext } from "./CodeContext";
-import CancelToRestartButton from "../others/CancelToRestartButton";
+import CloseToRestartButton from "../others/CloseToRestartButton";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import './css/CodeDetail.css'
@@ -65,7 +65,7 @@ const CodeDetailComponent = ({ code }) => {
     return (
         <div>
             <div className="refresh-btn-container">
-            <CancelToRestartButton></CancelToRestartButton>
+            <CloseToRestartButton></CloseToRestartButton>
             </div>
             <div className="code-card-content-container"
                 style={{ width: '100%', height: `${Math.min(29, 8 + referenceCodeSepOffset)}rem` }}>

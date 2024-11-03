@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 import threading
 from flask import Flask, session, request, jsonify, render_template, make_response
 from flask_cors import CORS
@@ -14,7 +13,9 @@ from backend.process.process import (process_execute,
                                      load_config_classifier_all,
                                      process_text_query,
                                      train_classifier,
-                                     process_remove_file
+                                     process_remove_file,
+                                     load_config_approval_template_by_id,
+                                     load_config_ner_details
                                      )
 
 # Create a Flask application instance
@@ -23,14 +24,15 @@ app = Flask(__name__,
             static_folder='frontend/build/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
-                    r'/process/file/upload': {"origins": "http://localhost:3000"},
-                    r'/process/file/remove': {"origins": "http://localhost:3000"},
-                    r'/process/execute': {"origins": "http://localhost:3000"},
-                    r'/process/ask': {"origins": "http://localhost:3000"},
-                    r'/process/convert': {"origins": "http://localhost:3000"},
-                    r'/config/load/classifier': {"origins": "http://localhost:3000"},
-                    r'/config/train/classifier': {"origins": "http://localhost:3000"},
-},
+                        r'/process/file/upload': {"origins": "http://localhost:3000"},
+                        r'/process/file/remove': {"origins": "http://localhost:3000"},
+                        r'/process/execute': {"origins": "http://localhost:3000"},
+                        r'/process/ask': {"origins": "http://localhost:3000"},
+                        r'/process/convert': {"origins": "http://localhost:3000"},
+                        r'/config/load/classifier': {"origins": "http://localhost:3000"},
+                        r'/config/train/classifier': {"origins": "http://localhost:3000"},
+                        r'/config/load/ner': {"origins": "http://localhost:3000"},
+                    },
                     headers='Content-Type')
 app.secret_key = 'your_secret_key_here'
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -132,6 +134,19 @@ def audit_load_all():
 @app.route('/config/load/classifier', methods=['GET'])
 def config_load_all():
     resp = make_response(load_config_classifier_all())
+    return resp
+
+@app.route('/config/load/approval', methods=['GET'])
+def config_load_approval():
+    approval_template_id = request.args.get('approval_template_id')
+    resp = make_response(load_config_approval_template_by_id(approval_template_id))
+    return resp
+
+@app.route('/config/load/ner', methods=['GET'])
+def config_load_ner():
+    ner_task = request.args.get('nertask', None)
+    ner_item = request.args.get('neritem', None)
+    resp = make_response(load_config_ner_details(ner_task, ner_item))
     return resp
 
 @app.route('/config/train/classifier', methods=['POST'])

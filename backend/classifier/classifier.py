@@ -5,10 +5,10 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.pipeline import make_pipeline
 import pickle
 import os
-try:
-    from backend.classifier.utils import text_to_dataset
-except ImportError:
-    from utils import text_to_dataset
+from backend.classifier.utils import (text_to_dataset,
+                                      compute_num_samples_per_label,
+                                      compute_accuracy_per_label)
+
 
 dt_model_file = 'dt_model.pkl'
 classifier_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,10 +44,12 @@ def train_dt_model():
     recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
     f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
     perf_metrics = {
-        "accuracy": f"{accuracy * 100:.2f}%",
-        "precision": f"{precision * 100:.2f}%",
-        "recall": f"{recall * 100:.2f}%",
-        "f1": f"{f1 * 100:.2f}%",
+        "accuracyAll": f"{accuracy * 100:.2f}%",
+        "precisionAll": f"{precision * 100:.2f}%",
+        "recallAll": f"{recall * 100:.2f}%",
+        "f1All": f"{f1 * 100:.2f}%",
+        "numberSamplesPerLabel": compute_num_samples_per_label(sample_labels),
+        "accuracyPerLabel": compute_accuracy_per_label(y_test, y_pred)
     }
 
     # Save the model to a file using pickle

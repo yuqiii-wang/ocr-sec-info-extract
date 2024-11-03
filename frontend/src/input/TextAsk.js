@@ -8,7 +8,7 @@ const TextAsk = () => {
         setReferenceTextNerJsonResults,
         setReferenceTextNerPosResults,
         setReferenceSrcTextResults,
-        setTaskLabel, setIsMainAskDone,
+        setTaskLabel, setIsMainAskDone, setApprovalTemplateId,
         setAnswerLoading, setIsSolutionShowDone
     } = useContext(GlobalAppContext);
 
@@ -46,6 +46,9 @@ const TextAsk = () => {
                 setReferenceSrcTextResults(data["msg"]);
                 setTaskLabel(data["task_label"]);
                 setIsSolutionShowDone(true);
+                const approvalThisTemplateId = data["approval_template_id"] !== undefined ? data["approval_template_id"] : -1;
+                setApprovalTemplateId(approvalThisTemplateId);
+                setInputValue('');
             });
         } catch (error) {
             console.error('Error sending message');
@@ -54,7 +57,6 @@ const TextAsk = () => {
             setIsJustStart(false);
             setIsMainAskDone(true);
             setAnswerLoading(false);
-            setInputValue('');
         }
     };
 

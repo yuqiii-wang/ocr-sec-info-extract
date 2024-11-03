@@ -252,7 +252,7 @@ const FileUploadComponent = () => {
 
             {!fileListData.length && (
                 <p className="text-center">
-                    Drag and drop a file here or click to upload.
+                    Drag and drop, copy and paste, or click to upload
                 </p>
             )}
 

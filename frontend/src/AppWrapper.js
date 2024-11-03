@@ -1,7 +1,7 @@
 import "./App.css";
 import App from "./App";
-import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
-import { GlobalAppContext, GlobalAppContextManager } from "./GlobalAppContext";
+import React from "react";
+import { GlobalAppContextManager } from "./GlobalAppContext";
 
 function AppWrapper() {
 

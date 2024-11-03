@@ -10,6 +10,9 @@ LOCAL_INPUT_IMAGE_DIR=os.path.join(current_dir, "local_files", "input_images")
 LOCAL_OCR_IMAGE_DIR=os.path.join(current_dir, "local_files", "ocr_images")
 LOCAL_OCR_TMP_IMAGE_DIR=os.path.join(current_dir, "local_files", "tmp_images")
 
+NER_CONFIG=os.path.join(current_dir, "ner", "ner.json")
+
+
 TEXT_LABEL_MAP = {
     "bond_bloomberg": 0,
     "mbs_bloomberg":  1,
@@ -17,6 +20,8 @@ TEXT_LABEL_MAP = {
     "unsettle_trade":  3,
     "extract_ytd_trades":  4,
 }
+
+LABEL_TEXT_MAP = {v : k for k, v in TEXT_LABEL_MAP.items()}
 
 LABEL_PARSER_MAP = {
     0: parse_bloomberg_bond_ocr,

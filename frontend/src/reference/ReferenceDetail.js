@@ -3,12 +3,13 @@ import { Container, Button, DropdownButton, Dropdown } from "react-bootstrap";
 import ImageReferenceDetails from "./ImageReferenceDetails";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import ApprovalModal from "../others/ApprovalModal";
 import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 import TextReferenceDetail from "./TextReferenceDetail";
 
 const ReferenceDetailComponent = () => {
-    const { referenceImageResults, taskLabel,
+    const { referenceImageResults, taskLabel, approvalTemplateId,
         isSolutionShowDone, referenceOCRJsonResults,
         setReferenceShellScriptResults, referenceSrcTextResults,
         referenceCodeSepOffset, setIsOnInputShow,
@@ -19,6 +20,7 @@ const ReferenceDetailComponent = () => {
     const [hover, setHover] = useState(false);
     const [isOnSwitchHandler, setIsOnSwitchHandler] = useState(false);
     const [conversionError, setConversionError] = useState("");
+    const [isShowApprovalModal, setIsShowApprovalModal] = useState(false);
 
     useEffect(() => {
         try {
@@ -76,29 +78,29 @@ const ReferenceDetailComponent = () => {
                     'Content-Type': 'application/json',
                 }),
             })
-                .then(response => {
-                    if (response == undefined) {
-                        throw new Error("ocr json conversion response is null.");
-                    } else if (!response.ok) {
-                        throw new Error('ocr json conversion response was not ok.');
-                    }
-                    return response.json();
-                })
-                .then(async (data) => {
-                    if (data.error != undefined) {
-                        setConversionError(data.error);
-                    } else {
-                        setReferenceShellScriptResults(data["shell_scripts"]);
-                        setIsOnInputShow(false);
-                    }
-                })
-                .catch((postErr) => {
-                    // Handle error response
-                    if (postErr == "") {
-                        postErr = "Image Process Error.";
-                    }
-                    setConversionError(postErr);
-                });
+            .then(response => {
+                if (response == undefined) {
+                    throw new Error("ocr json conversion response is null.");
+                } else if (!response.ok) {
+                    throw new Error('ocr json conversion response was not ok.');
+                }
+                return response.json();
+            })
+            .then(async (data) => {
+                if (data.error != undefined) {
+                    setConversionError(data.error);
+                } else {
+                    setReferenceShellScriptResults(data["shell_scripts"]);
+                    setIsOnInputShow(false);
+                }
+            })
+            .catch((postErr) => {
+                // Handle error response
+                if (postErr == "") {
+                    postErr = "Image Process Error.";
+                }
+                setConversionError(postErr);
+            });
         } catch (error) {
             setConversionError(error);
         } finally {
@@ -119,6 +121,19 @@ const ReferenceDetailComponent = () => {
             ) : referenceSrcTextResults != "" ? (
                 <TextReferenceDetail></TextReferenceDetail>
             ) : ("")}
+            {approvalTemplateId !== -1 &&(
+                <OverlayTrigger placement="top" overlay={
+                    <Tooltip id="button-tooltip">
+                        This query need management approval
+                    </Tooltip>
+                }>
+                    <Button variant="primary" type="submit" className="reference-approval-btn"
+                    style={{ top: `${Math.max(8, 23.5 - referenceCodeSepOffset)}rem` }}
+                    onClick={() => setIsShowApprovalModal(true)} disabled={!isSolutionShowDone}>
+                    Review Approval
+                </Button>
+                </OverlayTrigger>
+            )}
             <OverlayTrigger placement="top" overlay={
                 <Tooltip id="button-tooltip">
                     Switch to another backend handler for query parsing
@@ -135,6 +150,7 @@ const ReferenceDetailComponent = () => {
                     </DropdownButton>
                 </div>
             </OverlayTrigger>
+
             <OverlayTrigger placement="top" overlay={
                 <Tooltip id="button-tooltip">
                     Convert OCR/parsed text results into shell scripts.
@@ -142,10 +158,13 @@ const ReferenceDetailComponent = () => {
             } >
                 <Button variant="primary" type="submit" className="reference-convert-btn"
                     style={{ top: `${Math.max(8, 26.5 - referenceCodeSepOffset)}rem` }}
-                    onClick={handleConvert} disabled={!isSolutionShowDone}>
+                    onClick={handleConvert} disabled={!isSolutionShowDone || approvalTemplateId!==-1}>
                     Convert
                 </Button>
             </OverlayTrigger>
+            <ApprovalModal show={isShowApprovalModal}
+                        handleClose={() => setIsShowApprovalModal(false)}
+            />
         </Container>
     );
 };

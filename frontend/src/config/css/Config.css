@@ -2,3 +2,49 @@
     display: flex;
     justify-content: space-between; /* items evenly distributed (in row) */
 }
+
+.link-style {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.link-style:hover {
+    color: darkblue;
+}
+
+.link-style.expanded:hover {
+    color: blue;
+}
+
+.link-style-sublist {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.link-style-sublist.expanded {
+    max-height: 500px; /* Adjust as needed; should be large enough to fit most lists */
+    transition: max-height 0.8s ease-in;
+}
+
+.link-style-sublist:hover {
+    color: darkblue;
+}
+
+.add-new {
+    list-style-type: none; /* Remove default bullets */
+    padding-left: 1rem;
+}
+
+.add-new li {
+    position: relative;
+    padding-left: 1rem; /* Space for the custom bullet */
+}
+
+.add-new li::before {
+    content: '+'; /* Add a plus symbol before each list item */
+    color: blue; /* Customize the color if needed */
+    font-weight: bold; /* Make the plus symbol bold */
+    position: absolute;
+    left:0; /* Position the symbol */
+}

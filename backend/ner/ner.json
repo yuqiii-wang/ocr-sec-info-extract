@@ -1,0 +1,56 @@
+{
+    "bond_bloomberg": {
+        "Cpn Freq": {
+            "full_regex": "Cpn Freq[ ]*[\\w\\/]+",
+            "val_regex": "[\\w\\/]+",
+            "transform_val": {
+                "Q": 4,
+                "S/A": 2,
+                "A": 1
+            }
+        },
+        "ISIN": {
+            "full_regex": "ISIN[ ]*[A-Z0-9]{12}",
+            "val_regex": "[A-Z0-9]{12}",
+            "transform_val": {}
+        },
+        "Currency": {
+            "full_regex": "Currency[ ]*[A-Z]{3}",
+            "val_regex": "[A-Z]{3}",
+            "transform_val": {}
+        }
+    },
+    "mbs_bloomberg": {
+        "Currency": {
+            "full_regex": "Currency[ ]*[A-Z]{3}",
+            "val_regex": "[A-Z]{3}",
+            "transform_val": {}
+        }
+    },
+    "cfest_bond": {
+        "Master Sec": {
+            "full_regex": "Master Sec[ ]*[\\w\\/]+",
+            "val_regex": "[\\w\\/]+",
+            "transform_val": {}
+        },
+        "Currency": {
+            "full_regex": "Currency[ ]*[A-Z]{3}",
+            "val_regex": "[A-Z]{3}",
+            "transform_val": {}
+        }
+    },
+    "unsettle_trade": {
+        "Trade ID": {
+            "full_regex": "\\d{10}",
+            "val_regex": "\\d{10}",
+            "transform_val": {}
+        }
+    },
+    "extract_ytd_trades": {
+        "Book Account": {
+            "full_regex": "[A-Z]{3}\\d{3}",
+            "val_regex": "[A-Z]{3}\\d{3}",
+            "transform_val": {}
+        }
+    }
+}

@@ -23,6 +23,7 @@ function GlobalAppContextManager({ children }) {
     const [thisFileUuids, setThisFileUuids] = useState("");
     const [uploadedFilenames, setUploadedFilenames] = useState("");
     const [thisSessionUuid, setThisSessionUuid] = useState("");
+    const [approvalTemplateId, setApprovalTemplateId] = useState(-1);
     const [taskLabel, setTaskLabel] = useState("");
     const [inputError, setInputError] = useState("");
     const [isOnLoadingExecutionLog, setIsOnLoadingExecutionLog] = useState(false);
@@ -54,6 +55,7 @@ function GlobalAppContextManager({ children }) {
                                         referenceShellScriptResults, setReferenceShellScriptResults,
                                         isOnInputShow, setIsOnInputShow,
                                         thisFileUuids, setThisFileUuids,
+                                        approvalTemplateId, setApprovalTemplateId,
                                         uploadedFilenames, setUploadedFilenames,
                                         thisSessionUuid, setThisSessionUuid,
                                         taskLabel, setTaskLabel,

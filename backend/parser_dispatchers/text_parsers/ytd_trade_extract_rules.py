@@ -11,10 +11,18 @@ REGEX_RULES = {
 
 def parse_ytd_trade_extract_msg(text_query:str) -> dict:
     ner_results = {}
+    ner_pos_results = {}
     text_tokens = text_query.split(" ")
     for rule_key in REGEX_RULES:
+        char_pos = 0
         for token in text_tokens:
             match = re.search(REGEX_RULES[rule_key], token)
             if match:
-                ner_results[rule_key] = token
-    return ner_results
+                ner_results_per_rule_key:list = ner_results.get(rule_key, [])
+                ner_results_per_rule_key.append(token)
+                ner_results[rule_key] = ner_results_per_rule_key
+                ner_pos_results_per_rule_key:list = ner_pos_results.get(rule_key, [])
+                ner_pos_results_per_rule_key.append([ match.start()+char_pos, match.end()+char_pos ])
+                ner_pos_results[rule_key] = ner_pos_results_per_rule_key
+            char_pos += len(token)+1
+    return ner_results, ner_pos_results

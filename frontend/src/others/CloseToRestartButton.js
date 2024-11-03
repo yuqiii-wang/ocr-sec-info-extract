@@ -4,7 +4,7 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import { GlobalAppContext } from "../GlobalAppContext";
 
 
-const CancelToRestartButton = () => {
+const CloseToRestartButton = () => {
     const { isJustStart
     } = useContext(GlobalAppContext);
 
@@ -16,7 +16,7 @@ const CancelToRestartButton = () => {
     <div hidden={isJustStart}>
         <OverlayTrigger placement="top" overlay={
             <Tooltip id="button-tooltip">
-                Cancel all to start anew
+                Close all to start anew
             </Tooltip>
         } >
         <span style={{ fontWeight: 'bold', color: 'black',
@@ -36,4 +36,4 @@ const CancelToRestartButton = () => {
   );
 };
 
-export default CancelToRestartButton;
+export default CloseToRestartButton;

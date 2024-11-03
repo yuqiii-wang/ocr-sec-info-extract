@@ -1,9 +1,10 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Spinner, Card } from 'react-bootstrap';
+import React, { useContext, useState } from 'react';
+import {  Row, Col, } from 'react-bootstrap';
+import TextReferenceHighlights from './TextReferenceHighlights';
 import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 
-const TextReferenceDetail = ({image, key, onDelete}) => {
+const TextReferenceDetail = ({onDelete}) => {
     const {
         referenceTextNerJsonResults,
         referenceTextNerPosResults,
@@ -20,7 +21,7 @@ const TextReferenceDetail = ({image, key, onDelete}) => {
             onMouseLeave={() => setHover(false)}>
             <Col md={7}>
                 {referenceSrcTextResults != "" 
-                    ? (<p><br/>{referenceSrcTextResults}</p>)
+                    ? (<TextReferenceHighlights text={referenceSrcTextResults} highlights={referenceTextNerPosResults} />)
                     : ("")}
             </Col>
             <Col md={4}>
@@ -47,7 +48,7 @@ const TextReferenceDetail = ({image, key, onDelete}) => {
           <span style={{ fontWeight: 'bold', color: 'black' }}>&times;</span>
         </Col>
       )}
-            </Row>
+    </Row>
   );
 };
 

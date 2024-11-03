@@ -1,12 +1,16 @@
 from typing import List, Union
 import zipfile
 from flask import jsonify
-import os, io, zipfile, base64, time
+import os, io, zipfile, base64, time, json
 from pathlib import Path
 from logging import getLogger
 from flask_socketio import SocketIO,emit
 from backend.classifier.utils import store_ocr_text, store_msg_text
-from backend.config import LOCAL_INPUT_IMAGE_DIR, LABEL_PARSER_MAP, TEXT_LABEL_MAP
+from backend.config import (LABEL_TEXT_MAP,
+                            LOCAL_INPUT_IMAGE_DIR,
+                            LABEL_PARSER_MAP,
+                            TEXT_LABEL_MAP,
+                            NER_CONFIG)
 from backend.OCREngine import OCREngine
 from backend.classifier.classifier import DT_Classifier, train_dt_model
 from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
@@ -17,6 +21,7 @@ from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 ocr_engine = OCREngine()
 dt_classifier = DT_Classifier()
 imageSegByColor_engine = ImageSegByColor(ocr_engine)
+ner_config:dict[str, dict] = json.load(open(NER_CONFIG, "r"))
 
 logger = getLogger("app")
 
@@ -36,12 +41,17 @@ def process_upload_file(file, fileUuid):
 def process_text_query(text_query: str):
     label_func_pred = dt_classifier.predict(text_query)
     proc_func = LABEL_PARSER_MAP[label_func_pred]
+    task_handler_name = LABEL_TEXT_MAP[label_func_pred]
     ner_results, ner_pos_results = proc_func(text_query)
     store_msg_text(text_query)
+    approval_template_id = -1
+    if (label_func_pred == 4):
+        approval_template_id = 4
     return {"ner_results": ner_results,
             "ner_pos": ner_pos_results,
             "msg": text_query,
-            "task_label": proc_func.__name__,}
+            "task_label": task_handler_name,
+            "approval_template_id": approval_template_id}
 
 def process_remove_file(filename:str):
     file_path = Path(LOCAL_INPUT_IMAGE_DIR, filename)
@@ -123,6 +133,37 @@ def process_execute(shell_scripts:list[str], socketio:SocketIO):
 
 def load_config_classifier_all():
     return jsonify({"classifier_config": TEXT_LABEL_MAP})
+
+def load_config_approval_template_by_id(approval_template_id:int):
+    return jsonify({"approval_template_id": approval_template_id,
+                    "approval_email_recipients": ["yuqi.wang@xxx.com"],
+                    "regulation_reference_links":["https://example.xxx.com/regulations",
+                                                  "https://example.xxx.com/regulations/dataprivacy"],
+                    "approval_email_template": 
+"""Dear approval manager
+
+This email seeks for your approval on the request.
+
+Thanks,
+John
+"""
+                    })
+
+def load_config_ner_details(ner_task, ner_item):
+    if ner_task is None or not ner_task in TEXT_LABEL_MAP:
+        return jsonify({})
+    elif ner_item is None:
+        ner_config_task_items = list(ner_config[ner_task].keys())
+        return jsonify({
+            "ner_task": ner_task,
+            "ner_task_items": ner_config_task_items,
+        })
+    ner_task_item_details = ner_config[ner_task].get(ner_item, -1)
+    return jsonify({
+            "ner_task": ner_task,
+            "ner_task_item": ner_item,
+            "ner_task_item_details": ner_task_item_details
+        })
 
 def train_classifier():
     perf_metrics = train_dt_model()

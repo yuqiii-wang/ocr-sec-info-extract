@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
-import CancelToRestartButton from "../others/CancelToRestartButton";
+import CloseToRestartButton from "../others/CloseToRestartButton";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import FileUploadComponent from "./FileUpload";
@@ -12,7 +12,7 @@ const InputComponent = () => {
 
     const { answerLoading, isMainAskDone, setAnswerLoading,
         referenceCodeSepOffset, thisFileUuids, uploadedFilenames,
-        referenceImageResults, setThisFileUuids,  
+        setApprovalTemplateId, setThisFileUuids,  
         setIsMainAskDone, isOnInputShow, setUploadedFilenames,
         setTaskLabel, setReferenceImageResults, setIsSolutionShowDone,
         setIsOnHomeAskPage, setReferenceOCRJsonResults,
@@ -57,6 +57,8 @@ const InputComponent = () => {
                     setReferenceOCRJsonResults(data.solution_reference);
                     setIsSolutionShowDone(true);
                     setTaskLabel(data.task_label);
+                    const approvalTemplateId = data.get("approval_template_id") !== undefined ? data.get("approval_template_id") : -1;
+                    setApprovalTemplateId(approvalTemplateId);
                 }
                 setAnswerLoading(false);
             })
@@ -83,8 +85,8 @@ const InputComponent = () => {
       style={{ height: `${Math.min(32, 12+referenceCodeSepOffset)}rem`, margin: "1%" }}>
               <Form >
                 <div className="input-top-wrapper">
-                    <Form.Label>Upload a file</Form.Label>
-                    <CancelToRestartButton></CancelToRestartButton>
+                    <Form.Label>Upload image files</Form.Label>
+                    <CloseToRestartButton></CloseToRestartButton>
                 </div>
               
                 <FileUploadComponent />

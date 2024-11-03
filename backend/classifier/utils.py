@@ -1,7 +1,8 @@
 import os, re, glob, sys
 from collections import defaultdict
+from sklearn.metrics import confusion_matrix
 import uuid
-from backend.config import TEXT_LABEL_MAP
+from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP
 
 uuid_pattern = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
@@ -61,14 +62,16 @@ def trim_text(text:str):
 
 def store_msg_text(text:str):
     for text_filepath in text_filepaths:
-        if "unsettle" in text_filepath and "unsettle" in text:
+        if "unsettle" in text_filepath and "unsettle" in text.lower():
             with open(text_filepath, "a") as filehandle:
                 random_uuid = str(uuid.uuid4())
                 filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
-        if "extract" in text_filepath and "extract" in text:
+            break
+        if "extract" in text_filepath and "extract" in text.lower():
             with open(text_filepath, "a") as filehandle:
                 random_uuid = str(uuid.uuid4())
                 filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
+            break
 
 
 def store_ocr_text(filename:str, text:str):
@@ -85,3 +88,28 @@ def store_ocr_text(filename:str, text:str):
     trimmed_text = trim_text(text)
     with open(sample_path, "a") as filehandle:
         filehandle.write(filename_uuid + "<SEP>" + trimmed_text + "</SEP>\n")
+
+def compute_num_samples_per_label(sample_labels:list):
+    num_samples_per_label_idx = {}
+    for label in sample_labels:
+        count = num_samples_per_label_idx.get(label, 0)
+        count += 1
+        num_samples_per_label_idx[label] = count
+    num_samples_per_label = {LABEL_TEXT_MAP[k]: v for k, v in num_samples_per_label_idx.items()}
+    return num_samples_per_label
+
+def compute_accuracy_per_label(y_test:list, y_pred:list):
+    unique_label_list:list = []
+    unique_label_set:set = set()
+    # confusion_matrix accuracies correspond to 
+    # ordered presences of labels in y_test
+    for label in y_test:
+        if not label in unique_label_set:
+            unique_label_list.append(label)
+        unique_label_set.add(label)
+
+    conf_mat = confusion_matrix(y_test, y_pred)
+    acc_list = conf_mat.diagonal()/conf_mat.sum(axis=1)
+    label_idx_acc_per_label_dict = {label: f"{acc * 100:.2f}%" for label, acc in zip(unique_label_list, acc_list)}
+    label_acc_per_label_dict = {LABEL_TEXT_MAP[k]: v for k, v in label_idx_acc_per_label_dict.items()}
+    return label_acc_per_label_dict

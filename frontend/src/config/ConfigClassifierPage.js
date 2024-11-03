@@ -97,20 +97,20 @@ const ConfigClassifierPage = () => {
       <Row>
         <Col className='justify-content-center' xs={4}>
         <Row>
-        <Col className='justify-content-center' xs={4}>
-          <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>
-            {isOnClassifierTraining ? (
-                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-            ) : "Train"}
-          </Button>
-          </Col>
-        <p>Classifier training labels</p>
+        <p>Classifier training labels:</p>
           </Row>
           <ul>
         {trainingLabels.map((key) => (
           <li key={key}>{key}</li>
         ))}
       </ul>
+      <Col className='justify-content-end' >
+          <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>
+            {isOnClassifierTraining ? (
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+            ) : "Train"}
+          </Button>
+          </Col>
         </Col>
         <Col xs={8}>
           {isOnClassifierTraining ? (
