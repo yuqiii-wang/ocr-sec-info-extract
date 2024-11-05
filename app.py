@@ -3,7 +3,7 @@ from flask import Flask, session, request, jsonify, render_template, make_respon
 from flask_cors import CORS
 import os, flask, json
 from flask_socketio import SocketIO
-from backend.config import setup_logger
+from backend.config import setup_logger, NER_CONFIG
 from backend.process.process import (process_execute, 
                                      process_upload_file,
                                      process_ocr,
@@ -15,7 +15,8 @@ from backend.process.process import (process_execute,
                                      train_classifier,
                                      process_remove_file,
                                      load_config_approval_template_by_id,
-                                     load_config_ner_details
+                                     load_config_ner_details,
+                                     save_config_ner_details
                                      )
 
 # Create a Flask application instance
@@ -32,12 +33,14 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                         r'/config/load/classifier': {"origins": "http://localhost:3000"},
                         r'/config/train/classifier': {"origins": "http://localhost:3000"},
                         r'/config/load/ner': {"origins": "http://localhost:3000"},
+                        r'/config/save/ner': {"origins": "http://localhost:3000"},
                     },
                     headers='Content-Type')
 app.secret_key = 'your_secret_key_here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
 
+app.config['NER_CONFIG'] = json.load(open(NER_CONFIG, "r"))
 
 setup_logger(app)
 
@@ -146,7 +149,16 @@ def config_load_approval():
 def config_load_ner():
     ner_task = request.args.get('nertask', None)
     ner_item = request.args.get('neritem', None)
-    resp = make_response(load_config_ner_details(ner_task, ner_item))
+    resp = make_response(load_config_ner_details(app, ner_task, ner_item))
+    return resp
+
+@app.route('/config/save/ner', methods=['POST'])
+def config_save_ner():
+    data = request.get_json()
+    ner_task = data.get("nerTask")
+    ner_task_item = data.get("nerTaskItem")
+    ner_task_item_details = json.loads(data.get("nerTaskItemDetails"))
+    resp = make_response(save_config_ner_details(app, ner_task, ner_task_item, ner_task_item_details))
     return resp
 
 @app.route('/config/train/classifier', methods=['POST'])

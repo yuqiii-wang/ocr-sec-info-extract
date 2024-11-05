@@ -13,10 +13,6 @@
     color: darkblue;
 }
 
-.link-style.expanded:hover {
-    color: blue;
-}
-
 .link-style-sublist {
     max-height: 0;
     overflow: hidden;
@@ -48,3 +44,14 @@
     position: absolute;
     left:0; /* Position the symbol */
 }
+
+.ner-regex-btn-container {
+    display: flex; /* Use flexbox */
+    justify-content: end; /* Center horizontally */
+    align-items: end; /* Center vertically */
+}
+
+.tooltip-content {
+    text-align: left;
+    font-size: 14px;
+  }

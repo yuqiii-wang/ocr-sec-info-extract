@@ -21,7 +21,6 @@ from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 ocr_engine = OCREngine()
 dt_classifier = DT_Classifier()
 imageSegByColor_engine = ImageSegByColor(ocr_engine)
-ner_config:dict[str, dict] = json.load(open(NER_CONFIG, "r"))
 
 logger = getLogger("app")
 
@@ -149,7 +148,8 @@ John
 """
                     })
 
-def load_config_ner_details(ner_task, ner_item):
+def load_config_ner_details(app, ner_task, ner_item):
+    ner_config = app.config['NER_CONFIG']
     if ner_task is None or not ner_task in TEXT_LABEL_MAP:
         return jsonify({})
     elif ner_item is None:
@@ -164,6 +164,18 @@ def load_config_ner_details(ner_task, ner_item):
             "ner_task_item": ner_item,
             "ner_task_item_details": ner_task_item_details
         })
+
+def save_config_ner_details(app, ner_task:str, ner_item:str, ner_details:dict):
+    ner_config = app.config['NER_CONFIG']
+    if ner_config.get(ner_task, -1) == -1:
+        return jsonify({
+            "error_message": f"{ner_task} not found."
+        })
+    ner_config[ner_task][ner_item] = ner_details
+    ner_config_str = json.dumps(ner_config)
+    with open(NER_CONFIG, "w") as filehandle:
+        filehandle.write(ner_config_str)
+    return jsonify({"message": "ok"})
 
 def train_classifier():
     perf_metrics = train_dt_model()

@@ -89,6 +89,8 @@ const ConfigNERPage = () => {
             })
             .then( data => {
                 setNerTaskItemLabels(data["ner_task_items"]);
+                setSelectedNerItemLabel("");
+                setSelectedNerItemDetails("");
             })
             .catch((postErr) => {
                 // Handle error response
@@ -101,6 +103,18 @@ const ConfigNERPage = () => {
             setLoadConfigClassifierError(error);
         } finally {
             ;
+        }
+    }
+
+    const handleAddNew = (neritem) => {
+        if (neritem === "AddNew") {
+            setSelectedNerItemLabel(neritem);
+            setSelectedNerItemDetails({
+                "full_regex": "",
+                "transform_val": {},
+                "val_regex": ""
+              })
+            return;
         }
     }
 
@@ -155,18 +169,21 @@ const ConfigNERPage = () => {
           </Row>
           <ul>
         {nerTaskLabels.map((nerTask) => (
-          <li key={nerTask} className={`link-style ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemsRequest(nerTask)}>{nerTask}
+            <React.Fragment>
+          <li key={nerTask} className={`link-style ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemsRequest(nerTask)}>{nerTask}</li>
           {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel == nerTask && (
-                <ul key={nerTaskItem} className={`link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
+                <ul key={nerTaskItem} className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
                 </ul>
           )))}
           {selectedNerTaskLabel == nerTask && isSubListExpanded &&(
             <ul className="add-new">
-                <li className={`link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`}>Add New
+                <li className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} 
+                    onClick={() => handleAddNew("AddNew")}>
+                        Add New
                 </li>
             </ul>
           )}
-          </li>
+          </React.Fragment>
         ))}
       </ul>
         </Col>
@@ -189,14 +206,16 @@ const ConfigNERPage = () => {
                 />
             </Form.Group>
         </Form>
-        { nerTaskItemLabels.length === 0 ? (
+        { nerTaskItemLabels.length === 0 || !isSubListExpanded ? (
             <p>Click an NER item to start, or <span className='link-style'>
                 <span style={{fontWeight:"bold"}}>+</span> Add New</span>.
             </p>
         ) : selectedComponent === 'A' ? (
             <ConfigNERRegexComponent
                 nerTaskLabels={nerTaskLabels}
-                selectedNerTaskLabel={selectedNerTaskLabel}>
+                selectedNerTaskLabel={selectedNerTaskLabel}
+                selectedNerItemLabel={selectedNerItemLabel}
+                selectedNerItemDetails={selectedNerItemDetails}>
             </ConfigNERRegexComponent>
             ) : (
                 <div>To be continued...</div>
