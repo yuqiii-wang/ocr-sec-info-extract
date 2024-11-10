@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import ConfigNERRegexComponent from './ConfigNERRegexComponent';
+import { ArrowClockwise } from 'react-bootstrap-icons';
 
 const ConfigNERPage = () => {
 
@@ -65,10 +66,6 @@ const ConfigNERPage = () => {
       }, []);
 
     const handleGetNerTaskItemsRequest = (nertask) => {
-        const isNowSubListExpanded = toggleSubListExpand();
-        if (!isNowSubListExpanded) {
-            return;
-        }
         try {
             setSelectedNerTaskLabel(nertask);
             const response = fetch("/config/load/ner?" + "nertask=" + nertask, {
@@ -111,7 +108,7 @@ const ConfigNERPage = () => {
             setSelectedNerItemLabel(neritem);
             setSelectedNerItemDetails({
                 "full_regex": "",
-                "transform_val": {},
+                "key_regex": "",
                 "val_regex": ""
               })
             return;
@@ -165,14 +162,26 @@ const ConfigNERPage = () => {
       <Row>
         <Col className='justify-content-center' xs={4}>
         <Row>
-        <p>NER tasks:</p>
+        <div className='flex-container'>
+            <p>NER tasks:</p>
+            <ArrowClockwise className='ner-refresh-btn' onClick={() => {
+                handleGetNerTaskItemsRequest(selectedNerTaskLabel)}}></ArrowClockwise>
+            <p></p>
+        </div>
           </Row>
           <ul>
         {nerTaskLabels.map((nerTask) => (
-            <React.Fragment>
-          <li key={nerTask} className={`link-style ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemsRequest(nerTask)}>{nerTask}</li>
+            <React.Fragment key={nerTask}>
+          <li key={nerTask} className={`link-style ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => {
+                                                                                            toggleSubListExpand();
+                                                                                            handleGetNerTaskItemsRequest(nerTask)}
+                                                                                        }
+            >
+            {nerTask}
+            </li>
           {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel == nerTask && (
-                <ul key={nerTaskItem} className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
+                <ul key={nerTaskItem} className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`}
+                    onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
                 </ul>
           )))}
           {selectedNerTaskLabel == nerTask && isSubListExpanded &&(

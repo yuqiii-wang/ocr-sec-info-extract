@@ -3,6 +3,10 @@
     justify-content: space-between; /* items evenly distributed (in row) */
 }
 
+.ner-refresh-btn:hover {
+    cursor: pointer;
+}
+
 .link-style {
     color: blue;
     text-decoration: underline;
@@ -27,6 +31,16 @@
     color: darkblue;
 }
 
+.link-style-ticked-sublist {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.link-style-ticked-sublist.expanded {
+    max-height: 500px; /* Adjust as needed; should be large enough to fit most lists */
+    transition: max-height 0.8s ease-in;
+}
+
 .add-new {
     list-style-type: none; /* Remove default bullets */
     padding-left: 1rem;
@@ -34,7 +48,7 @@
 
 .add-new li {
     position: relative;
-    padding-left: 1rem; /* Space for the custom bullet */
+    padding-left: 1rem;
 }
 
 .add-new li::before {
@@ -54,4 +68,10 @@
 .tooltip-content {
     text-align: left;
     font-size: 14px;
-  }
+}
+
+.ner-script-edit-btn-container {
+    display: flex; /* Use flexbox */
+    justify-content: end; /* Center horizontally */
+    align-items: end; /* Center vertically */
+}

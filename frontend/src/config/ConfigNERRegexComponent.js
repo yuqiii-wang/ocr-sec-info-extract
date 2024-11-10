@@ -17,7 +17,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
     const [nerItemName, setNerItemName] = useState("");
     const [isValidTransformedNerItemDetailJson, setIsValidTransformedNerItemDetailJson] = useState(true);
     const [transformedNerItemDetailJson, setTransformedNerItemDetailJson] = useState("");
-    const validKeys = new Set(['full_regex', 'transform_val', 'val_regex']);
+    const validKeys = new Set(['full_regex', 'val_regex', 'key_regex']);
 
     const toggleIsEditing = () => {
         isOnEditing ? setIsOnEditing(false) : setIsOnEditing(true);
@@ -27,34 +27,31 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
     }
 
     const transformNerItemDetailJson = (selectedNerItemDetails) => {
-        const data_json = JSON.stringify(selectedNerItemDetails, null, 2);
+        const data_json = JSON.stringify(selectedNerItemDetails, null, 2).replace(/\\\\/g, '\\');;
         setTransformedNerItemDetailJson(data_json);
-    }
-
-    const updateEscapeCharNerItemDetailJson = () => {
-        const regex_escape = /(?<!\\)(["'\\])/g;
-        let transformedNerItemDetailJsonStr = transformedNerItemDetailJson.replace(regex_escape, "\\$1");
-        setTransformedNerItemDetailJson(transformedNerItemDetailJsonStr);
     }
 
     const validateTransformedNerItemDetailJson = () => {
         let isValid = true;
         let transformedNerItemDetailJsonObj = { };
+        const regex_escape = /[\\]/g;
         try {
-            let transformedNerItemDetailJsonStr = transformedNerItemDetailJson;
+            let transformedNerItemDetailJsonStr = transformedNerItemDetailJson.replace(regex_escape, "\\\\");
             transformedNerItemDetailJsonObj = JSON.parse(transformedNerItemDetailJsonStr);
         } catch (error) {
+            console.log("err");
             setIsValidTransformedNerItemDetailJson(false);
-            return isValid;
+            return false;
         }
         
-        if (Object.keys(transformedNerItemDetailJsonObj).length !== 3) {
-            setIsValidTransformedNerItemDetailJson(isValid);
-            return isValid;
+        if (Object.keys(transformedNerItemDetailJsonObj).length !== validKeys.size) {
+            setIsValidTransformedNerItemDetailJson(false);
+            return false;
         }
         for (let key of Object.keys(transformedNerItemDetailJsonObj)) {
             if (!validKeys.has(key)) {
                 isValid = isValid && false;
+                console.log("err3");
                 break;
             }
         }
@@ -71,13 +68,16 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
     }
 
     const handleSaveNerRequest = () => {
-
+        if (nerItemName === undefined || nerItemName === "AddNew" || nerItemName === "") {
+            return;
+        }
         try {
+            const regex_escape = /[\\]/g;
             const response = fetch("/config/save/ner", {
                 method: 'POST',
                 body: JSON.stringify({ "nerTask": selectedNerTaskLabel,
                                     "nerTaskItem": nerItemName,
-                                    "nerTaskItemDetails": transformedNerItemDetailJson
+                                    "nerTaskItemDetails": transformedNerItemDetailJson.replace(regex_escape, "\\\\")
                  }),
                 mode: "cors",
                 headers: new Headers({
@@ -137,7 +137,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
             <br/>
             <Form>
                 <Row className="mb-3">
-                    <Col md="3">
+                    <Col md="4">
                         <Form.Group as={Col} controlId="formNERName">
                         <h6>NER Name</h6>
                             <Form.Control
@@ -164,8 +164,9 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
                                 placement="top"
                                 overlay={<Tooltip id="tooltip-info">
                                     <div className='tooltip-content'>
-                                    <p>full_regex searches matched from whole msg text.</p>
-                                            <p>val_regex searches pattern from full_regex found items.</p>
+                                    <p>full_regex searches matched text from whole msg.</p>
+                                    <p>key_regex searches pattern from full_regex found items, and remove itself.</p>
+                                    <p>val_regex searches pattern from full_regex found items with key_regex text removed.</p>
                                             </div>
                                         </Tooltip>}
                             >
@@ -188,7 +189,6 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
                             Edit
                         </Button>) : (
                             <Button variant='primary' onClick={() => {
-                                                                    updateEscapeCharNerItemDetailJson();
                                                                     const isValid = validateTransformedNerItemDetailJson();
                                                                     isValid ? setIsOnEditing(false) : setIsOnEditing(true);
                                                                     isValid && handleSaveNerRequest();}

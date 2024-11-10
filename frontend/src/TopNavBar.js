@@ -85,7 +85,7 @@ function TopNavBar() {
                         <Nav.Link href="" onClick={handleHomeClick}>Home</Nav.Link>
                         <NavDropdown title="Config" onSelect={handleConfigSelect}>
                                 <NavDropdown.Item eventKey="Classifier Training">Classifier Training</NavDropdown.Item>
-                                <NavDropdown.Item eventKey="NER Engine Training">NER Engine Training</NavDropdown.Item>
+                                <NavDropdown.Item eventKey="NER Engine Training">NER Engine Setup</NavDropdown.Item>
                                 <NavDropdown.Item eventKey="Script Generator Setup">Script Generator Setup</NavDropdown.Item>
                                 <NavDropdown.Item eventKey="Approval Setup">Approval Setup</NavDropdown.Item>
                         </NavDropdown>

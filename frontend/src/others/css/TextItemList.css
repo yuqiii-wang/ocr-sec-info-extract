@@ -1,0 +1,15 @@
+.flex-container {
+    display: flex;
+    justify-content: start; /* items evenly distributed (in row) */
+}
+
+.text-item {
+    padding-left: 1rem;
+}
+
+.add-btn {
+    padding-left: 1rem;
+}
+  
+.add-btn:hover {
+}

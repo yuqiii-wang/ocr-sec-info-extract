@@ -10,12 +10,14 @@ from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
                             LABEL_PARSER_MAP,
                             TEXT_LABEL_MAP,
-                            NER_CONFIG)
+                            NER_CONFIG,
+                            TASK_SCRIPTS)
+from backend.process.utils import iterate_dict, parse_ocr_to_box_and_json
 from backend.OCREngine import OCREngine
 from backend.classifier.classifier import DT_Classifier, train_dt_model
 from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
 from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
-from backend.shell_script_converter.shell_script_BBG_converter import convert_to_shell_script_BBG
+from backend.shell_script_generator.shell_script_generator import generate_shell_scripts
 from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
 ocr_engine = OCREngine()
@@ -71,10 +73,12 @@ def load_and_store_ocr_results(filename:str, text_bounding_boxes:list[TextBoundi
     store_ocr_text(filename, all_text)
     return all_text
 
-def process_ocr(filenames:list[str]):
+def process_ocr(app, filenames:list[str]):
 
     found_item_jsons = []
     image_output_paths = []
+
+    task_label = ""
 
     for filename in filenames:
         file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
@@ -84,9 +88,10 @@ def process_ocr(filenames:list[str]):
         label_func_pred = dt_classifier.predict(trimmed_text)
         if not label_func_pred in (0,1,2):
             label_func_pred = 2
-        proc_func = LABEL_PARSER_MAP[label_func_pred]
-        logger.info(f"Loaded func is {proc_func.__name__}")
-        found_bounding_boxes, found_item_json = ocr_engine.parse_ocr(text_bounding_boxes, proc_func)
+        task_label = LABEL_TEXT_MAP[label_func_pred]
+        logger.info(f"Loaded task handler is {task_label}")
+        task_ner_details = app.config['NER_CONFIG'][task_label]
+        found_bounding_boxes, found_item_json = parse_ocr_to_box_and_json(text_bounding_boxes, task_ner_details)
         image_output_path = ocr_engine.draw_ocr(filename, found_bounding_boxes)
         found_item_jsons.append(found_item_json)
         image_output_paths.append(image_output_path)
@@ -105,18 +110,17 @@ def process_ocr(filenames:list[str]):
     # Create a JSON response containing the encoded zip file
     response_data = {
         "status": "success",
-        "task_label": proc_func.__name__,
+        "task_label": task_label,
         "solution_reference": found_item_jsons,
         "zip_file": encoded_zip
     }
     return jsonify(response_data)
 
-def process_convert(ocr_jsons, converter=convert_to_shell_script_BBG):
-    shell_scripts = []
-    for ocr_json in ocr_jsons:
-        shell_scripts.append(converter(ocr_json))
+def process_generate_shell_scripts(app, ner_jsons, task_label, generator=generate_shell_scripts):
+    shell_script_generation_config = app.config['TASK_SCRIPTS'][task_label]
+    result_task_scripts = generator(shell_script_generation_config, ner_jsons)
     return jsonify({
-        "shell_scripts": shell_scripts
+        "shell_scripts": result_task_scripts
     })
 
 def process_execute(shell_scripts:list[str], socketio:SocketIO):
@@ -158,7 +162,9 @@ def load_config_ner_details(app, ner_task, ner_item):
             "ner_task": ner_task,
             "ner_task_items": ner_config_task_items,
         })
-    ner_task_item_details = ner_config[ner_task].get(ner_item, -1)
+    ner_task_item_details:dict = ner_config[ner_task].get(ner_item, -1)
+    if ner_task_item_details != -1:
+        iterate_dict(ner_task_item_details)
     return jsonify({
             "ner_task": ner_task,
             "ner_task_item": ner_item,
@@ -180,6 +186,24 @@ def save_config_ner_details(app, ner_task:str, ner_item:str, ner_details:dict):
 def train_classifier():
     perf_metrics = train_dt_model()
     return jsonify(perf_metrics)
+
+def load_ner_task_scripts(app, ner_task):
+    ner_config_task_scripts = app.config['TASK_SCRIPTS']
+    ner_task_script_config = ner_config_task_scripts[ner_task]
+    return jsonify(ner_task_script_config)
+
+def save_ner_task_scripts(app, ner_task:str, ner_task_script_configs:dict):
+    ner_config_task_scripts = app.config['TASK_SCRIPTS']
+    ner_task_script_config = ner_config_task_scripts[ner_task]
+    if ner_config_task_scripts.get(ner_task, -1) == -1:
+        return jsonify({
+            "error_message": f"{ner_task} not found."
+        })
+    ner_config_task_scripts[ner_task] = ner_task_script_configs
+    ner_config_str = json.dumps(ner_config_task_scripts)
+    with open(TASK_SCRIPTS, "w") as filehandle:
+        filehandle.write(ner_config_str)
+    return jsonify(ner_task_script_config)
 
 def load_audit_all():
     return jsonify({"message": "ok"})

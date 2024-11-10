@@ -1,10 +1,9 @@
 from paddleocr import PaddleOCR
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import cv2
 import os
 
 from backend.config import LOCAL_INPUT_IMAGE_DIR, LOCAL_OCR_IMAGE_DIR
-from backend.parser_dispatchers.ocr_parsers.bloomberg_bond_rules import parse_bloomberg_bond_ocr
 from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 
 class OCREngine:
@@ -46,8 +45,6 @@ class OCREngine:
                 text_bounding_boxes.append(TextBoundingBox(text, box, score))
         return text_bounding_boxes
 
-    def parse_ocr(self, bounding_boxes:list[TextBoundingBox], parser_func=parse_bloomberg_bond_ocr) -> list[TextBoundingBox]:
-        return parser_func(bounding_boxes)
 
 if __name__=="__main__":
     ocrEngine = OCREngine()

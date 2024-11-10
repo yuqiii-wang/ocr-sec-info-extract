@@ -91,7 +91,6 @@ const InputComponent = () => {
               
                 <FileUploadComponent />
               </Form>
-              {inputError && <Alert variant="danger" onClose={() => setInputError(null)} dismissible>{inputError}</Alert>}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop:"1%" }}>
               <OverlayTrigger placement="top" overlay={
                     <Tooltip id="button-tooltip">

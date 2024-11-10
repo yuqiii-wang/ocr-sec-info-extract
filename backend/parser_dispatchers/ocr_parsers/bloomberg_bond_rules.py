@@ -13,7 +13,7 @@ REGEX_RULES = {
     "S&P": r"S&P[; ]*[\w\+\-]+",
     "Fitch": r"Fitch[; ]*[\w\+\-]+",
     "Coupon": r"Coupon[^s][; ]*[fF\d\.]+",
-    "Maturity": r"Coupon[^s][; ]*[\w\/]+",
+    "Maturity": r"Maturity[^s][; ]*[\w\/]+",
     "Day Cnt": r"Day Cnt[; ]*[\w\/]+",
     "Cpn Freq": r"Cpn Freq[; ]*[\w\/]+",
     "Interest Accrual Date": r"Interest Accrual Date[; ]*[\w\/]+",
