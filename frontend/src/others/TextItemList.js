@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button, Form } from 'react-bootstrap';
 import "./css/TextItemList.css"
 
 const TextItemList = ({listName, listItems, setListItems}) => {
 
   const [isOnEditing, setIsOnEditing] = useState(false);
   const [isOnEditingItemIdx, setIsOnEditingItemIdx] = useState(-1);
+  const [colTextSizes, setTextColSizes] = useState([]);
   const [newText, setNewText] = useState('');
 
   const toggleIsEditing = () => {
@@ -28,14 +29,40 @@ const TextItemList = ({listName, listItems, setListItems}) => {
     setNewText(e.target.value)
   };
 
+  useEffect(() => {
+    const colTextSizeTempList = [];
+    for (let listItem of listItems) {
+        if (listItem.length > 10) {
+            colTextSizeTempList.push(4);
+        } else {
+            colTextSizeTempList.push(3);
+        }
+    }
+    setTextColSizes(colTextSizeTempList);
+    }, [listItems]);
+
   return (
       <Row>
         <div className='flex-container'>
         <h6>{listName}:</h6>
         {listItems.map((item, index) => (
-          <Col key={index} md={3}>
+          <Col key={index} md={colTextSizes[index]}>
             <div className='text-item' >
-              {item}
+                <Form.Control
+                as="textarea"
+                rows={1}
+                readOnly
+                value={item}
+                onFocus={(e) => {return;}}
+                style={{
+                    resize: 'none', // Disable resizing
+                    overflowY: 'hidden', // Disable vertical scroll
+                    cursor: 'default', // No pointer cursor
+                    backgroundColor: '#e9ecef',
+                    color: '#495057',
+                    border: '1px solid #ced4da',
+                  }} 
+            />
               </div>
           </Col>
         ))}

@@ -27,7 +27,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
     }
 
     const transformNerItemDetailJson = (selectedNerItemDetails) => {
-        const data_json = JSON.stringify(selectedNerItemDetails, null, 2).replace(/\\\\/g, '\\');;
+        const data_json = JSON.stringify(selectedNerItemDetails, null, 2).replace(/\\\\/g, '\\');
         setTransformedNerItemDetailJson(data_json);
     }
 
@@ -168,12 +168,13 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
                                     <p>key_regex searches pattern from full_regex found items, and remove itself.</p>
                                     <p>val_regex searches pattern from full_regex found items with key_regex text removed.</p>
                                             </div>
-                                        </Tooltip>}
+                                    </Tooltip>}
                             >
                                 <Button variant="link">
-                                <QuestionCircle size={24} />
+                                    <QuestionCircle size={24} />
                                 </Button>
-                            </OverlayTrigger></Form.Label>
+                            </OverlayTrigger>
+                            </Form.Label>
                             <Form.Control
                                 value={transformedNerItemDetailJson}
                                 as="textarea"

@@ -71,7 +71,9 @@ const ReferenceDetailComponent = () => {
         try {
             const response = fetch("/process/convert", {
                 method: 'POST',
-                body: JSON.stringify({ "ocr_jsons": referenceOCRJsonResults }),
+                body: JSON.stringify({ "ocr_jsons": referenceOCRJsonResults,
+                                        "task_label": taskLabel
+                 }),
                 mode: "cors",
                 headers: new Headers({
                     'Accept': 'application/json',

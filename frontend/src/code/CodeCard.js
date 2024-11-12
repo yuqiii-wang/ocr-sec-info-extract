@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { github } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
@@ -12,20 +12,25 @@ SyntaxHighlighter.registerLanguage('shell', shell);
 
 
 const CodeCard = ({ language = 'shell' }) => {
-    const { referenceShellScriptResults, setReferenceShellScriptResults,
+    const { referenceShellScriptResults,
         referenceCodeSepOffset } = useContext(GlobalAppContext);
-    const { 
-        isEditingCode } = useContext(CodeContext);
+    const { isEditingCode } = useContext(CodeContext);
+
+    const [referenceShellScriptResultsAsCode, setReferenceShellScriptResultsAsCode] = useState("");
 
     const handleCodeChange = (event) => {
-        setReferenceShellScriptResults(event.target.value);
+        setReferenceShellScriptResultsAsCode(event.target.value);
     };
+
+    useEffect(() => {
+        setReferenceShellScriptResultsAsCode(referenceShellScriptResults.join("\n"));
+    }, [referenceShellScriptResults]);
 
     return (
             <div>
             {isEditingCode ? (
                 <textarea
-                    value={referenceShellScriptResults}
+                    value={referenceShellScriptResultsAsCode}
                     onChange={handleCodeChange}
                     style={{ width: '100%', fontFamily: 'monospace', 
                         padding: '10px', borderRadius: '5px',
@@ -37,7 +42,7 @@ const CodeCard = ({ language = 'shell' }) => {
                     style={github}
                     customStyle={{ overflow: 'auto', textAlign: 'left' }}
                 >
-                    {referenceShellScriptResults}
+                    {referenceShellScriptResultsAsCode}
                 </SyntaxHighlighter>
             )}
             </div>

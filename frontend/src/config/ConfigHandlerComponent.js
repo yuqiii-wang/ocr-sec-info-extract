@@ -1,6 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import TextItemList from '../others/TextItemList';
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import ErrorBar from '../others/ErrorBar';
+import { QuestionCircle } from 'react-bootstrap-icons';
 import "./css/Config.css";
 
 const ConfigHandlerComponent = ({selectedNerTaskLabel,
@@ -36,25 +40,19 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
         setTransformLambda(e.target.value);
     }
 
-    const validateAndExtract = (populatedScripts) => {
+    const validateDoubleCurlyBracesInterpolationAndSetInUse = () => {
         // Regular expression to match {{item_name}}
         const regex = /\{\{(\w+)\}\}/g;
         let matches = [];
         let match;
-        let isThisValid = true;
+        let isValid = true;
 
         while ((match = regex.exec(populatedScripts)) !== null) {
           matches.push(match[1]);
         }
 
-        const isValid = matches.every((itemName) => {
-            const isThisTempValid = new RegExp(`\\{\\{${itemName}\\}\\}`).test(populatedScripts);
-            isThisValid = isThisValid && isThisTempValid;
-        });
-
         if (isValid) {
             const nerIsInUseSetMatches = new Set(matches);
-            console.log(nerIsInUseSetMatches);
             setNerIsInUseSet(nerIsInUseSetMatches);
         } else {
             setNerIsInUseSet(new Set([]));
@@ -97,7 +95,7 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                 setPopulatedScripts(populated_scripts);
                 setDuplicateKeys(duplicate_keys);
                 setAllowedMergeDuplicateItems(allowed_merge_duplicate_items);
-                const transform_lambda_str = JSON.stringify(transform_lambda, null, 2);
+                const transform_lambda_str = JSON.stringify(transform_lambda, null, 2).replace(/\\\\/g, '\\');
                 setTransformLambda(transform_lambda_str);
             })
             .catch((postErr) => {
@@ -120,14 +118,15 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
         if (nertask === '' || nertask === undefined) {
             return;
         }
-        const regex_escape = /[\\]/g;
+        const transformLambdaStr = JSON.stringify(transformLambda, null, 2).replace(/\\\\/g, '\\');
+        setTransformLambda(transformLambdaStr);
         const nertaskScriptConfigs = {
             "pre_scripts": preScripts,
             "post_scripts": postScripts,
             "populated_scripts": populatedScripts,
             "duplicate_keys": duplicateKeys,
             "allowed_merge_duplicate_items": allowedMergeDuplicateItems,
-            "transform_lambda": transformLambda
+            "transform_lambda": transformLambdaStr
         };
         try {
             const response = fetch("/config/save/ner/task/scripts", {
@@ -170,6 +169,10 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
         handleGetNerTaskScriptsRequest(selectedNerTaskLabel);
     }, [selectedNerTaskLabel]);
 
+    useEffect(() => {
+        validateDoubleCurlyBracesInterpolationAndSetInUse();
+    }, [populatedScripts]);
+
   return (
     <Container fluid>
       <Form>
@@ -208,7 +211,22 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                     </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group as={Col} controlId="postScripts">
-                <h6>NER Populated Scripts</h6>
+                    <h6>NER Populated Scripts
+                    <OverlayTrigger
+                        placement="top"
+                        overlay={
+                            <Tooltip id="tooltip-info">
+                            <div className='tooltip-content'>
+                                <p>Items in double curly braces &#123;&#123; NER_Item_Name &#125;&#125; 
+                                    will be replaced with actual values from NER results.</p>
+                            </div>
+                            </Tooltip>}
+                    >
+                        <Button variant="link">
+                        <QuestionCircle size={24} />
+                        </Button>
+                    </OverlayTrigger>
+                    </h6>
                     <Form.Control
                         value={populatedScripts}
                         as="textarea"
@@ -239,7 +257,7 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                 <Button variant='primary' onClick={toggleIsEditing}>
                     Edit
                 </Button>) : (
-                    <Button variant='primary' onClick={() => {const isValid = validateAndExtract();
+                    <Button variant='primary' onClick={() => {const isValid = validateDoubleCurlyBracesInterpolationAndSetInUse();
                                                             isValid && toggleIsEditing();
                                                             isValid && handleSaveNerTaskScriptsRequest(selectedNerTaskLabel);}
                     }>

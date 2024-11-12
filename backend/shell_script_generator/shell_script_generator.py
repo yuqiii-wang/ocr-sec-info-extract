@@ -23,12 +23,13 @@ def _merge_ner_list_by_duplicate_keys(duplicate_keys:list[str],
                     grouped_dict[key_value].add((k, v))
 
     # Convert each set of tuples back to a dictionary format
-    result = {key: {k: {v for k, v in values if k == k} for k in {k for k, _ in values}} for key, values in grouped_dict.items()}
-
-    # check allowed_merge_duplicate_items
-    for key in result:
-        if key in allowed_merge_duplicate_items:
-            result[key] = result[key].items()[0]
+    result = {}
+    for duplicate_val in grouped_dict:
+        result[duplicate_val] = {}
+        for ner_key, ner_val in grouped_dict[duplicate_val]:
+            result[duplicate_val][ner_key] = ner_val
+        for duplicate_key in duplicate_keys:
+            result[duplicate_val][duplicate_key] = duplicate_val
 
     return result
 
@@ -41,19 +42,20 @@ def generate_shell_scripts(shell_script_generation_config:dict, ner_jsons:list[d
     post_scripts:str = shell_script_generation_config["post_scripts"]
     merged_ner_jsons = _merge_ner_list_by_duplicate_keys(duplicate_keys, allowed_merge_duplicate_items, ner_jsons)
     for transform_ner_name in transform_lambda:
-        for merged_ner_json in merged_ner_jsons:
-            if "__datetime" in transform_lambda[transform_ner_name]:
-                datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["__datetime"])
-                merged_ner_json[transform_ner_name] = datetime_str
-            else:
-                transform_val = transform_lambda[transform_ner_name][transform_ner_name]
-                merged_ner_json[transform_ner_name] = transform_val
+        for merged_ner_key, merged_ner_json in merged_ner_jsons.items():
+            if transform_ner_name in merged_ner_json:
+                if "__datetime" in transform_lambda[transform_ner_name]:
+                    datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["__datetime"])
+                    merged_ner_json[transform_ner_name] = datetime_str
+                elif "__static_mapping" in transform_lambda[transform_ner_name]:
+                    transform_val = transform_lambda[transform_ner_name]["__static_mapping"][merged_ner_json[transform_ner_name]]
+                    merged_ner_json[transform_ner_name] = transform_val
     result_populated_scripts = []
     result_populated_scripts.append(pre_scripts)
-    for merged_ner_json in merged_ner_jsons:
+    for merged_ner_key, merged_ner_json in merged_ner_jsons.items():
         this_populated_scripts = copy.deepcopy(populated_scripts)
         for merged_ner_name in merged_ner_json:
-            this_populated_scripts.replace("{{" + merged_ner_name + "}}", merged_ner_json[merged_ner_name])
+            this_populated_scripts = this_populated_scripts.replace(r"{{" + merged_ner_name + r"}}", merged_ner_json[merged_ner_name])
         result_populated_scripts.append(this_populated_scripts)
     result_populated_scripts.append(post_scripts)
     return result_populated_scripts

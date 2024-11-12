@@ -1,6 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import { Check } from 'react-bootstrap-icons';
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import ErrorBar from '../others/ErrorBar';
+import { QuestionCircle } from 'react-bootstrap-icons';
 import ConfigHandlerComponent from './ConfigHandlerComponent';
 import "./css/Config.css";
 
@@ -106,7 +110,21 @@ const ConfigHandlerPage = () => {
         <Col className='justify-content-center' xs={4}>
         <Row>
         <div className='flex-container'>
-            <p>NER tasks:</p>
+            <p>NER tasks:<OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                            <Tooltip id="tooltip-info">
+                            <div className='tooltip-content'>
+                                <p>Check NER items in double curly braces &#123;&#123; NER_Item_Name &#125;&#125; 
+                                    from <i>NER Populated Scripts</i>, if used, show ticked.</p>
+                            </div>
+                            </Tooltip>}
+                    >
+                        <Button variant="link">
+                        <QuestionCircle size={24} />
+                        </Button>
+                    </OverlayTrigger>
+            </p>
         </div>
           </Row>
           <ul>
@@ -121,7 +139,7 @@ const ConfigHandlerPage = () => {
             </li>
           {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel == nerTask && (
                 <ul key={nerTaskItem} className={`link-style-ticked-sublist ${isSubListExpanded ? 'expanded' : ''}`} >
-                    {nerIsInUseSet.has(nerTaskItem) && <Check size={18} color="blue" key={nerTaskItem}></Check>}
+                    <Check size={18} color="blue" key={nerTaskItem} hidden={!nerIsInUseSet.has(nerTaskItem)}></Check>
                 {nerTaskItem}
                 </ul>
           )))}
