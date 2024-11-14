@@ -44,18 +44,21 @@ def generate_shell_scripts(shell_script_generation_config:dict, ner_jsons:list[d
     for transform_ner_name in transform_lambda:
         for merged_ner_key, merged_ner_json in merged_ner_jsons.items():
             if transform_ner_name in merged_ner_json:
-                if "__datetime" in transform_lambda[transform_ner_name]:
-                    datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["__datetime"])
+                if "datetime" in transform_lambda[transform_ner_name]:
+                    datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["datetime"])
                     merged_ner_json[transform_ner_name] = datetime_str
-                elif "__static_mapping" in transform_lambda[transform_ner_name]:
-                    transform_val = transform_lambda[transform_ner_name]["__static_mapping"][merged_ner_json[transform_ner_name]]
+                elif "static_mapping" in transform_lambda[transform_ner_name]:
+                    transform_val = transform_lambda[transform_ner_name]["static_mapping"][merged_ner_json[transform_ner_name]]
                     merged_ner_json[transform_ner_name] = transform_val
     result_populated_scripts = []
     result_populated_scripts.append(pre_scripts)
     for merged_ner_key, merged_ner_json in merged_ner_jsons.items():
         this_populated_scripts = copy.deepcopy(populated_scripts)
         for merged_ner_name in merged_ner_json:
-            this_populated_scripts = this_populated_scripts.replace(r"{{" + merged_ner_name + r"}}", merged_ner_json[merged_ner_name])
+            replace_val = merged_ner_json[merged_ner_name]
+            if not isinstance(merged_ner_json[merged_ner_name], str):
+                replace_val = str(replace_val)
+            this_populated_scripts = this_populated_scripts.replace(r"{{" + merged_ner_name + r"}}", replace_val)
         result_populated_scripts.append(this_populated_scripts)
     result_populated_scripts.append(post_scripts)
     return result_populated_scripts

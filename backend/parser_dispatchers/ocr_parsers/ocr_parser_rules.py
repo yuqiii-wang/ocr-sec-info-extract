@@ -21,28 +21,36 @@ def parse_ocr_by_rules(bounding_boxes:list[TextBoundingBox], ner_item_details:di
             ner_item_detail = ner_item_details[rule_key]
             full_match = re.search(ner_item_detail["full_regex"], surround_bounding_box_text)
             if not full_match is None:
-                matched_text = full_match.group()
-                key_match = re.search(ner_item_detail["key_regex"], matched_text)
+                full_matched_text = full_match.group()
+                key_match = re.search(ner_item_detail["key_regex"], full_matched_text)
                 if not key_match is None and not rule_key in found_items :
-                    loaded_bounding_box_idx = -1
-                    if key_match.group() in bounding_box_this_text:
-                        bounding_box_this_text = bounding_box_this_text.replace(key_match.group(), "")
-                        loaded_bounding_box_idx = idx
-                    if loaded_bounding_box_idx == -1:
-                        continue
-                    loaded_text_idx = -1
+                    loaded_bounding_box_key_idx = -1
                     val_text = ""
+                    if key_match.group() in full_matched_text:
+                        # just for val extract
+                        non_key_matched_text = full_matched_text.replace(key_match.group(), "")
+                        val_match = re.search(ner_item_detail["val_regex"], non_key_matched_text)
+                        if not val_match is None:
+                            val_text = val_match.group()
+                        bounding_box_this_key_match = re.search(ner_item_detail["key_regex"], bounding_box_this_text)
+                        if not bounding_box_this_key_match is None:
+                            loaded_bounding_box_key_idx = idx
+                        else:
+                            bounding_box_next_key_match = re.search(ner_item_detail["key_regex"], bounding_box_next_text)
+                            if not bounding_box_next_key_match is None:
+                                loaded_bounding_box_key_idx = (idx+1) % len(bounding_boxes)
+
+                    loaded_bounding_box_val_idx = -1
                     val_this_text_match = re.search(ner_item_detail["val_regex"], bounding_box_this_text)
                     val_next_text_match = re.search(ner_item_detail["val_regex"], bounding_box_next_text)
                     if not val_this_text_match is None:
-                        loaded_text_idx = idx if idx != loaded_bounding_box_idx else -1
-                        val_text = val_this_text_match.group()
+                        loaded_bounding_box_val_idx = idx if idx != loaded_bounding_box_key_idx else -1
                     elif not val_next_text_match is None:
-                        loaded_text_idx = (idx+1) % len(bounding_boxes) if (idx+1) % len(bounding_boxes) != loaded_bounding_box_idx else -1
-                        val_text = val_next_text_match.group()
-                    if loaded_text_idx != -1:
-                        found_bounding_boxes.append(bounding_boxes[loaded_text_idx])
-                    found_bounding_boxes.append(bounding_boxes[loaded_bounding_box_idx])
+                        loaded_bounding_box_val_idx = (idx+1) % len(bounding_boxes) if (idx+1) % len(bounding_boxes) != loaded_bounding_box_key_idx else -1
+                    if loaded_bounding_box_val_idx != -1:
+                        found_bounding_boxes.append(bounding_boxes[loaded_bounding_box_val_idx])
+                    if loaded_bounding_box_key_idx != -1:
+                        found_bounding_boxes.append(bounding_boxes[loaded_bounding_box_key_idx])
                     found_items[rule_key] = val_text
                     is_found_in_boxes = True
                     break

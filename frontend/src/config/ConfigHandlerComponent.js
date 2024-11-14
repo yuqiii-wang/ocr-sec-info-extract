@@ -3,8 +3,8 @@ import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import TextItemList from '../others/TextItemList';
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import ErrorBar from '../others/ErrorBar';
 import { QuestionCircle } from 'react-bootstrap-icons';
+import ConfigHandlerTransformRuleComponent from './ConfigHandlerTransformRuleComponent';
 import "./css/Config.css";
 
 const ConfigHandlerComponent = ({selectedNerTaskLabel,
@@ -34,10 +34,6 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
 
     const handleEditPostScriptsChange = (e) => {
         setPostScripts(e.target.value);
-    }
-
-    const handleEditTransformLambdaChange = (e) => {
-        setTransformLambda(e.target.value);
     }
 
     const validateDoubleCurlyBracesInterpolationAndSetInUse = () => {
@@ -95,8 +91,7 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                 setPopulatedScripts(populated_scripts);
                 setDuplicateKeys(duplicate_keys);
                 setAllowedMergeDuplicateItems(allowed_merge_duplicate_items);
-                const transform_lambda_str = JSON.stringify(transform_lambda, null, 2).replace(/\\\\/g, '\\');
-                setTransformLambda(transform_lambda_str);
+                setTransformLambda(transform_lambda);
             })
             .catch((postErr) => {
                 // Handle error response
@@ -118,15 +113,13 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
         if (nertask === '' || nertask === undefined) {
             return;
         }
-        const transformLambdaStr = JSON.stringify(transformLambda, null, 2).replace(/\\\\/g, '\\');
-        setTransformLambda(transformLambdaStr);
         const nertaskScriptConfigs = {
             "pre_scripts": preScripts,
             "post_scripts": postScripts,
             "populated_scripts": populatedScripts,
             "duplicate_keys": duplicateKeys,
             "allowed_merge_duplicate_items": allowedMergeDuplicateItems,
-            "transform_lambda": transformLambdaStr
+            "transform_lambda": transformLambda
         };
         try {
             const response = fetch("/config/save/ner/task/scripts", {
@@ -175,28 +168,24 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
 
   return (
     <Container fluid>
-      <Form>
+            <Form>
         <Row className="mb-3">
             <Col md="10">
-            <TextItemList listName="Duplicate Keys"
+            <TextItemList listName="GroupBy Keys"
                         listItems={duplicateKeys}
-                        setListItems={setDuplicateKeys}></TextItemList>
-            <TextItemList listName="Merge Duplicate Items"
+                        setListItems={setDuplicateKeys}
+                        isEnabledEditing={isOnEditing}></TextItemList>
+            <TextItemList listName="ReduceAsOne Items"
                         listItems={allowedMergeDuplicateItems}
-                        setListItems={setAllowedMergeDuplicateItems}></TextItemList>
-                <Form.Group as={Col} controlId="preScripts">
-                <h6>Transform Rules</h6>
-                    <Form.Control
-                        value={transformLambda}
-                        as="textarea"
-                        rows={4}
-                        disabled={!isOnEditing}
-                        onChange={handleEditTransformLambdaChange}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                        Input should not contain spaces.
-                    </Form.Control.Feedback>
-                </Form.Group>
+                        setListItems={setAllowedMergeDuplicateItems}
+                        isEnabledEditing={isOnEditing}></TextItemList>
+            <h6>Value Transform Rules:</h6>
+            <ConfigHandlerTransformRuleComponent 
+                transformItems={transformLambda}
+                setTransformItems={setTransformLambda}
+                isEnabledEditing={isOnEditing}>
+            </ConfigHandlerTransformRuleComponent>
+
                 <Form.Group as={Col} controlId="preScripts">
                 <h6>Pre Scripts</h6>
                     <Form.Control

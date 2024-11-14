@@ -107,7 +107,7 @@ const ConfigHandlerPage = () => {
         </Col>
       </Row>
       <Row>
-        <Col className='justify-content-center' xs={4}>
+        <Col className='justify-content-center' xs={3}>
         <Row>
         <div className='flex-container'>
             <p>NER tasks:<OverlayTrigger
@@ -147,7 +147,7 @@ const ConfigHandlerPage = () => {
         ))}
       </ul>
         </Col>
-        <Col xs={8}>
+        <Col xs={9}>
         {selectedNerTaskLabel !== "" ? ( 
             <ConfigHandlerComponent selectedNerTaskLabel={selectedNerTaskLabel}
             nerIsInUseSet={nerIsInUseSet}

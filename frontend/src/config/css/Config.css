@@ -75,3 +75,14 @@
     justify-content: end; /* Center horizontally */
     align-items: end; /* Center vertically */
 }
+
+.transform-rule-wrapper {
+    display: flex; /* Use flexbox */
+    justify-content: space-between; /* Center horizontally */
+}
+
+.transform-rule-key-val-wrapper {
+    display: flex; /* Use flexbox */
+    justify-content: end; /* Center horizontally */
+    align-items: end; /* Center vertically */
+}

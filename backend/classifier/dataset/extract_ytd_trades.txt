@@ -34,3 +34,4 @@ b62a5ca2-3b5c-4f7e-8ebb-ea198639ebda<SEP>Extract this year to date for ABC447 an
 1b917e2a-3e9a-4a24-b0e2-687b66ea97a0<SEP>This year trade extract for EFG256 and KKL256 account.</SEP>
 5ef68ef3-f5bc-4e1b-b224-d1f5b1bf8a58<SEP>Care to extract this year to date for ABC447 and ABC446 account for me ?</SEP>
 7e0270ba-6edd-4f4f-9d10-bc2b54b9455e<SEP>give this year trade extract for EBB372</SEP>
+6b8b578f-69a0-49d3-9c6f-c628939426d7<SEP>extract trade for POS250</SEP>

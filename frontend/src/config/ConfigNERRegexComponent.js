@@ -159,7 +159,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
                 <Row className="mb-3">
                     <Col md="8">
                         <Form.Group as={Col} controlId="formNERName">
-                        <Form.Label>Regex and Transform Rules
+                        <Form.Label>Regex to recognize NER
                             <OverlayTrigger
                                 placement="top"
                                 overlay={<Tooltip id="tooltip-info">

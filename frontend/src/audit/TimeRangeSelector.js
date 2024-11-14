@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dropdown, Form, Col, Button, Row } from 'react-bootstrap';
 
 const TimeRangeSelector = () => {
-    const [timeRange, setTimeRange] = useState('Last 1 hour');
+    const [timeRange, setTimeRange] = useState('Last 1 day');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
     const [isCustom, setIsCustom] = useState(false);
@@ -28,7 +28,6 @@ const TimeRangeSelector = () => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    <Dropdown.Item eventKey="Last 1 hour">Last 1 hour</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 12 hours">Last 12 hours</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 1 day">Last 1 day</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 3 days">Last 3 days</Dropdown.Item>

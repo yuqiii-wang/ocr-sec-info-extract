@@ -1,14 +1,18 @@
-import os, re, glob, sys
+import datetime
+import os, re, glob, sys, json
 from collections import defaultdict
 from sklearn.metrics import confusion_matrix
 import uuid
-from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP
+from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP, MSG_DATASET
+from datetime import datetime
 
 uuid_pattern = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
 classifier_dir = os.path.dirname(os.path.abspath(__file__))
 classifier_dataset_dir = os.path.join(classifier_dir, "dataset")
 text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
+
+msg_dataset = json.load(open(MSG_DATASET, "r"))
 
 def text_to_dataset():
     text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
@@ -61,17 +65,27 @@ def trim_text(text:str):
     return trimmed_text
 
 def store_msg_text(text:str):
+    random_uuid = str(uuid.uuid4())
     for text_filepath in text_filepaths:
         if "unsettle" in text_filepath and "unsettle" in text.lower():
             with open(text_filepath, "a") as filehandle:
-                random_uuid = str(uuid.uuid4())
                 filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
             break
         if "extract" in text_filepath and "extract" in text.lower():
             with open(text_filepath, "a") as filehandle:
-                random_uuid = str(uuid.uuid4())
                 filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
             break
+    dir, filename = os.path.split(text_filepath)
+    filename_main, ext = os.path.splitext(filename)
+    msg_dataset[filename_main].append({
+        "uuid": random_uuid,
+        "content": text,
+        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "requester": ""
+    })
+    msg_dataset_str = json.dumps(msg_dataset)
+    with open(MSG_DATASET, "w") as filehandle:
+        filehandle.write(msg_dataset_str)
 
 
 def store_ocr_text(filename:str, text:str):
@@ -88,6 +102,15 @@ def store_ocr_text(filename:str, text:str):
     trimmed_text = trim_text(text)
     with open(sample_path, "a") as filehandle:
         filehandle.write(filename_uuid + "<SEP>" + trimmed_text + "</SEP>\n")
+    msg_dataset[filename_main].append({
+        "uuid": filename_uuid,
+        "content": trimmed_text,
+        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "requester": ""
+    })
+    msg_dataset_str = json.dumps(msg_dataset)
+    with open(MSG_DATASET, "w") as filehandle:
+        filehandle.write(msg_dataset_str)
 
 def compute_num_samples_per_label(sample_labels:list):
     num_samples_per_label_idx = {}

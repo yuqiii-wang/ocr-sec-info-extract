@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import "./css/TextItemList.css"
 
-const TextItemList = ({listName, listItems, setListItems}) => {
+const TextItemList = ({listName, listItems, setListItems, isEnabledEditing}) => {
 
   const [isOnEditing, setIsOnEditing] = useState(false);
   const [isOnEditingItemIdx, setIsOnEditingItemIdx] = useState(-1);
@@ -29,13 +29,21 @@ const TextItemList = ({listName, listItems, setListItems}) => {
     setNewText(e.target.value)
   };
 
+  const handleUpdateText = (e, index) => {
+    const updatedListItems = listItems;
+    updatedListItems[index] = e.target.value;
+    setListItems([...updatedListItems]);
+  }
+
   useEffect(() => {
     const colTextSizeTempList = [];
     for (let listItem of listItems) {
-        if (listItem.length > 10) {
-            colTextSizeTempList.push(4);
-        } else {
+        if (listItem.length < 5) {
+            colTextSizeTempList.push(2);
+        } else if (listItem.length < 10) {
             colTextSizeTempList.push(3);
+        } else {
+            colTextSizeTempList.push(4);
         }
     }
     setTextColSizes(colTextSizeTempList);
@@ -46,22 +54,14 @@ const TextItemList = ({listName, listItems, setListItems}) => {
         <div className='flex-container'>
         <h6>{listName}:</h6>
         {listItems.map((item, index) => (
-          <Col key={index} md={colTextSizes[index]}>
-            <div className='text-item' >
-                <Form.Control
+          <Col key={item} md={colTextSizes[index]}>
+            <div className='text-item' key={item}>
+                <Form.Control key={item}
                 as="textarea"
                 rows={1}
-                readOnly
+                disabled={!isEnabledEditing}
                 value={item}
-                onFocus={(e) => {return;}}
-                style={{
-                    resize: 'none', // Disable resizing
-                    overflowY: 'hidden', // Disable vertical scroll
-                    cursor: 'default', // No pointer cursor
-                    backgroundColor: '#e9ecef',
-                    color: '#495057',
-                    border: '1px solid #ced4da',
-                  }} 
+                onChange={(e) => {handleUpdateText(e, index);}}
             />
               </div>
           </Col>
@@ -80,6 +80,7 @@ const TextItemList = ({listName, listItems, setListItems}) => {
         <div className='add-btn'>
             <Button
               variant="primary"
+              hidden={!isEnabledEditing}
               onClick={() => {handleClickAddItem();}}
             >
               {isOnEditing ? 'Save' : '+'}
