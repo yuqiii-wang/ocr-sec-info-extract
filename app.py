@@ -36,6 +36,7 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                         r'/config/train/classifier': {"origins": "http://localhost:3000"},
                         r'/config/load/ner': {"origins": "http://localhost:3000"},
                         r'/config/save/ner': {"origins": "http://localhost:3000"},
+                        r'/config/load/ner/task/scripts': {"origins": "http://localhost:3000"},
                     },
                     headers='Content-Type')
 app.secret_key = 'your_secret_key_here'

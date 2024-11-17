@@ -18,7 +18,10 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
     const [populatedScripts, setPopulatedScripts] = useState('');
     const [duplicateKeys, setDuplicateKeys] = useState([]);
     const [allowedMergeDuplicateItems, setAllowedMergeDuplicateItems] = useState([]);
-    const [transformLambda, setTransformLambda] = useState({});
+    const [transformItems, setTransformItems] = useState({});
+    const [transformItemLambdaNames, setTransformItemLambdaNames] = useState([]);
+    const [nerNames, setNerNames] = useState([]);
+    const [isSetupTransformItems, setIsSetupTransformItems] = useState(true);
 
     const toggleIsEditing = () => {
         isOnEditing ? setIsOnEditing(false) : setIsOnEditing(true);
@@ -91,7 +94,18 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                 setPopulatedScripts(populated_scripts);
                 setDuplicateKeys(duplicate_keys);
                 setAllowedMergeDuplicateItems(allowed_merge_duplicate_items);
-                setTransformLambda(transform_lambda);
+                setTransformItems(transform_lambda);
+                const tmpNerNames = [];
+                const tmpTransformItemLambdaNames = [];
+                Object.entries(transform_lambda).map(([transformNerName, transformItemLambdas]) => {
+                    tmpNerNames.push(transformNerName);
+                    Object.entries(transformItemLambdas).map(([transformItemLambdaName, transformItemLambdaItems]) => {
+                        tmpTransformItemLambdaNames.push(transformItemLambdaName);
+                    });
+                });
+                setNerNames([...tmpNerNames]);
+                setTransformItemLambdaNames(tmpTransformItemLambdaNames);
+                setTimeout(() => setIsSetupTransformItems(false), 500);
             })
             .catch((postErr) => {
                 // Handle error response
@@ -107,19 +121,35 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
         }
     }
 
+    const filterTransformItems = () => {
+        const tmpTransformItems = transformItems;
+        const resultTransformItems = {};
+        Object.entries(tmpTransformItems).forEach(([transformItemName, transformItemLambdas], index) => {
+            resultTransformItems[transformItemName] = Object.fromEntries(
+                Object.entries(transformItemLambdas).filter(([transformItemLambdaKey]) => {
+                    const transformItemLambdaKeyStr = JSON.stringify(transformItemLambdaKey);
+                    const transformItemLambdaUsedKeyStr = JSON.stringify(transformItemLambdaNames[index]);
+                    return transformItemLambdaUsedKeyStr === transformItemLambdaKeyStr;
+                })
+            );
+        });
+        setTransformItems(resultTransformItems);
+        return resultTransformItems;
+    }
 
     const handleSaveNerTaskScriptsRequest = (nertask) => {
         setIsOnEditing(false);
         if (nertask === '' || nertask === undefined) {
             return;
         }
+        const filteredTransform = filterTransformItems();
         const nertaskScriptConfigs = {
             "pre_scripts": preScripts,
             "post_scripts": postScripts,
             "populated_scripts": populatedScripts,
             "duplicate_keys": duplicateKeys,
             "allowed_merge_duplicate_items": allowedMergeDuplicateItems,
-            "transform_lambda": transformLambda
+            "transform_lambda": filteredTransform
         };
         try {
             const response = fetch("/config/save/ner/task/scripts", {
@@ -181,9 +211,15 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                         isEnabledEditing={isOnEditing}></TextItemList>
             <h6>Value Transform Rules:</h6>
             <ConfigHandlerTransformRuleComponent 
-                transformItems={transformLambda}
-                setTransformItems={setTransformLambda}
-                isEnabledEditing={isOnEditing}>
+                transformItems={transformItems}
+                setTransformItems={setTransformItems}
+                isEnabledEditing={isOnEditing}
+                transformItemLambdaNames={transformItemLambdaNames}
+                 setTransformItemLambdaNames={setTransformItemLambdaNames}
+                 isSetupTransformItems={isSetupTransformItems}
+                 setIsSetupTransformItems={setIsSetupTransformItems}
+                 nerNames={nerNames}
+                 setNerNames={setNerNames}>
             </ConfigHandlerTransformRuleComponent>
 
                 <Form.Group as={Col} controlId="preScripts">

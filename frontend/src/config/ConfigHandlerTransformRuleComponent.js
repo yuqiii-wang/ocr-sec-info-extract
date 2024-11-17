@@ -2,46 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Dropdown, DropdownButton, Col } from 'react-bootstrap';
 import "./css/Config.css";
 
-const ConfigHandlerTransformRuleComponent = ({transformItems, setTransformItems, isEnabledEditing}) => {
-  const [nerNames, setNerNames] = useState([]);
-  const [transformItemLambdaNames, setTransformItemLambdaNames] = useState([]);
-  const [transformItemLambdaNameValues, setTransformItemLambdaNameValues] = useState([]);
-  const [transformItemLambdaValues, setTransformItemLambdaValues] = useState([]);
-  const [colTextSizes, setTextColSizes] = useState([]);
+const ConfigHandlerTransformRuleComponent = ({transformItems, setTransformItems, 
+                                            isEnabledEditing, transformItemLambdaNames, 
+                                            setTransformItemLambdaNames, isSetupTransformItems,
+                                            setIsSetupTransformItems,
+                                            nerNames, setNerNames}) => {
+    const [tmpEditingText, setTmpEditingText] = useState("");
 
-  const handleAddItem = () => {
-    // Add functionality for the "+" button (e.g., adding a new row, or other logic)
-    console.log("Add Item clicked");
-  };
+    // key is editable text field key, maps to if this field is onFocus
+    const [isOnFocusFields, setIsOnFocusFields] = useState({});
+    const [textOnFocusFields, setTextOnFocusFields] = useState({});
 
-  useEffect(() => {
-    if (Object.keys(transformItems).length === 0) {
-        return;
-    }
-    const colTextSizeTempList = [];
-    const tmpNerNames = [];
-    const tmpTransformItemLambdaNames = [];
-    const tmpTransformItemLambdaValues = [];
-    Object.entries(transformItems).map(([transformItemName, transformItemLambdas]) => {
-        if (transformItemName.length < 5) {
-            colTextSizeTempList.push(2);
-        } else if (transformItemName.length < 10) {
-            colTextSizeTempList.push(3);
-        } else {
-            colTextSizeTempList.push(4);
-        }
-        Object.entries(transformItemLambdas).map(([transformItemLambdaName, transformItemLambdaValue]) => {
-            tmpTransformItemLambdaNames.push(transformItemLambdaName);
-            tmpTransformItemLambdaValues.push(transformItemLambdaValue);
-        });
-        tmpNerNames.push(transformItemName);
-    })
-    setNerNames([...tmpNerNames]);
-    setTransformItemLambdaNames([...tmpTransformItemLambdaNames]);
-    setTransformItemLambdaValues([...tmpTransformItemLambdaValues]);
-    setTextColSizes(colTextSizeTempList);
-    
-    }, [transformItems]);
+    const handleAddStaticMappingItem = (nerName) => {
+        let tmpTransformItems = transformItems;
+        let tmpStaticMappings = tmpTransformItems[nerName]["static_mapping"];
+        tmpStaticMappings[""]= "";
+        tmpTransformItems[nerName]["static_mapping"] = tmpStaticMappings;
+        setTransformItems(tmpTransformItems);
+    };
+
+    const handleBlur = (fieldKey) => {
+        let tmpIsOnFocusFields = isOnFocusFields;
+        tmpIsOnFocusFields[fieldKey] = false;
+        setIsOnFocusFields(tmpIsOnFocusFields);
+    };
+
+    const handleFocus = (fieldKey) => {
+        let tmpIsOnFocusFields = isOnFocusFields;
+        tmpIsOnFocusFields[fieldKey] = true;
+        setIsOnFocusFields(tmpIsOnFocusFields);
+    };
 
     const handleUpdateNerName = (e, index) => {
         const updatedListItems = nerNames;
@@ -49,44 +39,55 @@ const ConfigHandlerTransformRuleComponent = ({transformItems, setTransformItems,
         setNerNames([...updatedListItems]);
     }
 
-    const handleUpdateTransformItemLambdaName = (eKey, index) => {
+    const handleUpdateTransformItemLambdaName = (eKey, index, nerName) => {
         const updatedListItems = transformItemLambdaNames;
         updatedListItems[index] = eKey;
         setTransformItemLambdaNames([...updatedListItems]);
 
-        let transformItem = transformItems[nerNames[index]];
-        console.log(transformItem);
-
-        const updatedList2Items = transformItemLambdaValues;
-        if (transformItem[eKey] === undefined) {
-            let tmpTransformItem = {};
+        let tmpTransformItems = transformItems;
+        if (tmpTransformItems[nerName][eKey] === undefined) {
             if (eKey === "datetime") {
-                tmpTransformItem["datetime"] = "";
+                tmpTransformItems[nerName]["datetime"] = "%Y-%m-%d";
             } else if (eKey === "static_mapping") {
-                tmpTransformItem["static_mapping"] = {"": ""};
+                tmpTransformItems[nerName]["static_mapping"] = {"Default": ""};
             }
-            updatedList2Items[index] = tmpTransformItem[eKey];
         }
-        setTransformItemLambdaValues([...updatedList2Items]);
+        setTransformItems(tmpTransformItems);
     }
 
-    const handleUpdateStaticMappingKey = (e, index, staticMappingIndex) => {
-        const updatedListItems = transformItemLambdaValues;
-        const staticMappingKey = e.target.value;
-        setTransformItemLambdaValues([...updatedListItems]);
+    const handleUpdateStaticMappingKey = (e, nerName, index, itemKey, fieldKey) => {
+        let tmpTextOnFocusFields = textOnFocusFields;
+        tmpTextOnFocusFields[fieldKey] = e.target.value;
+        setTextOnFocusFields(tmpTextOnFocusFields);
+        let tmpTransformItems = transformItems;
+        const itemVal = tmpTransformItems[nerName][transformItemLambdaNames[index]][itemKey];
+        delete tmpTransformItems[nerName][transformItemLambdaNames[index]][tmpEditingText];
+        tmpTransformItems[nerName][transformItemLambdaNames[index]][e.target.value] = itemVal;
+        setTmpEditingText(e.target.value);
     }
 
-    const handleUpdateStaticMappingValue = (e, index, staticMappingIndex) => {
-        const updatedListItems = transformItemLambdaValues;
-        updatedListItems[index] = e.target.value;;
-        setTransformItemLambdaValues([...updatedListItems]);
+    const handleUpdateStaticMappingValue = (e, nerName, index, itemKey) => {
+        let tmpTransformItems = transformItems;
+        const itemVal = e.target.value;
+        tmpTransformItems[nerName][transformItemLambdaNames[index]][itemKey] = itemVal;
+        setTmpEditingText(itemVal);
+        setTransformItems({...tmpTransformItems});
+    }
+
+    const handleUpdateDatetimeValue = (e, nerName, index) => {
+        let tmpTransformItems = transformItems;
+        const itemVal = e.target.value;
+        console.log(itemVal);
+        tmpTransformItems[nerName][transformItemLambdaNames[index]] = itemVal;
+        setTransformItems({...tmpTransformItems});
+        console.log(transformItemLambdaNames);
     }
 
   return (
     <div>
     {Object.entries(transformItems).map(([nerName, transformItem], index) => (
     <div className="transform-rule-wrapper" key={nerName}>
-        <Col md={4}>
+        <Col md={3} key={nerName}>
         <Form.Group key={nerName}>
           <Form.Control  key={nerName}
             as="textarea"
@@ -98,74 +99,80 @@ const ConfigHandlerTransformRuleComponent = ({transformItems, setTransformItems,
         </Form.Group>
         </Col>
 
-        <Col md={3}>
-        <Form.Group>
+        <Col md={3} >
+        <Form.Group >
           <DropdownButton 
+            key={transformItemLambdaNames[index]}
             id="dropdown-basic-button"
-            title={transformItemLambdaNames[index]}
-            onSelect={(eKey) => handleUpdateTransformItemLambdaName(eKey, index)}
+            title={transformItemLambdaNames[index] !== undefined ? transformItemLambdaNames[index] : ""}
+            onSelect={(eKey) => handleUpdateTransformItemLambdaName(eKey, index, nerName)}
             disabled={!isEnabledEditing}
           >
-            <Dropdown.Item eventKey="datetime">datetime</Dropdown.Item>
-            <Dropdown.Item eventKey="static_mapping">static_mapping</Dropdown.Item>
+            <Dropdown.Item eventKey="datetime" key="datetime" >datetime</Dropdown.Item>
+            <Dropdown.Item eventKey="static_mapping" key="static_mapping" >static_mapping</Dropdown.Item>
           </DropdownButton>
         </Form.Group>
         </Col>
 
-        { (typeof transformItemLambdaValues[index] === "string") ? (
-            <div>
-            <div className='transform-rule-key-val-wrapper'>
-            <Col md={12}>
-            <Form.Group  key={index}>
+        { (typeof transformItem[transformItemLambdaNames[index]] === "string") ? (
+            <div className='transform-rule-key-val-wrapper' >
+            <Col md={12} >
+            <Form.Group >
                 <Form.Control
+                key={nerName+transformItemLambdaNames[index]}
                 as="textarea"
-                value={transformItemLambdaValues[index]}
+                value={transformItem[transformItemLambdaNames[index]]}
                 rows={1}
                 disabled={!isEnabledEditing}
+                onChange={(e) => handleUpdateDatetimeValue(e, nerName, index)}
                 />
           </Form.Group>
           </Col>
           </div>
-          </div>
-        ) : (transformItemLambdaValues[index] instanceof Object) ? (
-        <div>
-            {Object.entries(transformItemLambdaValues[index]).map(([key, val], staticMappingIndex) => (
-                    <div className='transform-rule-key-val-wrapper'>
-                        <Col md={5}>
-                        <Form.Group  key={staticMappingIndex}>
-                            <Form.Control  key={staticMappingIndex}
+        ) : (transformItem[transformItemLambdaNames[index]] instanceof Object) ? (
+        <div >
+            {Object.entries(transformItem[transformItemLambdaNames[index]]).map(([itemKey, itemVal], staticMappingIndex) => (
+                    <div className='transform-rule-key-val-wrapper' key={[nerName, "keyval", staticMappingIndex].join(",")}>
+                        <Col md={5} >
+                        {itemKey === "Default" ? (
+                            <Form.Group  >
+                                <Form.Label>Default</Form.Label>
+                            </Form.Group>
+                        ) : (<Form.Group >
+                            <Form.Control  key={[nerName, "key", staticMappingIndex].join(",")}
                             as="textarea"
-                            value={key}
+                            value={itemKey}
                             rows={1}
                             disabled={!isEnabledEditing}
-                            onChange={(e) => handleUpdateStaticMappingKey(e, index, staticMappingIndex)}
+                            onChange={(e) => handleUpdateStaticMappingKey(e, nerName, index, itemKey, [nerName, itemKey].join(","))}
                         />
-                        </Form.Group>
+                        </Form.Group>)}
                         </Col>
                         as
                         <Col md={5}>
-                        <Form.Group  key={key}>
-                            <Form.Control  key={key}
+                        <Form.Group >
+                            <Form.Control  key={[nerName, itemKey, "val" , staticMappingIndex].join(",")}
                                 as="textarea"
-                                value={val}
+                                value={itemVal}
                                 rows={1}
                                 disabled={!isEnabledEditing}
-                                onChange={(e) => handleUpdateStaticMappingValue(e, index, staticMappingIndex)}
+                                onChange={(e) => handleUpdateStaticMappingValue(e, nerName, index, itemKey)}
                             />
                         </Form.Group>
                         </Col>
                     </div>
             ))}
-            <Button variant="primary" onClick={handleAddItem} hidden={!isEnabledEditing}>
+            <Button variant="primary" onClick={() => handleAddStaticMappingItem(nerName)} 
+                hidden={!isEnabledEditing} >
                 +
             </Button>
-        </div>) : (<p>
-            {typeof transformItemLambdaValues[index]}
+        </div>) : (<p >
+            {typeof transformItem[transformItemLambdaNames[index]]}
         </p>)}
         
     </div>
     ))}
-    <Button variant="primary" onClick={handleAddItem} hidden={!isEnabledEditing}>
+    <Button variant="primary" onClick={handleAddStaticMappingItem} hidden={!isEnabledEditing}>
         +
       </Button>
     </div>
