@@ -33,23 +33,29 @@ def _merge_ner_list_by_duplicate_keys(duplicate_keys:list[str],
 
     return result
 
-def generate_shell_scripts(shell_script_generation_config:dict, ner_jsons:list[dict]):
+def convert_to_merged_ner_jsons(shell_script_generation_config:dict, ner_jsons:list[dict]):
     duplicate_keys = shell_script_generation_config["duplicate_keys"]
     allowed_merge_duplicate_items = shell_script_generation_config["allowed_merge_duplicate_items"]
+    merged_ner_jsons = _merge_ner_list_by_duplicate_keys(duplicate_keys, allowed_merge_duplicate_items, ner_jsons)
+    return merged_ner_jsons
+
+def generate_shell_scripts(shell_script_generation_config:dict, merged_ner_jsons:list[dict]):
     transform_lambda = shell_script_generation_config["transform_lambda"]
     pre_scripts:str = shell_script_generation_config["pre_scripts"]
     populated_scripts:str = shell_script_generation_config["populated_scripts"]
     post_scripts:str = shell_script_generation_config["post_scripts"]
-    merged_ner_jsons = _merge_ner_list_by_duplicate_keys(duplicate_keys, allowed_merge_duplicate_items, ner_jsons)
     for transform_ner_name in transform_lambda:
         for merged_ner_key, merged_ner_json in merged_ner_jsons.items():
             if transform_ner_name in merged_ner_json:
-                if "datetime" in transform_lambda[transform_ner_name]:
-                    datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["datetime"])
-                    merged_ner_json[transform_ner_name] = datetime_str
-                elif "static_mapping" in transform_lambda[transform_ner_name]:
-                    transform_val = transform_lambda[transform_ner_name]["static_mapping"][merged_ner_json[transform_ner_name]]
-                    merged_ner_json[transform_ner_name] = transform_val
+                try:
+                    if "datetime" in transform_lambda[transform_ner_name]:
+                        datetime_str = _convert_to_standard_date(merged_ner_json[transform_ner_name], transform_lambda[transform_ner_name]["datetime"])
+                        merged_ner_json[transform_ner_name] = datetime_str
+                    elif "static_mapping" in transform_lambda[transform_ner_name]:
+                        transform_val = transform_lambda[transform_ner_name]["static_mapping"][merged_ner_json[transform_ner_name]]
+                        merged_ner_json[transform_ner_name] = transform_val
+                except Exception as err:
+                    print(transform_ner_name)
     result_populated_scripts = []
     result_populated_scripts.append(pre_scripts)
     for merged_ner_key, merged_ner_json in merged_ner_jsons.items():

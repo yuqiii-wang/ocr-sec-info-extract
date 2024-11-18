@@ -17,7 +17,7 @@ from backend.OCREngine import OCREngine
 from backend.classifier.classifier import DT_Classifier, train_dt_model
 from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
 from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
-from backend.shell_script_generator.shell_script_generator import generate_shell_scripts
+from backend.shell_script_generator.shell_script_generator import generate_shell_scripts, convert_to_merged_ner_jsons
 from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
 ocr_engine = OCREngine()
@@ -115,6 +115,13 @@ def process_ocr(app, filenames:list[str]):
         "zip_file": encoded_zip
     }
     return jsonify(response_data)
+
+def process_convert_to_merged_ner_jsons(app, ner_jsons, task_label):
+    shell_script_generation_config = app.config['TASK_SCRIPTS'][task_label]
+    merged_ner_jsons = convert_to_merged_ner_jsons(shell_script_generation_config, ner_jsons)
+    return jsonify({
+        "merged_ner_jsons": merged_ner_jsons
+    })
 
 def process_generate_shell_scripts(app, ner_jsons, task_label, generator=generate_shell_scripts):
     shell_script_generation_config = app.config['TASK_SCRIPTS'][task_label]

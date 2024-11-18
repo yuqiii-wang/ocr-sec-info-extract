@@ -8,6 +8,7 @@ from backend.process.process import (process_execute,
                                      process_upload_file,
                                      process_ocr,
                                      process_generate_shell_scripts,
+                                     process_convert_to_merged_ner_jsons,
                                      load_audit,
                                      load_audit_all,
                                      load_config_classifier_all,
@@ -126,6 +127,14 @@ def convert():
     ocr_jsons:list[dict] = data.get("ocr_jsons", [{}])
     ner_jsons:list[dict] = data.get("ner_jsons", [{}])
     ner_jsons = ocr_jsons + ner_jsons
+    resp = make_response(process_convert_to_merged_ner_jsons(app, ner_jsons, task_label))
+    return resp
+
+@app.route('/process/generate', methods=['POST'])
+def generate():
+    data = request.get_json()
+    task_label = data.get("task_label", None)
+    ner_jsons:dict[str, dict] = data.get("ner_jsons", {"": {}})
     resp = make_response(process_generate_shell_scripts(app, ner_jsons, task_label))
     return resp
 

@@ -7,12 +7,13 @@ import ApprovalModal from "../others/ApprovalModal";
 import { GlobalAppContext } from "../GlobalAppContext";
 import "./css/ocr_results.css";
 import TextReferenceDetail from "./TextReferenceDetail";
+import MergedNerJsonReferenceDetail from "./MergedNerJsonReferenceDetail";
 
 const ReferenceDetailComponent = () => {
     const { referenceImageResults, taskLabel, approvalTemplateId,
-        isSolutionShowDone, referenceOCRJsonResults,
+        isSolutionShowDone, referenceOCRJsonResults, referenceMergedNerJsonResults,
         setReferenceShellScriptResults, referenceSrcTextResults,
-        referenceCodeSepOffset, setIsOnInputShow,
+        referenceCodeSepOffset, setIsOnInputShow, setReferenceMergedNerJsonResults,
         setIsSolutionConcludeDone } = useContext(GlobalAppContext);
 
     const [trainingLabels, setTrainingLabels] = useState([]);
@@ -21,6 +22,7 @@ const ReferenceDetailComponent = () => {
     const [isOnSwitchHandler, setIsOnSwitchHandler] = useState(false);
     const [conversionError, setConversionError] = useState("");
     const [isShowApprovalModal, setIsShowApprovalModal] = useState(false);
+    const [isShowMergedNerJsonResults, setIsShowMergedNerJsonResults] = useState(false);
 
     useEffect(() => {
         try {
@@ -88,11 +90,62 @@ const ReferenceDetailComponent = () => {
                 }
                 return response.json();
             })
+            .then( (data) => {
+                if (data.error != undefined) {
+                    setConversionError(data.error);
+                } else {
+                    console.log(data["merged_ner_jsons"]);
+                    setReferenceMergedNerJsonResults(data["merged_ner_jsons"]);
+                    setIsOnInputShow(false);
+                    console.log(data["merged_ner_jsons"]);
+                    generateShellScripts(data["merged_ner_jsons"]);
+                }
+            })
+            .catch((postErr) => {
+                // Handle error response
+                if (postErr == "") {
+                    postErr = "Image Process Error.";
+                }
+                setConversionError(postErr);
+            });
+        } catch (error) {
+            setConversionError(error);
+        } finally {
+            ;
+        }
+    };
+
+    const generateShellScripts = (mergedNerJsons) => {
+        if (mergedNerJsons === undefined) {
+            return;
+        }
+        console.log(mergedNerJsons);
+        try {
+            const response = fetch("/process/generate", {
+                method: 'POST',
+                body: JSON.stringify({ "ner_jsons": mergedNerJsons,
+                                        "task_label": taskLabel
+                 }),
+                mode: "cors",
+                headers: new Headers({
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }),
+            })
+            .then(response => {
+                if (response == undefined) {
+                    throw new Error("ocr json conversion response is null.");
+                } else if (!response.ok) {
+                    throw new Error('ocr json conversion response was not ok.');
+                }
+                return response.json();
+            })
             .then(async (data) => {
                 if (data.error != undefined) {
                     setConversionError(data.error);
                 } else {
                     setReferenceShellScriptResults(data["shell_scripts"]);
+                    setIsShowMergedNerJsonResults(true);
                     setIsOnInputShow(false);
                 }
             })
@@ -116,6 +169,12 @@ const ReferenceDetailComponent = () => {
             onMouseLeave={() => setHover(false)}>
             {taskLabel && (<React.Fragment>
                 <p><span style={{fontWeight: "bold"}}>Assigned task handler</span>: {taskLabel}</p>
+                {isShowMergedNerJsonResults && (<React.Fragment>
+                <p><span style={{fontWeight: "bold"}}>Merged NERs</span>:</p>
+                    <MergedNerJsonReferenceDetail 
+                        referenceMergedNerJsonResults={referenceMergedNerJsonResults}>
+                    </MergedNerJsonReferenceDetail>
+                    </React.Fragment>)}
                 <p><span style={{fontWeight: "bold"}}>Content</span>: </p>
                 </React.Fragment>)}
             {referenceImageResults.length > 0 ? (

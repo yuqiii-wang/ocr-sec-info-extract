@@ -17,8 +17,9 @@ function GlobalAppContextManager({ children }) {
     const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState("");
     const [referenceTextNerJsonResults, setReferenceTextNerJsonResults] = useState("");
     const [referenceTextNerPosResults, setReferenceTextNerPosResults] = useState("");
+    const [referenceMergedNerJsonResults, setReferenceMergedNerJsonResults] = useState({});
     const [referenceSrcTextResults, setReferenceSrcTextResults] = useState("");
-    const [referenceShellScriptResults, setReferenceShellScriptResults] = useState("");
+    const [referenceShellScriptResults, setReferenceShellScriptResults] = useState([]);
     const [isOnInputShow, setIsOnInputShow] = useState(true);
     const [thisFileUuids, setThisFileUuids] = useState("");
     const [uploadedFilenames, setUploadedFilenames] = useState("");
@@ -53,6 +54,7 @@ function GlobalAppContextManager({ children }) {
                                         referenceTextNerPosResults, setReferenceTextNerPosResults,
                                         referenceSrcTextResults, setReferenceSrcTextResults,
                                         referenceShellScriptResults, setReferenceShellScriptResults,
+                                        referenceMergedNerJsonResults, setReferenceMergedNerJsonResults,
                                         isOnInputShow, setIsOnInputShow,
                                         thisFileUuids, setThisFileUuids,
                                         approvalTemplateId, setApprovalTemplateId,
