@@ -21,7 +21,7 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
     const [transformItems, setTransformItems] = useState({});
     const [transformItemLambdaNames, setTransformItemLambdaNames] = useState([]);
     const [nerNames, setNerNames] = useState([]);
-    const [isSetupTransformItems, setIsSetupTransformItems] = useState(true);
+    const [isSetupTransformItems, setIsSetupTransformItems] = useState(false);
 
     const toggleIsEditing = () => {
         isOnEditing ? setIsOnEditing(false) : setIsOnEditing(true);
@@ -104,8 +104,8 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                     });
                 });
                 setNerNames([...tmpNerNames]);
-                setTransformItemLambdaNames(tmpTransformItemLambdaNames);
-                setTimeout(() => setIsSetupTransformItems(false), 500);
+                setTransformItemLambdaNames([...tmpTransformItemLambdaNames]);
+                setTimeout(() => setIsSetupTransformItems(true), 100);
             })
             .catch((postErr) => {
                 // Handle error response
