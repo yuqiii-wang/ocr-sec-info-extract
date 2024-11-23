@@ -1,5 +1,5 @@
-import React from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row, Spinner } from 'react-bootstrap';
 import { Scatter } from 'react-chartjs-2';
 import TimeRangeSelector from './TimeRangeSelector';
 import {
@@ -18,83 +18,19 @@ ChartJS.register(TimeScale, LinearScale, PointElement, Tooltip, Legend, Category
 
 const AuditChartByTimeCategory = () => {
 
-    const y_labels = ['', 'BBG Bond', 'BBG MBS', 'CFETS', 'Unsettle Trade', 'YTD Trade Extract', ''];
+    const [timeRange, setTimeRange] = useState('Last 1 day');
+    const [auditData, setAuditData] = useState(null);
+    const [axisTimeUnit, setXAxisTimeUnit] = useState('hour');
 
-    const data = {
-        datasets: [
-            {
-                label: 'BBG Bond',
-                data: [
-                    { x: '2024-10-21T10:05:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T11:10:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T12:20:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T10:23:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T11:45:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T12:12:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T10:40:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T11:26:00', y: 'BBG Bond' },
-                    { x: '2024-10-21T12:50:00', y: 'BBG Bond' },
-                ],
-                backgroundColor: 'rgba(255, 165, 0, 0.8)',
-                pointRadius: 5,
-            },
-            {
-                label: 'BBG MBS',
-                data: [
-                    { x: '2024-10-21T10:30:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T11:30:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T12:30:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T10:23:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T11:53:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T12:16:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T10:36:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T11:55:00', y: 'BBG MBS' },
-                    { x: '2024-10-21T12:47:00', y: 'BBG MBS' },
-                ],
-                backgroundColor: 'rgba(255, 217, 0, 0.7)',
-                pointRadius: 5,
-            },
-            {
-                label: 'CFETS',
-                data: [
-                    { x: '2024-10-21T10:30:00', y: 'CFETS' },
-                    { x: '2024-10-21T11:30:00', y: 'CFETS' },
-                    { x: '2024-10-21T12:30:00', y: 'CFETS' },
-                    { x: '2024-10-21T10:11:00', y: 'CFETS' },
-                    { x: '2024-10-21T11:01:00', y: 'CFETS' },
-                    { x: '2024-10-21T12:51:00', y: 'CFETS' },
-                    { x: '2024-10-21T10:45:00', y: 'CFETS' },
-                    { x: '2024-10-21T11:32:00', y: 'CFETS' },
-                    { x: '2024-10-21T12:24:00', y: 'CFETS' },
-                ],
-                backgroundColor: 'rgba(255, 192, 0, 0.6)',
-                pointRadius: 5,
-            },
-            {
-                label: 'Unsettle Trade',
-                data: [
-                    { x: '2024-10-21T10:14:54', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T10:47:10', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T11:30:00', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T11:45:00', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T12:40:01', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T11:51:25', y: 'Unsettle Trade' },
-                    { x: '2024-10-21T12:10:00', y: 'Unsettle Trade' },
-                ],
-                backgroundColor: 'rgba(230, 181, 10, 0.8)',
-                pointRadius: 5,
-            },
-            {
-                label: 'YTD Trade Extract',
-                data: [
-                    { x: '2024-10-21T10:10:00', y: 'YTD Trade Extract' },
-                    { x: '2024-10-21T11:30:00', y: 'YTD Trade Extract' },
-                ],
-                backgroundColor: 'rgba(230, 181, 10, 0.8)',
-                pointRadius: 5,
-            },
-        ],
-    };
+    const y_labels = ['', 'bond_bloomberg', 'cfest_bond', 'mbs_bloomberg', 'extract_ytd_trades', 'unsettle_trade', ''];
+
+    useEffect(() => {
+        if (timeRange === 'Last 12 hours' || timeRange === 'Last 1 day' || timeRange === 'Last 3 days') {
+            setXAxisTimeUnit("hour");
+        } else {
+            setXAxisTimeUnit("day");
+        }
+    }, [timeRange]);
 
     // Chart options
     const options = {
@@ -102,7 +38,7 @@ const AuditChartByTimeCategory = () => {
             x: {
                 type: 'time',
                 time: {
-                    unit: 'hour',
+                    unit: axisTimeUnit,
                 },
                 title: {
                     display: true,
@@ -146,14 +82,23 @@ const AuditChartByTimeCategory = () => {
             </Row>
             <Row>
             <Col md="12" className="audit-time-container">
-                    <TimeRangeSelector></TimeRangeSelector>
+                    <TimeRangeSelector setAuditData={setAuditData}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}>
+                    </TimeRangeSelector>
                 </Col>
             </Row>
             <Row>
                 <Col>
-                    <div style={chartStyle}>
-                        <Scatter data={data} options={options} />
-                    </div>
+                {auditData ? 
+                    (<div style={chartStyle}>
+                        <Scatter data={auditData} options={options} />
+                    </div>) : (
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                    )
+                }                
+                    
+                    
                 </Col>
             </Row>
         </Container>

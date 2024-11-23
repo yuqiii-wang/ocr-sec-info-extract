@@ -6,6 +6,7 @@ from pathlib import Path
 from logging import getLogger
 from flask_socketio import SocketIO,emit
 from backend.classifier.utils import store_ocr_text, store_msg_text
+from backend.audit.audit import load_audit_by_time
 from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
                             LABEL_PARSER_MAP,
@@ -216,4 +217,5 @@ def load_audit_all():
     return jsonify({"message": "ok"})
 
 def load_audit(start_time, end_time):
-    return jsonify({"message": "ok"})
+    audit_result:dict = load_audit_by_time(start_time, end_time)
+    return jsonify(audit_result)

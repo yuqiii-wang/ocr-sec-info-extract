@@ -1,214 +1,205 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Dropdown, DropdownButton, Col } from 'react-bootstrap';
+import { Form, Button, Dropdown, DropdownButton, Row, Col } from 'react-bootstrap';
 import "./css/Config.css";
 
 const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems,
     isEnabledEditing, transformItemLambdaNames,
     setTransformItemLambdaNames, isSetupTransformItems,
     setIsSetupTransformItems,
-    nerNames, setNerNames }) => {
+    nerNames, setNerNames, nerTaskItemLabels }) => {
 
     // static mapping key
-    const [staticMappingKeyFields, setStaticMappingKeyFields] = useState({});
-    const [staticMappingValFields, setStaticMappingValFields] = useState({});
+    const [thisNerName, setThisNerName] = useState("");
+    const [thisTransformName, setThisTransformName] = useState("");
+    const [thisTransformJsonValue, setThisTransformJsonValue] = useState("");
+    const [remainedNerTaskItemLabels, setRemainedNerTaskItemLabels] = useState([]);
 
+    // only on first time mount
     useEffect(() => {
         if (!isSetupTransformItems) {
             return;
         }
-        let tmpStaticMappingKeyFields = {};
-        let tmpStaticMappingValFields = {};
-        Object.entries(transformItems).map(([transformNerName, transformItemLambdas], index) => {
-            if (JSON.parse(JSON.stringify(transformItemLambdaNames[index])) === "datetime") {
-                tmpStaticMappingValFields[[nerNames[index], "datetime"].join(",")] = transformItems[nerNames[index]]["datetime"]
-            } else if (JSON.parse(JSON.stringify(transformItemLambdaNames[index])) === "static_mapping") {
-                Object.entries(transformItems[nerNames[index]]["static_mapping"]).map(([transformItemLambdaItemKey, transformItemLambdaItemVal], staticMappingKeyIndex) => {
-                    tmpStaticMappingKeyFields[[nerNames[index], "static_mapping", transformItemLambdaItemKey].join(",")]
-                        = transformItemLambdaItemKey;
-                    tmpStaticMappingValFields[[nerNames[index], "static_mapping", transformItemLambdaItemKey].join(",")]
-                        = transformItemLambdaItemVal;
-                });
-            }
-        });
-        setStaticMappingKeyFields({ ...tmpStaticMappingKeyFields });
-        setStaticMappingValFields({ ...tmpStaticMappingValFields });
+
+        setThisNerName(nerNames[0]);
+        setThisTransformName(transformItemLambdaNames[0]);
+
+        let tmpTransformJsonValue = "";
+        if (transformItemLambdaNames[0] === "datetime") {
+            tmpTransformJsonValue = transformItems[nerNames[0]][transformItemLambdaNames[0]];
+        } else if (transformItemLambdaNames[0] === "static_mapping") {
+            tmpTransformJsonValue = JSON.stringify(transformItems[nerNames[0]][transformItemLambdaNames[0]]
+                                                    , null, 2);
+        }
+
+        setThisTransformJsonValue(tmpTransformJsonValue);
+
+        const tmpRemainedNerTaskItemLabels = nerTaskItemLabels.filter(nerTaskItemLabel => !nerNames.includes(nerTaskItemLabel));
+        setRemainedNerTaskItemLabels([...tmpRemainedNerTaskItemLabels]);
+
         setIsSetupTransformItems(false); // done setup
     }, [transformItems, isSetupTransformItems]);
 
-    const handleAddStaticMappingItem = () => {
-        let tmpTransformItems = transformItems;
-        tmpTransformItems[""] = { "static_mapping": { "": "" } };
-        let tmpStaticMappings = tmpTransformItems[""]["static_mapping"];
-        tmpStaticMappings[""] = "";
-        let tmpStaticMappingKeyFields = staticMappingKeyFields;
-        tmpStaticMappingKeyFields[["", "static_mapping", staticMappingKeyFields.length].join(",")] = "";
-        setStaticMappingKeyFields({ ...tmpStaticMappingKeyFields });
-        setTransformItems(tmpTransformItems);
-    };
-
-    const handleUpdateNerName = (e, index) => {
-        const updatedListItems = nerNames;
-        updatedListItems[index] = e.target.value;
-        setNerNames([...updatedListItems]);
+    const handleUpdateNerName = (eKeyNerName) => {
+        setThisNerName(eKeyNerName);
+        Object.entries(transformItems[eKeyNerName]).map(([transformLambdaName, transformLambdaValue]) => {
+            let tmpTransformJsonValue = "";
+            if (transformLambdaName === "datetime") {
+                tmpTransformJsonValue = transformItems[eKeyNerName][transformLambdaName];
+            } else if (transformLambdaName === "static_mapping") {
+                tmpTransformJsonValue = JSON.stringify(transformItems[eKeyNerName][transformLambdaName]
+                                                        , null, 2);
+            }
+            setThisTransformName(transformLambdaName);
+            setThisTransformJsonValue(tmpTransformJsonValue);
+        });
     }
 
-    const handleUpdateTransformItemLambdaName = (eKey, index, nerName) => {
-        const updatedListItems = transformItemLambdaNames;
-        updatedListItems[index] = eKey;
-        setTransformItemLambdaNames([...updatedListItems]);
-
+    const handleUpdateTransformItemLambdaName = (eKeyLambdaName) => {
         let tmpTransformItems = transformItems;
-        if (tmpTransformItems[nerName][eKey] === undefined) {
-            if (eKey === "datetime") {
-                tmpTransformItems[nerName]["datetime"] = "%Y-%m-%d";
-                const updatedMapItems = staticMappingValFields;
-                updatedMapItems[[nerNames[index], transformItemLambdaNames[index]].join(",")] = "%Y-%m-%d";
-                setStaticMappingValFields({ ...updatedMapItems });
-            } else if (eKey === "static_mapping") {
-                tmpTransformItems[nerName]["static_mapping"] = { "": "" };
-                const updatedMapKeyItems = staticMappingKeyFields;
-                updatedMapKeyItems[[nerNames[index], transformItemLambdaNames[index], updatedMapKeyItems.length].join(",")] = "Default";
-                setStaticMappingKeyFields({ ...updatedMapKeyItems });
-                const updatedMapValItems = staticMappingValFields;
-                updatedMapValItems[[nerNames[index], transformItemLambdaNames[index], updatedMapValItems.length].join(",")] = "";
-                setStaticMappingValFields({ ...updatedMapValItems });
+        if (tmpTransformItems[thisNerName][eKeyLambdaName] === undefined) {
+            if (eKeyLambdaName === "datetime") {
+                tmpTransformItems[thisNerName][eKeyLambdaName] = "";
+            } else if (eKeyLambdaName === "static_mapping") {
+                tmpTransformItems[thisNerName][eKeyLambdaName] = {};
             }
         }
+        let index = 0;
+        for (let tmpNerName of nerNames) {
+            if (tmpNerName === thisNerName) {
+                break;
+            }
+            index += 1;
+        };
+        let tmpTransformItemLambdaNames = transformItemLambdaNames;
+        tmpTransformItemLambdaNames[index] = eKeyLambdaName;
+        setTransformItemLambdaNames(tmpTransformItemLambdaNames);
+
+        setThisTransformName(eKeyLambdaName);
+        let tmpTransformJsonValue = "";
+        if (eKeyLambdaName === "datetime") {
+            tmpTransformJsonValue = transformItems[thisNerName][eKeyLambdaName];
+        } else if (eKeyLambdaName === "static_mapping") {
+            tmpTransformJsonValue = JSON.stringify(transformItems[thisNerName][eKeyLambdaName]
+                                                    , null, 2);
+        }
+        setThisTransformJsonValue(tmpTransformJsonValue);
+        setTransformItems({...tmpTransformItems});
+    }
+
+    const handleUpdateTransformValue = (e) => {
+        let isValidTransformValue = false;
+        let tmpTransformItems = transformItems;
+        setThisTransformJsonValue(e.target.value);
+        if (thisTransformName === "datetime") {
+            isValidTransformValue = validateDatetime();
+            if (isValidTransformValue) {
+                tmpTransformItems[thisNerName][thisTransformName] = thisTransformJsonValue;
+            }
+        } else if (thisTransformName === "static_mapping") {
+            try {
+                isValidTransformValue = validateStaticMappingJsonValue();
+                if (isValidTransformValue) {
+                    tmpTransformItems[thisNerName][thisTransformName] = JSON.parse(thisTransformJsonValue);
+                }
+            } catch (error) {
+                ;
+            } finally {
+                ;
+            }
+        }
+        if (isValidTransformValue) {
+            setTransformItems({...tmpTransformItems});
+        }
+    }
+
+    const handleAddNewTransform = (eKeyNerName) => {
+        let tmpTransformItems = transformItems;
+        tmpTransformItems[eKeyNerName] = {"static_mapping": {}};
+        setNerNames([...nerNames, eKeyNerName]);
+        setTransformItemLambdaNames([...transformItemLambdaNames, "static_mapping"]);
+        setThisNerName(eKeyNerName);
+        setThisTransformName("static_mapping");
+        setThisTransformJsonValue(JSON.stringify({}, null, 2));
         setTransformItems(tmpTransformItems);
     }
 
-    const handleUpdateStaticMappingKey = (e, index, keyItemVal) => {
-        const updatedMapItems = staticMappingKeyFields;
-        updatedMapItems[[nerNames[index], "static_mapping", keyItemVal].join(",")] = e.target.value;
-        setStaticMappingKeyFields({ ...updatedMapItems });
-        let tmpTransformItems = transformItems;
-        const itemKey = e.target.value;
-        const prevItemVal = tmpTransformItems[nerNames[index]]["static_mapping"][itemKey];
-        tmpTransformItems[nerNames[index]]["static_mapping"][itemKey] = prevItemVal;
-        setTransformItems({ ...tmpTransformItems });
-    }
+    const validateDatetime = () => {
+        if (thisTransformName !== "datetime") {
+            return true;
+        }
+        const regex = /[\%]/;
+        return regex.test(thisTransformJsonValue);
+    };
 
-    const handleUpdateStaticMappingValue = (e, index, keyItemVal) => {
-        const updatedMapItems = staticMappingValFields;
-        updatedMapItems[[nerNames[index], "static_mapping", keyItemVal].join(",")] = e.target.value;
-        setStaticMappingValFields({ ...updatedMapItems });
-        let tmpTransformItems = transformItems;
-        const itemVal = e.target.value;
-        tmpTransformItems[nerNames[index]]["static_mapping"]
-        [staticMappingKeyFields[[nerNames[index], "static_mapping", keyItemVal].join(",")]] = itemVal;
-        setTransformItems({ ...tmpTransformItems });
-    }
-
-    const handleUpdateDatetimeValue = (e, index) => {
-        const updatedMapItems = staticMappingValFields;
-        updatedMapItems[[nerNames[index], "datetime"].join(",")] = e.target.value;
-        setStaticMappingValFields({ ...updatedMapItems });
-        let tmpTransformItems = transformItems;
-        const itemVal = e.target.value;
-        tmpTransformItems[nerNames[index]]["datetime"] = itemVal;
-        setTransformItems({ ...tmpTransformItems });
-    }
+    const validateStaticMappingJsonValue = () => {
+        if (thisTransformName !== "static_mapping") {
+            return true;
+        }
+        const regex = /[\{\}]+/g;
+        return regex.test(thisTransformJsonValue);
+    };
 
     return (
         <div>
-            {nerNames.map((nerName, index) => (
-                <div className="transform-rule-wrapper" key={index}>
-                    <Col md={3} >
-                        <Form.Group >
-                            <Form.Control key={index}
-                                as="textarea"
-                                value={nerName}
-                                onChange={(e) => handleUpdateNerName(e, index)}
-                                rows={1}
-                                disabled={!isEnabledEditing}
-                            />
-                        </Form.Group>
-                    </Col>
-
-                    <Col md={3} >
-                        <Form.Group >
-                            <DropdownButton key={index}
-                                id="dropdown-basic-button"
-                                title={transformItemLambdaNames[index] !== undefined ? transformItemLambdaNames[index] : ""}
-                                onSelect={(eKey) => handleUpdateTransformItemLambdaName(eKey, index, nerName)}
-                                disabled={!isEnabledEditing}
-                            >
-                                <Dropdown.Item eventKey="datetime" key="datetime" >datetime</Dropdown.Item>
-                                <Dropdown.Item eventKey="static_mapping" key="static_mapping" >static_mapping</Dropdown.Item>
-                            </DropdownButton>
-                        </Form.Group>
-                    </Col>
-
-                    {(transformItemLambdaNames[index] === "datetime") ? (
-                        <div className='transform-rule-key-val-wrapper' key={[nerName, index, "datetime-wrapper"].join(",")}>
-                            <Col md={12} >
-                                <Form.Group >
-                                    <Form.Control
-                                        key={[nerNames[index], "datetime"].join(",")}
-                                        as="textarea"
-                                        value={staticMappingValFields[[nerNames[index], "datetime"].join(",")]}
-                                        rows={1}
-                                        disabled={!isEnabledEditing}
-                                        onChange={(e) => handleUpdateDatetimeValue(e, index)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </div>
-                    ) : (transformItemLambdaNames[index] === "static_mapping") ? (
-                        <div key={[nerName, index, "key-val-wrapper"].join(",")}>
-                            {Object.entries(staticMappingKeyFields).map(([keyItemKey, keyItemVal], staticMappingKeyIndex) => {
-                                if (keyItemKey.includes(nerName)) {
-                                    return (
-                                        <div className='transform-rule-key-val-wrapper' key={[nerName, index, "key-val", staticMappingKeyIndex].join(",")}>
-                                            <Col md={5} key={[nerName, index, "key-col", staticMappingKeyIndex].join(",")}>
-                                                {keyItemVal === "Default" ? (
-                                                    <Form.Group >
-                                                        <Form.Label key={[nerName, index, "key-val-default", staticMappingKeyIndex].join(",")}>
-                                                            Default
-                                                        </Form.Label>
-                                                    </Form.Group>
-                                                ) : (<Form.Group >
-                                                    <Form.Control key={[nerName, index, "key", staticMappingKeyIndex].join(",")}
-                                                        as="textarea"
-                                                        value={keyItemVal}
-                                                        rows={1}
-                                                        disabled={!isEnabledEditing}
-                                                        onChange={(e) => handleUpdateStaticMappingKey(e, index, keyItemVal)}
-                                                    />
-                                                </Form.Group>)}
-                                            </Col>
-                                            as
-                                            {Object.entries(staticMappingValFields).map(([valItemKey, valItemVal], staticMappingValIndex) => {
-                                                if (valItemKey === keyItemKey) {
-                                                    return (
-                                                        <Col md={5} key={[nerName, index, "val-col", staticMappingValIndex].join(",")}>
-                                                            <Form.Group >
-                                                                <Form.Control key={[nerName, index, "val", staticMappingValIndex].join(",")}
-                                                                    as="textarea"
-                                                                    value={valItemVal}
-                                                                    rows={1}
-                                                                    disabled={!isEnabledEditing}
-                                                                    onChange={(e) => handleUpdateStaticMappingValue(e, index, keyItemVal)}
-                                                                />
-                                                            </Form.Group>
-                                                        </Col>
-                                                    );
-                                                }
-                                            })}
-                                        </div>
-                                    );}
-                                }
-                                )}
-                        <Button variant="primary" onClick={() => handleAddStaticMappingItem(nerName)} 
-                            hidden={!isEnabledEditing} key={[nerName, index, "key-val-button"].join(",")}>
-                            +
-                        </Button>   
-                        </div>) : ("")}
-                </div>))}
-
-            <Button variant="primary" onClick={handleAddStaticMappingItem} hidden={!isEnabledEditing}>
-                +
-            </Button>
+        <Row>
+            <Col md={3} >
+            <DropdownButton
+                id="dropdown-basic-button"
+                title={thisNerName}
+                onSelect={(eKey) => handleUpdateNerName(eKey)}
+            >
+                {Object.entries(transformItems).map(([nerName, transformLambda], index) => (
+                    <Dropdown.Item eventKey={nerName} key={nerName} >{nerName}</Dropdown.Item>
+                ))}
+            </DropdownButton>
+            </Col>
+            <Col md={3} >
+                <Form.Group >
+                <DropdownButton
+                    id="dropdown-basic-button"
+                    title={thisTransformName}
+                    onSelect={(eKey) => handleUpdateTransformItemLambdaName(eKey)}
+                    disabled={!isEnabledEditing}
+                >
+                    <Dropdown.Item eventKey="datetime" key="datetime" >datetime</Dropdown.Item>
+                    <Dropdown.Item eventKey="static_mapping" key="static_mapping" >static_mapping</Dropdown.Item>
+                </DropdownButton>
+            </Form.Group>
+            </Col>
+            <Col md="6">
+                <Form.Group as={Col} controlId="formNERName">
+                    <Form.Control
+                        value={thisTransformJsonValue}
+                        as="textarea"
+                        rows={5}
+                        disabled={!isEnabledEditing}
+                        isInvalid={!validateDatetime() || !validateStaticMappingJsonValue()}
+                        onChange={handleUpdateTransformValue}
+                    />
+                    {thisTransformName === "datetime" &&
+                    <Form.Control.Feedback type="invalid">
+                        Must be <i>strftime</i>-compliant.
+                        Reference: https://strftime.org
+                    </Form.Control.Feedback>}
+                    {thisTransformName === "static_mapping" &&
+                    <Form.Control.Feedback type="invalid">
+                        Must be a single-level json, e.g., {`{"US Dollar": "USD", "$": "USD"}`}
+                    </Form.Control.Feedback>}
+                </Form.Group>
+            </Col>
+        </Row>
+        <DropdownButton
+                id="dropdown-basic-button"
+                title="+"
+                onSelect={(eKey) => handleAddNewTransform(eKey)}
+                hidden={!isEnabledEditing}
+            >
+                {remainedNerTaskItemLabels.map((remainedNerTaskItemLabel, index) => (
+                    <Dropdown.Item eventKey={remainedNerTaskItemLabel} key={remainedNerTaskItemLabel} >
+                        {remainedNerTaskItemLabel}
+                    </Dropdown.Item>
+                ))}
+            </DropdownButton>
         </div>
     );
 };

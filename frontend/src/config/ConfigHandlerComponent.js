@@ -7,7 +7,7 @@ import { QuestionCircle } from 'react-bootstrap-icons';
 import ConfigHandlerTransformRuleComponent from './ConfigHandlerTransformRuleComponent';
 import "./css/Config.css";
 
-const ConfigHandlerComponent = ({selectedNerTaskLabel,
+const ConfigHandlerComponent = ({nerTaskItemLabels, selectedNerTaskLabel,
     nerIsInUseSet, setNerIsInUseSet
 }) => {
 
@@ -219,7 +219,8 @@ const ConfigHandlerComponent = ({selectedNerTaskLabel,
                  isSetupTransformItems={isSetupTransformItems}
                  setIsSetupTransformItems={setIsSetupTransformItems}
                  nerNames={nerNames}
-                 setNerNames={setNerNames}>
+                 setNerNames={setNerNames}
+                 nerTaskItemLabels={nerTaskItemLabels}>
             </ConfigHandlerTransformRuleComponent>
 
                 <Form.Group as={Col} controlId="preScripts">

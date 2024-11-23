@@ -149,7 +149,9 @@ const ConfigHandlerPage = () => {
         </Col>
         <Col xs={9}>
         {selectedNerTaskLabel !== "" ? ( 
-            <ConfigHandlerComponent selectedNerTaskLabel={selectedNerTaskLabel}
+            <ConfigHandlerComponent 
+            nerTaskItemLabels={nerTaskItemLabels}
+            selectedNerTaskLabel={selectedNerTaskLabel}
             nerIsInUseSet={nerIsInUseSet}
             setNerIsInUseSet={setNerIsInUseSet}></ConfigHandlerComponent>
         ) : (
