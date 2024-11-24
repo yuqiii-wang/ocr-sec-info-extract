@@ -9,6 +9,8 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
     nerNames, setNerNames, nerTaskItemLabels }) => {
 
     // static mapping key
+    const [thisNerNameDisplayColSize, setThisNerNameDisplayColSize] = useState(3);
+    const [thisLambdaNameDisplayColSize, setThisLambdaNameDisplayColSize] = useState(3);
     const [thisNerName, setThisNerName] = useState("");
     const [thisTransformName, setThisTransformName] = useState("");
     const [thisTransformJsonValue, setThisTransformJsonValue] = useState("");
@@ -21,6 +23,12 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
         }
 
         setThisNerName(nerNames[0]);
+        if (nerNames[0].length > 30) {
+            setThisNerNameDisplayColSize(4);
+        } else {
+            setThisNerNameDisplayColSize(3);
+        }
+
         setThisTransformName(transformItemLambdaNames[0]);
 
         let tmpTransformJsonValue = "";
@@ -41,6 +49,11 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
 
     const handleUpdateNerName = (eKeyNerName) => {
         setThisNerName(eKeyNerName);
+        if (eKeyNerName.length > 30) {
+            setThisNerNameDisplayColSize(4);
+        } else {
+            setThisNerNameDisplayColSize(3);
+        }
         Object.entries(transformItems[eKeyNerName]).map(([transformLambdaName, transformLambdaValue]) => {
             let tmpTransformJsonValue = "";
             if (transformLambdaName === "datetime") {
@@ -135,14 +148,23 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
         if (thisTransformName !== "static_mapping") {
             return true;
         }
-        const regex = /[\{\}]+/g;
-        return regex.test(thisTransformJsonValue);
+
+        let isValidTransformValue = false;
+        try {
+            JSON.parse(thisTransformJsonValue);
+            isValidTransformValue = true;
+        } catch (error) {
+            ;
+        } finally {
+            ;
+        }
+        return isValidTransformValue;
     };
 
     return (
         <div>
         <Row>
-            <Col md={3} >
+            <Col md={thisNerNameDisplayColSize} >
             <DropdownButton
                 id="dropdown-basic-button"
                 title={thisNerName}
@@ -153,7 +175,7 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
                 ))}
             </DropdownButton>
             </Col>
-            <Col md={3} >
+            <Col md={thisLambdaNameDisplayColSize} >
                 <Form.Group >
                 <DropdownButton
                     id="dropdown-basic-button"

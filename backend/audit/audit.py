@@ -2,8 +2,6 @@ import json, random
 from dateutil import parser as datetime_parser
 from backend.config import MSG_DATASET
 
-msg_dataset = json.load(open(MSG_DATASET, "r"))
-
 color_scheme = [
     "rgba(255, 185, 50, 0.8)",
     "rgba(255, 140, 0, 0.8)",
@@ -18,6 +16,7 @@ color_scheme = [
 ]
 
 def load_audit_by_time(start_time, end_time):
+    msg_dataset = json.load(open(MSG_DATASET, "r"))
     start_datetime = datetime_parser.parse(start_time)
     end_datetime = datetime_parser.parse(end_time)
     audit_result:dict[str, list] = {}

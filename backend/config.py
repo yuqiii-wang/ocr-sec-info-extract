@@ -1,9 +1,4 @@
 import os
-from backend.parser_dispatchers.ocr_parsers.bloomberg_bond_rules import parse_bloomberg_bond_ocr
-from backend.parser_dispatchers.ocr_parsers.bloomberg_mbs_rules import parse_bloomberg_mbs_ocr
-from backend.parser_dispatchers.text_parsers.unsettle_trade_rules import parse_unsettle_trade_msg
-from backend.parser_dispatchers.text_parsers.ytd_trade_extract_rules import parse_ytd_trade_extract_msg
-from backend.parser_dispatchers.ocr_parsers.cfest_bond_rules import parse_cfest_ocr
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCAL_INPUT_IMAGE_DIR=os.path.join(current_dir, "local_files", "input_images")
@@ -24,22 +19,6 @@ TEXT_LABEL_MAP = {
 }
 
 LABEL_TEXT_MAP = {v : k for k, v in TEXT_LABEL_MAP.items()}
-
-LABEL_PARSER_MAP = {
-    0: parse_bloomberg_bond_ocr,
-    1: parse_bloomberg_mbs_ocr,
-    2: parse_cfest_ocr,
-    3: parse_unsettle_trade_msg,
-    4: parse_ytd_trade_extract_msg,
-}
-
-LABEL_SCRIPT_MAP = {
-    0: parse_bloomberg_bond_ocr,
-    1: parse_bloomberg_mbs_ocr,
-    2: parse_cfest_ocr,
-    3: parse_unsettle_trade_msg,
-    4: parse_ytd_trade_extract_msg,
-}
 
 
 if not os.path.exists(LOCAL_INPUT_IMAGE_DIR):

@@ -12,7 +12,7 @@ import MergedNerJsonReferenceDetail from "./MergedNerJsonReferenceDetail";
 const ReferenceDetailComponent = () => {
     const { referenceImageResults, taskLabel, approvalTemplateId,
         isSolutionShowDone, referenceOCRJsonResults, referenceMergedNerJsonResults,
-        setReferenceShellScriptResults, referenceSrcTextResults,
+        setReferenceShellScriptResults, referenceSrcTextResults, referenceTextNerJsonResults,
         referenceCodeSepOffset, setIsOnInputShow, setReferenceMergedNerJsonResults,
         setIsSolutionConcludeDone } = useContext(GlobalAppContext);
 
@@ -74,6 +74,7 @@ const ReferenceDetailComponent = () => {
             const response = fetch("/process/convert", {
                 method: 'POST',
                 body: JSON.stringify({ "ocr_jsons": referenceOCRJsonResults,
+                                        "ner_jsons": referenceTextNerJsonResults,
                                         "task_label": taskLabel
                  }),
                 mode: "cors",
@@ -114,6 +115,10 @@ const ReferenceDetailComponent = () => {
             ;
         }
     };
+
+    const handleGenerateShellScripts = () => {
+        generateShellScripts(referenceMergedNerJsonResults);
+    }
 
     const generateShellScripts = (mergedNerJsons) => {
         if (mergedNerJsons === undefined) {
@@ -172,7 +177,8 @@ const ReferenceDetailComponent = () => {
                 {isShowMergedNerJsonResults && (<React.Fragment>
                 <p><span style={{fontWeight: "bold"}}>Merged NERs</span>:</p>
                     <MergedNerJsonReferenceDetail 
-                        referenceMergedNerJsonResults={referenceMergedNerJsonResults}>
+                        referenceMergedNerJsonResults={referenceMergedNerJsonResults}
+                        setReferenceMergedNerJsonResults={setReferenceMergedNerJsonResults}>
                     </MergedNerJsonReferenceDetail>
                     </React.Fragment>)}
                 <p><span style={{fontWeight: "bold"}}>Content</span>: </p>
@@ -212,17 +218,33 @@ const ReferenceDetailComponent = () => {
                 </div>
             </OverlayTrigger>
 
-            <OverlayTrigger placement="top" overlay={
-                <Tooltip id="button-tooltip">
-                    Convert OCR/parsed text results into shell scripts.
-                </Tooltip>
-            } >
-                <Button variant="primary" type="submit" className="reference-convert-btn"
-                    style={{ top: `${Math.max(8, 26.5 - referenceCodeSepOffset)}rem` }}
-                    onClick={handleConvert} disabled={!isSolutionShowDone || approvalTemplateId!==-1}>
-                    Convert
-                </Button>
-            </OverlayTrigger>
+            {
+                isShowMergedNerJsonResults ? (
+                <OverlayTrigger placement="top" overlay={
+                    <Tooltip id="button-tooltip">
+                        Generate shell scripts given the shown merged NER results.
+                    </Tooltip>
+                } >
+                    <Button variant="primary" type="submit" className="reference-convert-btn"
+                        style={{ top: `${Math.max(8, 26.5 - referenceCodeSepOffset)}rem` }}
+                        onClick={handleGenerateShellScripts} disabled={!isSolutionShowDone || approvalTemplateId!==-1}>
+                        Generate
+                    </Button>
+                </OverlayTrigger>) : (
+                <OverlayTrigger placement="top" overlay={
+                    <Tooltip id="button-tooltip">
+                        Convert OCR/parsed text results into shell scripts.
+                    </Tooltip>
+                } >
+                    <Button variant="primary" type="submit" className="reference-convert-btn"
+                        style={{ top: `${Math.max(8, 26.5 - referenceCodeSepOffset)}rem` }}
+                        onClick={handleConvert} disabled={!isSolutionShowDone || approvalTemplateId!==-1}>
+                        Convert
+                    </Button>
+                </OverlayTrigger>
+                )
+            }
+            
             <ApprovalModal show={isShowApprovalModal}
                         handleClose={() => setIsShowApprovalModal(false)}
             />

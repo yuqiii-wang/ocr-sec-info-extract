@@ -1,6 +1,8 @@
 from dateutil import parser
 from collections import defaultdict
-import copy
+import copy, json
+from backend.config import NER_CONFIG
+
 
 def _convert_to_standard_date(input_date_str, output_date_format:str='%Y-%m-%d'):
     try:
@@ -23,15 +25,25 @@ def _merge_ner_list_by_duplicate_keys(duplicate_keys:list[str],
                     grouped_dict[key_value].add((k, v))
 
     # Convert each set of tuples back to a dictionary format
-    result = {}
+    result:dict[str, dict[str, str]] = {}
     for duplicate_val in grouped_dict:
         result[duplicate_val] = {}
         for ner_key, ner_val in grouped_dict[duplicate_val]:
-            result[duplicate_val][ner_key] = ner_val
+            ner_existing_val = result[duplicate_val].get(ner_key, -1)
+            if ((ner_existing_val != -1) and (len(ner_existing_val)<len(ner_val))) or \
+            (ner_existing_val == -1):
+                result[duplicate_val][ner_key] = ner_val
         for duplicate_key in duplicate_keys:
             result[duplicate_val][duplicate_key] = duplicate_val
 
     return result
+
+def add_missing_ners_to_merged_ner_jsons(merged_ner_jsons:list[dict], task_label_ner_config:dict):
+    for groupby_key in merged_ner_jsons:
+        for defined_ner in task_label_ner_config:
+            if not defined_ner in merged_ner_jsons[groupby_key]:
+                merged_ner_jsons[groupby_key][defined_ner] = ""
+    return merged_ner_jsons
 
 def convert_to_merged_ner_jsons(shell_script_generation_config:dict, ner_jsons:list[dict]):
     duplicate_keys = shell_script_generation_config["duplicate_keys"]

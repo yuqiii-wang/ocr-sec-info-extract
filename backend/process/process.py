@@ -4,21 +4,24 @@ from flask import jsonify
 import os, io, zipfile, base64, time, json
 from pathlib import Path
 from logging import getLogger
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO, emit
 from backend.classifier.utils import store_ocr_text, store_msg_text
 from backend.audit.audit import load_audit_by_time
 from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
-                            LABEL_PARSER_MAP,
                             TEXT_LABEL_MAP,
                             NER_CONFIG,
                             TASK_SCRIPTS)
-from backend.process.utils import iterate_dict, parse_ocr_to_box_and_json
+from backend.process.utils import (iterate_dict, 
+                                   parse_ocr_to_box_and_json,
+                                   parse_text_query_to_json)
 from backend.OCREngine import OCREngine
 from backend.classifier.classifier import DT_Classifier, train_dt_model
 from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
 from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
-from backend.shell_script_generator.shell_script_generator import generate_shell_scripts, convert_to_merged_ner_jsons
+from backend.shell_script_generator.shell_script_generator import (generate_shell_scripts, 
+                                                    convert_to_merged_ner_jsons,
+                                                    add_missing_ners_to_merged_ner_jsons)
 from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
 ocr_engine = OCREngine()
@@ -40,20 +43,20 @@ def process_upload_file(file, fileUuid):
             "fileUuid": fileUuid,
             "filepath": file_path}
 
-def process_text_query(text_query: str):
+def process_text_query(app, text_query: str):
     label_func_pred = dt_classifier.predict(text_query)
-    proc_func = LABEL_PARSER_MAP[label_func_pred]
-    task_handler_name = LABEL_TEXT_MAP[label_func_pred]
-    ner_results, ner_pos_results = proc_func(text_query)
-    store_msg_text(text_query)
+    task_label = LABEL_TEXT_MAP[label_func_pred]
+    task_ner_details = app.config['NER_CONFIG'][task_label]
+    ner_results, ner_pos_results = parse_text_query_to_json(text_query, task_ner_details)
+    store_msg_text(text_query, task_label)
     approval_template_id = -1
     if (label_func_pred == 4):
         approval_template_id = 4
-    return {"ner_results": ner_results,
+    return jsonify({"ner_results": ner_results,
             "ner_pos": ner_pos_results,
             "msg": text_query,
-            "task_label": task_handler_name,
-            "approval_template_id": approval_template_id}
+            "task_label": task_label,
+            "approval_template_id": approval_template_id})
 
 def process_remove_file(filename:str):
     file_path = Path(LOCAL_INPUT_IMAGE_DIR, filename)
@@ -67,11 +70,10 @@ def process_remove_file(filename:str):
             "message": f"{filename} failed to get removed."
         })
 
-def load_and_store_ocr_results(filename:str, text_bounding_boxes:list[TextBoundingBox]):
+def load_ocr_results(text_bounding_boxes:list[TextBoundingBox]):
     all_text = ""
     for text_bounding_box in text_bounding_boxes:
         all_text += " " + text_bounding_box.text
-    store_ocr_text(filename, all_text)
     return all_text
 
 def process_ocr(app, filenames:list[str]):
@@ -85,11 +87,12 @@ def process_ocr(app, filenames:list[str]):
         file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
         text_bounding_boxes = ocr_engine.process_ocr(file_path)
         # text_bounding_boxes = imageSegByColor_engine.reseg_image_by_color(file_path, text_bounding_boxes)
-        trimmed_text = load_and_store_ocr_results(filename, text_bounding_boxes)
+        trimmed_text = load_ocr_results(text_bounding_boxes)
         label_func_pred = dt_classifier.predict(trimmed_text)
         if not label_func_pred in (0,1,2):
             label_func_pred = 2
         task_label = LABEL_TEXT_MAP[label_func_pred]
+        store_ocr_text(trimmed_text, filename, task_label)
         logger.info(f"Loaded task handler is {task_label}")
         task_ner_details = app.config['NER_CONFIG'][task_label]
         found_bounding_boxes, found_item_json = parse_ocr_to_box_and_json(text_bounding_boxes, task_ner_details)
@@ -119,7 +122,9 @@ def process_ocr(app, filenames:list[str]):
 
 def process_convert_to_merged_ner_jsons(app, ner_jsons, task_label):
     shell_script_generation_config = app.config['TASK_SCRIPTS'][task_label]
+    task_label_ner_config = app.config['NER_CONFIG'][task_label]
     merged_ner_jsons = convert_to_merged_ner_jsons(shell_script_generation_config, ner_jsons)
+    merged_ner_jsons = add_missing_ners_to_merged_ner_jsons(merged_ner_jsons, task_label_ner_config)
     return jsonify({
         "merged_ner_jsons": merged_ner_jsons
     })

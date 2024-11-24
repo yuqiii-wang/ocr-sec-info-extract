@@ -14,10 +14,10 @@ function GlobalAppContextManager({ children }) {
     const [isSolutionExecutionDone, setIsSolutionExecutionDone] = useState(false);
     const [referenceCodeSepOffset, setReferenceCodeSepOffset] = useState(0);
     const [referenceImageResults, setReferenceImageResults] = useState([]);
-    const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState("");
-    const [referenceTextNerJsonResults, setReferenceTextNerJsonResults] = useState("");
-    const [referenceTextNerPosResults, setReferenceTextNerPosResults] = useState("");
-    const [referenceMergedNerJsonResults, setReferenceMergedNerJsonResults] = useState({});
+    const [referenceOCRJsonResults, setReferenceOCRJsonResults] = useState([]);
+    const [referenceTextNerJsonResults, setReferenceTextNerJsonResults] = useState([]);
+    const [referenceTextNerPosResults, setReferenceTextNerPosResults] = useState([]);
+    const [referenceMergedNerJsonResults, setReferenceMergedNerJsonResults] = useState([]);
     const [referenceSrcTextResults, setReferenceSrcTextResults] = useState("");
     const [referenceShellScriptResults, setReferenceShellScriptResults] = useState([]);
     const [isOnInputShow, setIsOnInputShow] = useState(true);

@@ -10,6 +10,16 @@
     overflow-y: auto;
 }
 
+.reference-detail-merged-ner-container  {
+    display: flex; /* Use flexbox */
+    justify-content: start; /* Center horizontally */
+}
+
+.reference-detail-merged-ner-non-edit-container  {
+    display: flex; /* Use flexbox */
+    justify-content: space-between; /* Center horizontally */
+}
+
 .reference-detail  {
     display: flex;
     flex-direction: row;

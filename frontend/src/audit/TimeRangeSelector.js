@@ -52,7 +52,6 @@ const TimeRangeSelector = ({setAuditData, timeRange, setTimeRange}) => {
             startTime = new Date(customStart);
             endTime = new Date(customEnd);
         }
-        console.log(startTime);
         const startTimeStr = formatDatetime(startTime);
         const endTimeStr = formatDatetime(endTime);
         return [startTimeStr, endTimeStr];

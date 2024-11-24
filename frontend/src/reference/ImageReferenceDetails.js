@@ -26,7 +26,7 @@ const ImageReferenceDetails = () => {
                 onDelete={() => handleDeleteRow(referenceImageResults[index].name)} 
             />
         ));
-      
+
         return <div>{pairedItems}</div>;
       };
 

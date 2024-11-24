@@ -15,25 +15,12 @@ text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
 msg_dataset = json.load(open(MSG_DATASET, "r"))
 
 def text_to_dataset():
-    text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
     sample_data = []
     sample_labels = []
-    for text_filepath in text_filepaths:
-        _, text_filename = os.path.split(text_filepath)
-        label = TEXT_LABEL_MAP[text_filename.split(".")[0]]
-        uuid_to_concatenated_string_dict = defaultdict(str)
-        with open(text_filepath, "r") as filehandle:
-            for text_line in filehandle.read().split("\n"):
-                match = uuid_pattern.search(text_line)
-                if match:
-                    uuid = match.group(1)
-                    # Remove the UUID and any leading/trailing whitespace from the line.
-                    text = text_line.replace(uuid, '').strip()
-                    # Concatenate the text to the existing string for this UUID.
-                    uuid_to_concatenated_string_dict[uuid] += text + ' '
-            for uuid_key, sample_text in uuid_to_concatenated_string_dict.items():
-                sample_data.append(sample_text)
-                sample_labels.append(label)
+    for task_label in msg_dataset:
+        for each_done_task in msg_dataset[task_label]:
+            sample_data.append(each_done_task["content"])
+            sample_labels.append(TEXT_LABEL_MAP[task_label])
     return sample_data, sample_labels
 
 def split_word_by_caps(text:str):
@@ -64,20 +51,9 @@ def trim_text(text:str):
     trimmed_text = split_word_by_caps(text)
     return trimmed_text
 
-def store_msg_text(text:str):
+def store_msg_text(text:str, task_label:str):
     random_uuid = str(uuid.uuid4())
-    for text_filepath in text_filepaths:
-        if "unsettle" in text_filepath and "unsettle" in text.lower():
-            with open(text_filepath, "a") as filehandle:
-                filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
-            break
-        if "extract" in text_filepath and "extract" in text.lower():
-            with open(text_filepath, "a") as filehandle:
-                filehandle.write(random_uuid + "<SEP>" + text + "</SEP>\n")
-            break
-    dir, filename = os.path.split(text_filepath)
-    filename_main, ext = os.path.splitext(filename)
-    msg_dataset[filename_main].append({
+    msg_dataset[task_label].append({
         "uuid": random_uuid,
         "content": text,
         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -88,21 +64,10 @@ def store_msg_text(text:str):
         filehandle.write(msg_dataset_str)
 
 
-def store_ocr_text(filename:str, text:str):
-    filename_main = filename.split("__")[0]
-    filename_main = re.sub(r"[\d]*\.drawio", "", filename_main)
+def store_ocr_text(text:str, filename:str, task_label:str):
     filename_uuid = filename.split("__")[1]
-    text_filepath = None
-    for text_filepath in text_filepaths:
-        if filename_main in text_filepath:
-            break
-    if text_filepath is None:
-        return
-    sample_path = text_filepath
     trimmed_text = trim_text(text)
-    with open(sample_path, "a") as filehandle:
-        filehandle.write(filename_uuid + "<SEP>" + trimmed_text + "</SEP>\n")
-    msg_dataset[filename_main].append({
+    msg_dataset[task_label].append({
         "uuid": filename_uuid,
         "content": trimmed_text,
         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

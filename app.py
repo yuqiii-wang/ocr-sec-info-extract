@@ -74,7 +74,7 @@ def new_session():
 def ask():
     data = request.get_json()
     msg = data.get("msg")
-    resp = make_response(process_text_query(msg))
+    resp = make_response(process_text_query(app, msg))
     return resp
 
 @app.route('/process/file/remove', methods=['POST'])
