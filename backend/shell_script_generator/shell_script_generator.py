@@ -1,7 +1,6 @@
 from dateutil import parser
 from collections import defaultdict
 import copy, json
-from backend.config import NER_CONFIG
 
 
 def _convert_to_standard_date(input_date_str, output_date_format:str='%Y-%m-%d'):

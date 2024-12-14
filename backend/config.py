@@ -5,14 +5,10 @@ LOCAL_INPUT_IMAGE_DIR=os.path.join(current_dir, "local_files", "input_images")
 LOCAL_OCR_IMAGE_DIR=os.path.join(current_dir, "local_files", "ocr_images")
 LOCAL_OCR_TMP_IMAGE_DIR=os.path.join(current_dir, "local_files", "tmp_images")
 
-NER_CONFIG=os.path.join(current_dir, "classifier", "ner.json")
-TASK_SCRIPTS=os.path.join(current_dir, "shell_script_generator", "shell_script_templates.json")
-MSG_DATASET=os.path.join(current_dir, "classifier", "dataset", "dataset.json")
-
 
 TEXT_LABEL_MAP = {
-    "bond_bloomberg": 0,
-    "mbs_bloomberg":  1,
+    "bbg_bond": 0,
+    "bbg_mbs":  1,
     "cfest_bond":  2,
     "unsettle_trade":  3,
     "extract_ytd_trades":  4,

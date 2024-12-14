@@ -1,6 +1,4 @@
-import json, random
-from dateutil import parser as datetime_parser
-from backend.config import MSG_DATASET
+from backend.db.db_query_utils import merge_queried_dataset_datetime_by_query_task, query_dataset_by_time_range
 
 color_scheme = [
     "rgba(255, 185, 50, 0.8)",
@@ -16,23 +14,19 @@ color_scheme = [
 ]
 
 def load_audit_by_time(start_time, end_time):
-    msg_dataset = json.load(open(MSG_DATASET, "r"))
-    start_datetime = datetime_parser.parse(start_time)
-    end_datetime = datetime_parser.parse(end_time)
     audit_result:dict[str, list] = {}
     audit_result["datasets"] = []
-    for task_label_idx, task_label in enumerate(msg_dataset):
+    queried_results = query_dataset_by_time_range(start_time, end_time)
+    merged_queried_datetime_results = merge_queried_dataset_datetime_by_query_task(queried_results)
+    for task_label_idx, task_label in enumerate(merged_queried_datetime_results):
         audit_chart_item = {"label": task_label,
                             "data": [],
                             "backgroundColor": color_scheme[task_label_idx
                                                         % len(color_scheme)],
                             "pointRadius": 5}
-        for item in msg_dataset[task_label]:
-            if start_datetime < datetime_parser.parse(item["datetime"]) and \
-            end_datetime > datetime_parser.parse(item["datetime"]):
-                audit_chart_item["data"].append({
-                    "x": item["datetime"],
-                    "y": task_label})
+        for datetime_item in merged_queried_datetime_results[task_label]:
+            audit_chart_item["data"].append({
+                "x": datetime_item,
+                "y": task_label})
         audit_result["datasets"].append(audit_chart_item)
-    
     return audit_result

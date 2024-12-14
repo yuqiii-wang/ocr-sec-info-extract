@@ -3,7 +3,7 @@ from flask import Flask, session, request, jsonify, render_template, make_respon
 from flask_cors import CORS
 import os, flask, json
 from flask_socketio import SocketIO
-from backend.config import setup_logger, NER_CONFIG, TASK_SCRIPTS
+from backend.config import setup_logger
 from backend.process.process import (process_execute, 
                                      process_upload_file,
                                      process_ocr,
@@ -44,9 +44,6 @@ app.secret_key = 'your_secret_key_here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
 
-app.config['NER_CONFIG'] = json.load(open(NER_CONFIG, "r"))
-app.config['TASK_SCRIPTS'] = json.load(open(TASK_SCRIPTS, "r"))
-
 setup_logger(app)
 
 @app.after_request
@@ -74,7 +71,7 @@ def new_session():
 def ask():
     data = request.get_json()
     msg = data.get("msg")
-    resp = make_response(process_text_query(app, msg))
+    resp = make_response(process_text_query(msg))
     return resp
 
 @app.route('/process/file/remove', methods=['POST'])
@@ -107,7 +104,7 @@ def file_upload():
 def submit():
     data = request.get_json()
     filenames = data["filenames"]
-    resp = make_response(process_ocr(app, filenames))
+    resp = make_response(process_ocr(filenames))
     return resp
 
 @app.route('/process/execute', methods=['POST'])
@@ -127,7 +124,7 @@ def convert():
     ocr_jsons:list[dict] = data.get("ocr_jsons", [{}])
     ner_jsons:list[dict] = data.get("ner_jsons", [{}])
     ner_jsons = ocr_jsons + ner_jsons
-    resp = make_response(process_convert_to_merged_ner_jsons(app, ner_jsons, task_label))
+    resp = make_response(process_convert_to_merged_ner_jsons(ner_jsons, task_label))
     return resp
 
 @app.route('/process/generate', methods=['POST'])
@@ -135,7 +132,7 @@ def generate():
     data = request.get_json()
     task_label = data.get("task_label", None)
     ner_jsons:dict[str, dict] = data.get("ner_jsons", {"": {}})
-    resp = make_response(process_generate_shell_scripts(app, ner_jsons, task_label))
+    resp = make_response(process_generate_shell_scripts(ner_jsons, task_label))
     return resp
 
 @app.route('/audit/load/time', methods=['GET'])
@@ -165,13 +162,13 @@ def config_load_approval():
 def config_load_ner():
     ner_task = request.args.get('nertask', None)
     ner_item = request.args.get('neritem', None)
-    resp = make_response(load_config_ner_details(app, ner_task, ner_item))
+    resp = make_response(load_config_ner_details(ner_task, ner_item))
     return resp
 
 @app.route('/config/load/ner/task/scripts', methods=['GET'])
 def config_load_ner_task_scripts():
     ner_task = request.args.get('nertask', None)
-    resp = make_response(load_ner_task_scripts(app, ner_task))
+    resp = make_response(load_ner_task_scripts(ner_task))
     return resp
 
 @app.route('/config/save/ner/task/scripts', methods=['POST'])
@@ -179,7 +176,7 @@ def config_save_ner_task_scripts():
     data = request.get_json()
     ner_task = data.get('nertask', None)
     ner_task_script_configs = data.get('nertaskScriptConfigs', None)
-    resp = make_response(save_ner_task_scripts(app, ner_task, ner_task_script_configs))
+    resp = make_response(save_ner_task_scripts(ner_task, ner_task_script_configs))
     return resp
 
 @app.route('/config/save/ner', methods=['POST'])
@@ -188,7 +185,7 @@ def config_save_ner():
     ner_task = data.get("nerTask")
     ner_task_item = data.get("nerTaskItem")
     ner_task_item_details = json.loads(data.get("nerTaskItemDetails"))
-    resp = make_response(save_config_ner_details(app, ner_task, ner_task_item, ner_task_item_details))
+    resp = make_response(save_config_ner_details(ner_task, ner_task_item, ner_task_item_details))
     return resp
 
 @app.route('/config/train/classifier', methods=['POST'])

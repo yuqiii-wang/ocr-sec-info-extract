@@ -1,10 +1,12 @@
 import datetime
-import os, re, glob, sys, json
+import os, re, glob, json
 from collections import defaultdict
-from sklearn.metrics import confusion_matrix
-import uuid
-from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP, MSG_DATASET
 from datetime import datetime
+from sklearn.metrics import confusion_matrix
+from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP
+from datetime import datetime
+
+from backend.db.db_query_utils import insert_doc_to_dataset, query_dataset_by_time_range
 
 uuid_pattern = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
@@ -12,15 +14,15 @@ classifier_dir = os.path.dirname(os.path.abspath(__file__))
 classifier_dataset_dir = os.path.join(classifier_dir, "dataset")
 text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
 
-msg_dataset = json.load(open(MSG_DATASET, "r"))
-
 def text_to_dataset():
     sample_data = []
     sample_labels = []
-    for task_label in msg_dataset:
-        for each_done_task in msg_dataset[task_label]:
-            sample_data.append(each_done_task["content"])
-            sample_labels.append(TEXT_LABEL_MAP[task_label])
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    queried_results = query_dataset_by_time_range("1970-01-01 00:00:00", now, return_items=["query_task", "uuid", "datetime", "content"])
+
+    for item in queried_results:
+        sample_data.append(item["content"])
+        sample_labels.append(TEXT_LABEL_MAP[item["query_task"]])
     return sample_data, sample_labels
 
 def split_word_by_caps(text:str):
@@ -52,30 +54,13 @@ def trim_text(text:str):
     return trimmed_text
 
 def store_msg_text(text:str, task_label:str):
-    random_uuid = str(uuid.uuid4())
-    msg_dataset[task_label].append({
-        "uuid": random_uuid,
-        "content": text,
-        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "requester": ""
-    })
-    msg_dataset_str = json.dumps(msg_dataset)
-    with open(MSG_DATASET, "w") as filehandle:
-        filehandle.write(msg_dataset_str)
+    insert_doc_to_dataset(text, task_label)
 
 
 def store_ocr_text(text:str, filename:str, task_label:str):
     filename_uuid = filename.split("__")[1]
     trimmed_text = trim_text(text)
-    msg_dataset[task_label].append({
-        "uuid": filename_uuid,
-        "content": trimmed_text,
-        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "requester": ""
-    })
-    msg_dataset_str = json.dumps(msg_dataset)
-    with open(MSG_DATASET, "w") as filehandle:
-        filehandle.write(msg_dataset_str)
+    insert_doc_to_dataset(trimmed_text, task_label, filename_uuid)
 
 def compute_num_samples_per_label(sample_labels:list):
     num_samples_per_label_idx = {}
