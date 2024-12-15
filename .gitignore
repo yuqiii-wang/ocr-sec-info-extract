@@ -41,3 +41,4 @@ sentence-transformers*
 *.tar.gz
 backend/db/elasticsearch*
 backend/db/kibana*
+backend/db/nginx*

@@ -1,6 +1,7 @@
 import Container from "react-bootstrap/Container";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import React, { useState, useContext, useEffect, useRef, useCallback, } from "react";
+import React, { useState, useContext, } from "react";
+import AdminLogin from "./admin/index";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { GlobalAppContext } from "./GlobalAppContext";
@@ -13,6 +14,8 @@ function TopNavBar() {
         setIsOnConfigClassifierPage, setIsOnConfigNERPage,
         setIsOnConfigHandlerPage, setIsOnConfigApprovalPage
      } = useContext(GlobalAppContext);
+
+     const [isToShowAdminLogin, setIsToShowAdminLogin] = useState(false);
 
     const handleRefresh = () => {
         window.location.reload();
@@ -72,6 +75,10 @@ function TopNavBar() {
         }
     }
 
+    const handleToShowAdminLogin = () => {
+        setIsToShowAdminLogin(true);
+    }
+
     return (
         <Navbar expand="lg" className="bg-body-tertiary">
             <Container>
@@ -92,8 +99,14 @@ function TopNavBar() {
                         <Nav.Link href="" onClick={handleAuditClick}>Audit</Nav.Link>
                         <Nav.Link href="" onClick={handleAboutClick}>About</Nav.Link>
                     </Nav>
+                    <Nav>
+                        <Nav.Link onClick={handleToShowAdminLogin}>Admin</Nav.Link>
+                        <Nav.Link href="#home" onClick={handleRefresh} >Restart</Nav.Link>
+                    </Nav>
                 </Navbar.Collapse>
             </Container>
+            <AdminLogin isToShowAdminLogin={isToShowAdminLogin}
+                        setIsToShowAdminLogin={setIsToShowAdminLogin}></AdminLogin>
         </Navbar>
     );
 }

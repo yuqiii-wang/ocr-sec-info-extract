@@ -27,6 +27,7 @@ function GlobalAppContextManager({ children }) {
     const [approvalTemplateId, setApprovalTemplateId] = useState(-1);
     const [taskLabel, setTaskLabel] = useState("");
     const [inputError, setInputError] = useState("");
+    const [isAdminUserLoginSuccess, setIsAdminUserLoginSuccess] = useState(false);
     const [isOnLoadingExecutionLog, setIsOnLoadingExecutionLog] = useState(false);
     const [isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog] = useState(false);
     const [isJustStart, setIsJustStart] = useState(true);
@@ -62,6 +63,7 @@ function GlobalAppContextManager({ children }) {
                                         thisSessionUuid, setThisSessionUuid,
                                         taskLabel, setTaskLabel,
                                         inputError, setInputError,
+                                        isAdminUserLoginSuccess, setIsAdminUserLoginSuccess,
                                         isOnLoadingExecutionLog, setIsOnLoadingExecutionLog,
                                         isDoneLoadingExecutionLog, setIsDoneLoadingExecutionLog,
                                         isJustStart, setIsJustStart,

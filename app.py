@@ -1,10 +1,13 @@
 import threading
-from flask import Flask, session, request, jsonify, render_template, make_response
+from flask import Flask, render_template_string, session, request, jsonify, render_template, make_response, Response
 from flask_cors import CORS
-import os, flask, json
+import os, json
 from flask_socketio import SocketIO
 from backend.config import setup_logger
-from backend.process.process import (process_execute, 
+from flask_bcrypt import Bcrypt
+import requests
+from backend.process.admin import process_create_admin_user, process_login_admin_user
+from backend.process.process import (process_execute,
                                      process_upload_file,
                                      process_ocr,
                                      process_generate_shell_scripts,
@@ -26,7 +29,7 @@ from backend.process.process import (process_execute,
 app = Flask(__name__, 
             template_folder='frontend/build',
             static_folder='frontend/build/static')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                         r'/process/file/upload': {"origins": "http://localhost:3000"},
                         r'/process/file/remove': {"origins": "http://localhost:3000"},
@@ -38,11 +41,14 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                         r'/config/load/ner': {"origins": "http://localhost:3000"},
                         r'/config/save/ner': {"origins": "http://localhost:3000"},
                         r'/config/load/ner/task/scripts': {"origins": "http://localhost:3000"},
+                        r'/admin/login': {"origins": "http://localhost:3000"},
+                        r'/admin/create_user': {"origins": "http://localhost:3000"},
                     },
                     headers='Content-Type')
 app.secret_key = 'your_secret_key_here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 app_dir = os.path.dirname(os.path.abspath(__file__))
+bcrypt = Bcrypt(app)
 
 setup_logger(app)
 
@@ -54,6 +60,7 @@ def allow_cors(response):
 
 @app.route('/')
 @app.route('/#home')
+@app.route('/flask')
 def index():
     return render_template('index.html')
 
@@ -193,5 +200,75 @@ def config_train_classifier():
     resp = make_response(train_classifier())
     return resp
 
+@app.route('/admin/create_user', methods=['POST'])
+def create_admin_user():
+    data = request.get_json()
+    return process_create_admin_user(bcrypt, data)
+
+@app.route('/admin/login', methods=['POST'])
+def login_admin_user():
+    data = request.get_json()
+    return process_login_admin_user(bcrypt, data)
+
+# Route nginx proxy to render Kibana
+@app.route('/flask/kibana/<path:path>', methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+def render_kibana(path):
+    if path is None or path == "":
+        path = "app/home#"
+
+    kibana_url = f"http://127.0.0.1:5601/flask/kibana/{path}"
+
+    try:
+        headers = {key: value for key, value in request.headers if key != 'Host'}
+
+        # Ensure the `kbn-xsrf` header is included for non-GET requests
+        if request.method != 'GET' and 'kbn-xsrf' not in headers:
+            headers['kbn-xsrf'] = 'flask-proxy'
+
+        # Stream data to Kibana
+        # status_code = -1
+        # def generate_req_chunks():
+        #     with requests.request(
+        #         method=request.method,
+        #         url=kibana_url,
+        #         headers=headers,
+        #         data=request.stream,  # Stream the request data to the proxied server
+        #         cookies=request.cookies,
+        #         stream=True  # Enable streaming for the response
+        #     ) as resp:
+        #         status_code = resp.status_code
+        #         # Stream chunks back to the client
+        #         for chunk in resp.iter_content(chunk_size=8192):
+        #             if chunk:
+        #                 yield chunk
+        # combined_content = b""
+        # for chunk in generate_req_chunks():
+        #     combined_content += chunk
+
+        resp = requests.request(
+            method=request.method,
+            url=kibana_url,
+            headers=headers,
+            data=request.get_data(),
+            params=request.args,
+            cookies=request.cookies,
+            allow_redirects=False
+        )
+
+        # Build the Flask response from the proxied response
+        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+        response_headers = [(name, value) for (name, value) in resp.headers.items() if name.lower() not in excluded_headers]
+
+        response = Response(
+            resp.content,
+            resp.status_code,
+            response_headers
+        )
+        return response
+
+    except requests.exceptions.RequestException as e:
+        return f"Error communicating with Kibana: {e}", 502
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
