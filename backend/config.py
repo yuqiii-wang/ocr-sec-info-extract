@@ -9,9 +9,7 @@ LOCAL_OCR_TMP_IMAGE_DIR=os.path.join(current_dir, "local_files", "tmp_images")
 TEXT_LABEL_MAP = {
     "bbg_bond": 0,
     "bbg_mbs":  1,
-    "cfest_bond":  2,
-    "unsettle_trade":  3,
-    "extract_ytd_trades":  4,
+    "cfest_bond":  2
 }
 
 LABEL_TEXT_MAP = {v : k for k, v in TEXT_LABEL_MAP.items()}

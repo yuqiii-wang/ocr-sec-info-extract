@@ -110,7 +110,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
     }
 
     const validateNerItemNameInput = () => {
-        const regex = /[ ]/;
+        const regex = /[ \&]/;
         return !regex.test(nerItemName);
     };
     

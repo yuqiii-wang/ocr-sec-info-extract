@@ -21,6 +21,7 @@ def query_dataset_by_time_range(start_time:str, end_time:str, return_items=["que
                 }
             }
         },
+        "size": 9999,
         "_source": return_items
     }
     response = es.search(index=index_name, body=query_body)
@@ -82,6 +83,19 @@ def query_shell_config(query_task:str):
         return results[0]
     else:
         return []
+
+def get_all_query_tasks():
+    index_name = "query_task"
+    response = es.search(index=index_name)
+
+    results = []
+    for hit in response['hits']['hits']:
+        results.append({**hit['_source'],
+                        "id": hit["_id"]})
+    if len(results) > 0:
+        return results
+    else:
+        return []
     
 def update_ner_details(ner_detail:dict):
     index_name = "ner"
@@ -98,7 +112,7 @@ def update_shell_config(shell_config:dict):
     response = es.update(
         index=index_name,
         id=shell_config["id"],
-        doc={"shell_config": shell_config["shell_details"],
+        doc={"shell_details": shell_config["shell_details"],
                 "query_task": shell_config["query_task"]}
     )
     print(response)
