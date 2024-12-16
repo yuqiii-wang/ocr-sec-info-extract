@@ -18,6 +18,8 @@ const InputComponent = () => {
         setIsOnHomeAskPage, setReferenceOCRJsonResults,
         inputError, setInputError } = useContext(GlobalAppContext);
 
+    const [isDoneFileUpload, setIsDoneFileUpload] = useState(false);
+
     const handleSubmitRequest = async (event) => {
         setIsOnHomeAskPage(false);
         await processSubmitRequest(event);
@@ -89,7 +91,7 @@ const InputComponent = () => {
                     <CloseToRestartButton></CloseToRestartButton>
                 </div>
               
-                <FileUploadComponent />
+                <FileUploadComponent setIsDoneFileUpload={setIsDoneFileUpload}/>
               </Form>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop:"1%" }}>
               <OverlayTrigger placement="top" overlay={
@@ -97,7 +99,7 @@ const InputComponent = () => {
                         Submit this file/image for OCR parsing
                     </Tooltip>
                 } >
-                <Button variant="primary" type="submit" onClick={handleSubmitRequest} disabled={answerLoading}>
+                <Button variant="primary" type="submit" onClick={handleSubmitRequest} disabled={answerLoading||!isDoneFileUpload}>
                     {answerLoading ? (
                         <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
                         ) : (

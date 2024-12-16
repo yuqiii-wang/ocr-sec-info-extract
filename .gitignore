@@ -42,3 +42,6 @@ sentence-transformers*
 backend/db/elasticsearch*
 backend/db/kibana*
 backend/db/nginx*
+
+### dt model
+backend/classifier/dt_model.pkl

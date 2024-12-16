@@ -3,7 +3,7 @@ import { Form, Row, Col, Image, Modal, CloseButton } from 'react-bootstrap';
 import { GlobalAppContext } from "../GlobalAppContext";
 
 
-const FileUploadComponent = () => {
+const FileUploadComponent = ({setIsDoneFileUpload}) => {
     const { setThisFileUuids, setUploadedFilenames, 
         thisSessionUuid, setThisSessionUuid, setIsJustStart,
         inputError, setInputError, setIsSolutionShowDone
@@ -91,6 +91,8 @@ const FileUploadComponent = () => {
                 if (data == undefined) {
                     throw new Error("file upload response has no data json.");
                 }
+
+                setIsDoneFileUpload(true);
 
                 if (data["error"] != undefined) {
                     setInputError(data.error);
