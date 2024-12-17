@@ -1,10 +1,11 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { Form, Row, Col, Image, Modal, CloseButton } from 'react-bootstrap';
+import { Form, Row, Col, Image, Modal, CloseButton, Spinner } from 'react-bootstrap';
+import LoadingDots from '../others/LoadingDots';
 import { GlobalAppContext } from "../GlobalAppContext";
 
 
-const FileUploadComponent = ({setIsDoneFileUpload}) => {
-    const { setThisFileUuids, setUploadedFilenames, 
+const FileUploadComponent = ({setIsDoneFileUpload, isDoneFileUpload}) => {
+    const { setThisFileUuids, setUploadedFilenames, answerLoading,
         thisSessionUuid, setThisSessionUuid, setIsJustStart,
         inputError, setInputError, setIsSolutionShowDone
     } = useContext(GlobalAppContext);
@@ -24,6 +25,12 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
             );
         }
     };
+
+    useEffect(() => {
+        if (fileListData.length === 0) {
+            setIsDoneFileUpload(false);
+        }
+    }, [fileListData])
 
     const handleImageZoomIn = (event, imageSrc) => {
         const rect = event.target.getBoundingClientRect();
@@ -80,7 +87,7 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
                 })
             })
             .then(response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("file upload response is null.");
                 } else if (!response.ok) {
                     throw new Error('file upload response was not ok');
@@ -88,13 +95,13 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
                 return response.json();
             })
             .then(data => {
-                if (data == undefined) {
+                if (data === undefined) {
                     throw new Error("file upload response has no data json.");
                 }
 
                 setIsDoneFileUpload(true);
 
-                if (data["error"] != undefined) {
+                if (data["error"] !== undefined) {
                     setInputError(data.error);
                 }
             })
@@ -180,7 +187,7 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
             })
         })
         .then(response => {
-            if (response == undefined) {
+            if (response === undefined) {
                 throw new Error("file upload response is null.");
             } else if (!response.ok) {
                 throw new Error('file upload response was not ok');
@@ -188,10 +195,10 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
             return response.json();
         })
         .then(data => {
-            if (data == undefined) {
+            if (data === undefined) {
                 throw new Error("file upload response has no data json.");
             }
-            if (data["error"] != undefined) {
+            if (data["error"] !== undefined) {
                 setInputError(data.error);
             }
         })
@@ -229,7 +236,7 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
             </Form.Group>
 
             <Row className="mt-3" style={{ position: 'relative' }}>
-                {fileListData.length > 0 && fileListData.map((image, idx) => (
+                {fileListData.length > 0 && fileListData.map((image, idx) => (isDoneFileUpload && !answerLoading) ? (
                     <Col xs={1} key={idx}>
                         <div style={{ position: 'relative' }}>
                             <Image src={image.src} thumbnail
@@ -249,7 +256,39 @@ const FileUploadComponent = ({setIsDoneFileUpload}) => {
                             />
                         </div>
                     </Col>
+                ) : (
+                    <Col xs={1} key={idx}>
+                        <div style={{ position: 'relative' }}>
+                            <Image src={image.src} thumbnail
+                                onClick={(e) => handleImageZoomIn(e, image.src)}
+                                style={{
+                                    cursor: 'zoom-in',
+                                    transition: 'transform 0.3s ease',
+                                    display: 'inline-block',
+                                    opacity: 0.5
+                                }} />
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: "50%",
+                                        left: "50%",
+                                        transform: "translate(-50%, -50%)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        zIndex: 10,
+                                    }}
+                            >
+                            {!answerLoading && <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />}
+                            </div>
+                        </div>
+                    </Col>
                 ))}
+                {fileListData.length > 0 && !isDoneFileUpload && (
+                    <div style={{ position: "absolute", top: "50%", left: "50%", }}>
+                        <LoadingDots prefixText="File Upload in progress,"></LoadingDots>
+                </div>
+                )}
             </Row>
 
             {!fileListData.length && (

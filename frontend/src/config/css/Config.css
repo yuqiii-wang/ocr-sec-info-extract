@@ -3,6 +3,11 @@
     justify-content: space-between; /* items evenly distributed (in row) */
 }
 
+.flex-container-end {
+    display: flex;
+    justify-content: end; /* items evenly distributed (in row) */
+}
+
 .ner-refresh-btn:hover {
     cursor: pointer;
 }
@@ -61,8 +66,8 @@
 
 .ner-regex-btn-container {
     display: flex; /* Use flexbox */
-    justify-content: end; /* Center horizontally */
-    align-items: end; /* Center vertically */
+    justify-content: end; /* End horizontally */
+    align-items: end; /* End vertically */
 }
 
 .tooltip-content {
@@ -72,8 +77,8 @@
 
 .ner-script-edit-btn-container {
     display: flex; /* Use flexbox */
-    justify-content: end; /* Center horizontally */
-    align-items: end; /* Center vertically */
+    justify-content: end; /* End horizontally */
+    align-items: end; /* End vertically */
 }
 
 .transform-rule-wrapper {

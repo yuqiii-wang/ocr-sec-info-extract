@@ -4,12 +4,6 @@ import "./css/Config.css";
 
 const ConfigClassifierDynamicExampleComponent = () => {
 
-    const [trainingLabels, setTrainingLabels] = useState([]);
-    const [trainingResults, setTrainingResults] = useState("");
-    const [isOnClassifierTraining, setIsOnClassifierTraining] = useState(false);
-    const [loadConfigClassifierError, setLoadConfigClassifierError] = useState([]);
-
-
   return (
     <Container fluid>
       <Row className="mt-3" style={{ position: 'relative' }}>

@@ -6,21 +6,23 @@ from sklearn.metrics import confusion_matrix
 from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP
 from datetime import datetime
 
-from backend.db.db_query_utils import insert_doc_to_dataset, query_dataset_by_time_range
+from backend.db.db_query_utils import insert_doc_to_dataset, query_dataset_by_time_range, insert_image_to_store
 
 uuid_pattern = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
-classifier_dir = os.path.dirname(os.path.abspath(__file__))
-classifier_dataset_dir = os.path.join(classifier_dir, "dataset")
-text_filepaths = glob.glob(os.path.join(classifier_dataset_dir, "*.txt"))
 
-def text_to_dataset():
+def text_to_dataset(training_labels:list[str]):
+    training_labels = set(training_labels)
     sample_data = []
     sample_labels = []
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     queried_results = query_dataset_by_time_range("1970-01-01 00:00:00", now, return_items=["query_task", "uuid", "datetime", "content"])
 
     for item in queried_results:
+        if (TEXT_LABEL_MAP.get(item["query_task"]) is None):
+            continue
+        if (not item["query_task"] in training_labels):
+            continue
         sample_data.append(item["content"])
         sample_labels.append(TEXT_LABEL_MAP[item["query_task"]])
     return sample_data, sample_labels
@@ -57,10 +59,12 @@ def store_msg_text(text:str, task_label:str):
     insert_doc_to_dataset(text, task_label)
 
 
-def store_ocr_text(text:str, filename:str, task_label:str):
+def store_ocr_text_and_image(text:str, filename:str, task_label:str, file_idx:int):
     filename_uuid = filename.split("__")[1]
     trimmed_text = trim_text(text)
-    insert_doc_to_dataset(trimmed_text, task_label, filename_uuid)
+    insert_doc_to_dataset(trimmed_text, task_label, filename_uuid, file_idx)
+    insert_image_to_store(filename, task_label, filename_uuid, file_idx)
+
 
 def compute_num_samples_per_label(sample_labels:list):
     num_samples_per_label_idx = {}

@@ -10,7 +10,7 @@ import './css/Input.css';
 
 const InputComponent = () => {
 
-    const { answerLoading, isMainAskDone, setAnswerLoading,
+    const { answerLoading, setAnswerLoading,
         referenceCodeSepOffset, thisFileUuids, uploadedFilenames,
         setApprovalTemplateId, setThisFileUuids,  
         setIsMainAskDone, isOnInputShow, setUploadedFilenames,
@@ -42,7 +42,7 @@ const InputComponent = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("file upload response is null.");
                 } else if (!response.ok) {
                     throw new Error('file upload response was not ok.');
@@ -50,7 +50,7 @@ const InputComponent = () => {
                 return response.json();
             })
             .then( async (data) => {
-                if (data.error != undefined) {
+                if (data.error !== undefined) {
                     setInputError(data.error);
                 } else if (data.zip_file !== null) {
                     const referenceResults = data;
@@ -66,7 +66,7 @@ const InputComponent = () => {
             })
             .catch((postErr) => {
             // Handle error response
-            if (postErr == "") {
+            if (postErr === "") {
                 postErr = "Image Process Error.";
             }
             setInputError(postErr);
@@ -76,8 +76,6 @@ const InputComponent = () => {
             setInputError(error);
         } finally {
             setIsMainAskDone(true);
-            setThisFileUuids([]);
-            setUploadedFilenames([]);
         }
   };
 
@@ -91,7 +89,8 @@ const InputComponent = () => {
                     <CloseToRestartButton></CloseToRestartButton>
                 </div>
               
-                <FileUploadComponent setIsDoneFileUpload={setIsDoneFileUpload}/>
+                <FileUploadComponent setIsDoneFileUpload={setIsDoneFileUpload}
+                                    isDoneFileUpload={isDoneFileUpload}/>
               </Form>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop:"1%" }}>
               <OverlayTrigger placement="top" overlay={

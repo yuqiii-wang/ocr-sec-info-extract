@@ -46,7 +46,7 @@ CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
                     },
                     headers='Content-Type')
 app.secret_key = 'your_secret_key_here'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 app_dir = os.path.dirname(os.path.abspath(__file__))
 bcrypt = Bcrypt(app)
 
@@ -111,16 +111,17 @@ def file_upload():
 def submit():
     data = request.get_json()
     filenames = data["filenames"]
-    resp = make_response(process_ocr(filenames))
+    task_label = data.get("taskLabel", None)
+    resp_content = None
+    resp_content = process_ocr(filenames, resp_content, socketio, task_label)
+    resp = make_response(resp_content)
     return resp
 
 @app.route('/process/execute', methods=['POST'])
 def execute():
     data = request.get_json()
     shell_scripts = data.get("shell_scripts")
-    websocket_thread = threading.Thread(target=process_execute, args=(shell_scripts, socketio,))
-    websocket_thread.start()
-    websocket_thread.join()
+    process_execute(shell_scripts, socketio)
     resp = make_response(jsonify({"message": "ok"}))
     return resp
 
@@ -197,7 +198,9 @@ def config_save_ner():
 
 @app.route('/config/train/classifier', methods=['POST'])
 def config_train_classifier():
-    resp = make_response(train_classifier())
+    data = request.get_json()
+    training_labels = data["trainingLabels"]
+    resp = make_response(train_classifier(training_labels))
     return resp
 
 @app.route('/admin/create_user', methods=['POST'])
@@ -271,4 +274,4 @@ def render_kibana(path):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    socketio.run(app, debug=True, host="0.0.0.0", port=5000)

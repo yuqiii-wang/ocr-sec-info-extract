@@ -22,7 +22,7 @@ const AuditChartByTimeCategory = () => {
     const [auditData, setAuditData] = useState(null);
     const [axisTimeUnit, setXAxisTimeUnit] = useState('hour');
 
-    const y_labels = ['', 'bond_bloomberg', 'cfest_bond', 'mbs_bloomberg', 'extract_ytd_trades', 'unsettle_trade', ''];
+    const y_labels = ['', 'bbg_bond', 'cfest_bond', 'bbg_mbs', ''];
 
     useEffect(() => {
         if (timeRange === 'Last 12 hours' || timeRange === 'Last 1 day' || timeRange === 'Last 3 days') {

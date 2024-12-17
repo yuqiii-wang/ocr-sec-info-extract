@@ -86,7 +86,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config training response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config training response was not ok.');
@@ -98,7 +98,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
             });

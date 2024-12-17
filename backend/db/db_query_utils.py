@@ -1,6 +1,10 @@
 from elasticsearch import Elasticsearch
 from datetime import datetime, timedelta
-import uuid
+import os, uuid, base64
+from backend.config import (LABEL_TEXT_MAP,
+                            LOCAL_INPUT_IMAGE_DIR,
+                            TEXT_LABEL_MAP,
+                            )
 
 # Connect to Elasticsearch
 es = Elasticsearch("http://localhost:9200")
@@ -117,14 +121,31 @@ def update_shell_config(shell_config:dict):
     )
     print(response)
 
-def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4())):
+def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     INDEX_NAME = "dataset"
     doc = {
         "query_task": query_task,
         "uuid": uuid,
         "content": content,
         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "in_sample_seq_id": file_idx,
         "requester": ""
+    }
+    response = es.index(index=INDEX_NAME, document=doc)
+    print("Document indexed:", response)
+
+def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
+    file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
+    with open(file_path, "rb") as img_file:
+        image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
+    while len(image_base64) % 4 != 0:
+        image_base64 += "="
+    INDEX_NAME = "image_store"
+    doc = {
+        "query_task": query_task,
+        "uuid": uuid,
+        "image_base64": image_base64,
+        "in_sample_seq_id": file_idx,
     }
     response = es.index(index=INDEX_NAME, document=doc)
     print("Document indexed:", response)

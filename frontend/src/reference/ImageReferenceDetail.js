@@ -15,7 +15,7 @@ const ImageReferenceDetail = ({image, ocr_json, onDelete}) => {
                 <Card.Img className='reference-detail' src={image.src} />
             </Col>
             <Col md={4}>
-                {ocr_json != "" 
+                {ocr_json !== "" 
                     ? (<pre>{ocr_json}</pre>)
                     : ("")}
             </Col>

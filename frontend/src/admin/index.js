@@ -28,7 +28,7 @@ const AdminLogin = ({ isToShowAdminLogin, setIsToShowAdminLogin }) => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("response is undefined");
                 } else if (!response.ok) {
                     throw new Error('response not ok');

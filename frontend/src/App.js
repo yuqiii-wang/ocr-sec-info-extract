@@ -37,7 +37,7 @@ function App() {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config loading response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config loading response was not ok.');
@@ -49,7 +49,7 @@ function App() {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "New session error.";
                 }
             });

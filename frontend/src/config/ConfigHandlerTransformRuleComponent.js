@@ -106,13 +106,13 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
         if (thisTransformName === "datetime") {
             isValidTransformValue = validateDatetime();
             if (isValidTransformValue) {
-                tmpTransformItems[thisNerName][thisTransformName] = thisTransformJsonValue;
+                tmpTransformItems[thisNerName][thisTransformName] = e.target.value;
             }
         } else if (thisTransformName === "static_mapping") {
             try {
                 isValidTransformValue = validateStaticMappingJsonValue();
                 if (isValidTransformValue) {
-                    tmpTransformItems[thisNerName][thisTransformName] = JSON.parse(thisTransformJsonValue);
+                    tmpTransformItems[thisNerName][thisTransformName] = JSON.parse(e.target.value);
                 }
             } catch (error) {
                 ;
@@ -189,7 +189,7 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
             </Form.Group>
             </Col>
             <Col md="6">
-                <Form.Group as={Col} controlId="formNERName">
+                <Form.Group as={Col} controlId="thisTransformJsonValue">
                     <Form.Control
                         value={thisTransformJsonValue}
                         as="textarea"

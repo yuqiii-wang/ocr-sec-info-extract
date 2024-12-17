@@ -1,5 +1,6 @@
 import React, { useContext, } from "react";
-import { Container, Spinner, } from "react-bootstrap";
+import { Container, } from "react-bootstrap";
+import ProgressBarComponent from "../others/LoadingProgressBar";
 import TextAsk from "../input/TextAsk";
 import ReferenceDetailComponent from "./ReferenceDetail";
 import LogReferenceDetail from './LogReferenceDetail';
@@ -17,13 +18,7 @@ const ReferenceComponent = () => {
         <Container className="image-reference-container border rounded"
         style={{ height: `${Math.max(8, 28 - referenceCodeSepOffset)}rem` }}>
             {answerLoading ? (
-                <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                />
+                <ProgressBarComponent subscribedTopic="ocr_progress"></ProgressBarComponent>
             ) : isOnHomeAskPage ? (
                 <TextAsk />
             ) : (isOnLoadingExecutionLog || isDoneLoadingExecutionLog) ? (

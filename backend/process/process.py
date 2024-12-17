@@ -5,7 +5,7 @@ import os, io, zipfile, base64, time, json
 from pathlib import Path
 from logging import getLogger
 from flask_socketio import SocketIO, emit
-from backend.classifier.utils import store_ocr_text, store_msg_text
+from backend.classifier.utils import store_ocr_text_and_image, store_msg_text
 from backend.audit.audit import load_audit_by_time
 from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
@@ -38,6 +38,7 @@ def process_upload_file(file, fileUuid):
     # Optionally, you can save the file to a directory
     file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, file.filename)
     file.save(file_path)
+    time.sleep(0.1)
 
     return {"filename": file.filename,
             "fileUuid": fileUuid,
@@ -76,29 +77,29 @@ def load_ocr_results(text_bounding_boxes:list[TextBoundingBox]):
         all_text += " " + text_bounding_box.text
     return all_text
 
-def process_ocr(filenames:list[str]):
+def process_ocr(filenames:list[str], resp_content, socketio:SocketIO, task_label=None):
 
     found_item_jsons = []
     image_output_paths = []
 
-    task_label = ""
-
-    for filename in filenames:
+    for file_idx, filename in enumerate(filenames):
         file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
         text_bounding_boxes = ocr_engine.process_ocr(file_path)
         # text_bounding_boxes = imageSegByColor_engine.reseg_image_by_color(file_path, text_bounding_boxes)
         trimmed_text = load_ocr_results(text_bounding_boxes)
-        label_func_pred = dt_classifier.predict(trimmed_text)
-        if not label_func_pred in (0,1,2):
-            label_func_pred = 2
-        task_label = LABEL_TEXT_MAP[label_func_pred]
-        store_ocr_text(trimmed_text, filename, task_label)
+        if (task_label is None or task_label == ""):
+            label_func_pred = dt_classifier.predict(trimmed_text)
+            task_label = LABEL_TEXT_MAP[label_func_pred]
+        store_ocr_text_and_image(trimmed_text, filename, task_label, file_idx)
         logger.info(f"Loaded task handler is {task_label}")
         task_ner_details = query_ner_details(task_label)
         found_bounding_boxes, found_item_json = parse_ocr_to_box_and_json(text_bounding_boxes, task_ner_details["ners"])
         image_output_path = ocr_engine.draw_ocr(filename, found_bounding_boxes)
         found_item_jsons.append(found_item_json)
         image_output_paths.append(image_output_path)
+
+        progress = int((file_idx+1 / len(filenames)) * 100)
+        socketio.emit('ocr_progress', {'progress': progress, 'index':file_idx+1, 'total': len(filenames)})
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zip_file:
@@ -118,7 +119,10 @@ def process_ocr(filenames:list[str]):
         "solution_reference": found_item_jsons,
         "zip_file": encoded_zip
     }
-    return jsonify(response_data)
+
+    socketio.emit('ocr_progress', {'progress': 100, "status": "completed"})
+    resp_content = jsonify(response_data)
+    return resp_content
 
 def process_convert_to_merged_ner_jsons(ner_jsons, task_label):
     shell_script_generation_config = query_shell_config(task_label)
@@ -194,8 +198,8 @@ def save_config_ner_details(ner_task:str, ner_item:str, new_ner_detail:dict):
     update_ner_details(task_ner_details)
     return jsonify({"message": "ok"})
 
-def train_classifier():
-    perf_metrics = train_dt_model()
+def train_classifier(training_labels:list):
+    perf_metrics = train_dt_model(training_labels)
     return jsonify(perf_metrics)
 
 def load_ner_task_scripts(ner_task):

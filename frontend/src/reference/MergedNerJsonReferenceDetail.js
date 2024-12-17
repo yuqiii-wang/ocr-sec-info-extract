@@ -19,10 +19,6 @@ const MergedNerJsonReferenceDetail = ({ referenceMergedNerJsonResults, setRefere
         setReferenceMergedNerJsonResultText(tmpReferenceMergedNerJsonResultText);
     }, [referenceMergedNerJsonResults]);
 
-    const handleDoubleClick = () => {
-        setIsEditing(true);
-    };
-
     const toggleIsEditing = () => {
         setIsEditing(!isEditing);
     }
@@ -52,7 +48,6 @@ const MergedNerJsonReferenceDetail = ({ referenceMergedNerJsonResults, setRefere
                 <Container
                     className="p-3 border rounded"
                     style={{ "width": "150%" }}
-                    onDoubleClick={handleDoubleClick}
                     onMouseEnter={(e) => {
                         if (!isEditing) setIsOnHoveringText(true);
                     }}

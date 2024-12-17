@@ -36,17 +36,14 @@ const TimeRangeSelector = ({setAuditData, timeRange, setTimeRange}) => {
     const computeStartEndSearchTime = () => {
         let endTime = new Date(); // now
         let startTime = new Date(); // now
-        if (!isCustom) {
-            if (timeRange === "Last 12 hours") {
-                startTime = new Date(endTime.getTime() - 12 * 60 * 60 * 1000);
-            } else if (timeRange === "Last 1 day") {
+        if (!isCustom) {if (timeRange === "Last 1 day") {
                 startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
-            } else if (timeRange === "Last 3 days") {
-                startTime = new Date(endTime.getTime() - 3 * 24 * 60 * 60 * 1000);
             } else if (timeRange === "Last 7 days") {
                 startTime = new Date(endTime.getTime() - 7 * 24 * 60 * 60 * 1000);
             } else if (timeRange === "Last 1 month") {
                 startTime = new Date(endTime.getTime() - 30 * 24 * 60 * 60 * 1000);
+            } else if (timeRange === "Last 3 months") {
+                startTime = new Date(endTime.getTime() - 3 * 30 * 24 * 60 * 60 * 1000);
             } 
         } else {
             startTime = new Date(customStart);
@@ -73,7 +70,7 @@ const TimeRangeSelector = ({setAuditData, timeRange, setTimeRange}) => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config training response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config training response was not ok.');
@@ -85,7 +82,7 @@ const TimeRangeSelector = ({setAuditData, timeRange, setTimeRange}) => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
             });
@@ -106,11 +103,10 @@ const TimeRangeSelector = ({setAuditData, timeRange, setTimeRange}) => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    <Dropdown.Item eventKey="Last 12 hours">Last 12 hours</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 1 day">Last 1 day</Dropdown.Item>
-                    <Dropdown.Item eventKey="Last 3 days">Last 3 days</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 7 days">Last 7 days</Dropdown.Item>
                     <Dropdown.Item eventKey="Last 1 month">Last 1 month</Dropdown.Item>
+                    <Dropdown.Item eventKey="Last 3 months">Last 3 months</Dropdown.Item>
                     <Dropdown.Item eventKey="Custom">Custom</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>

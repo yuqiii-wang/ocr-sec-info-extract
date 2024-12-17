@@ -8,6 +8,7 @@ import os
 from backend.classifier.utils import (text_to_dataset,
                                       compute_num_samples_per_label,
                                       compute_accuracy_per_label)
+from backend.config import TEXT_LABEL_MAP, LABEL_TEXT_MAP
 
 
 dt_model_file = 'dt_model.pkl'
@@ -31,8 +32,8 @@ class DT_Classifier:
             tfidf_dt_clf = pickle.load(file)
         return tfidf_dt_clf
 
-def train_dt_model():
-    sample_data, sample_labels = text_to_dataset()
+def train_dt_model(training_labels:list=[label for label in TEXT_LABEL_MAP.keys()]):
+    sample_data, sample_labels = text_to_dataset(training_labels)
 
     tfidf_dt_clf = make_pipeline(TfidfVectorizer(), DecisionTreeClassifier())
     X_train, X_test, y_train, y_test = train_test_split(sample_data, sample_labels, test_size=0.3, random_state=42)

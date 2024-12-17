@@ -34,7 +34,7 @@ const CodeDetailComponent = ({ code }) => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("ocr json conversion response is null.");
                 } else if (!response.ok) {
                     throw new Error('ocr json conversion response was not ok.');
@@ -42,7 +42,7 @@ const CodeDetailComponent = ({ code }) => {
                 return response.json();
             })
             .then( async (data) => {
-                if (data.error != undefined) {
+                if (data.error !== undefined) {
                     setExecuteError(data.error);
                 } else {
                     setIsOnLoadingExecutionLog(false);
@@ -50,7 +50,7 @@ const CodeDetailComponent = ({ code }) => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
                 setExecuteError(postErr);

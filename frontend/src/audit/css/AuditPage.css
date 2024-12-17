@@ -18,6 +18,6 @@
 
 .audit-time-container {
     display: flex; /* Use flexbox */
-    justify-content: end; /* Center horizontally */
+    justify-content: end; /* End horizontally */
     align-items: center; /* Center vertically */
 }

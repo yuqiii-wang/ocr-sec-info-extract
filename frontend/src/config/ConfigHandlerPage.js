@@ -34,7 +34,7 @@ const ConfigHandlerPage = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config loading response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config loading response was not ok.');
@@ -51,7 +51,7 @@ const ConfigHandlerPage = () => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Classifier Process Error.";
                 }
                 setLoadConfigClassifierError(postErr);
@@ -75,7 +75,7 @@ const ConfigHandlerPage = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config training response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config training response was not ok.');
@@ -87,7 +87,7 @@ const ConfigHandlerPage = () => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
                 setLoadConfigClassifierError(postErr);
@@ -137,7 +137,7 @@ const ConfigHandlerPage = () => {
             >
             {nerTask}
             </li>
-          {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel == nerTask && (
+          {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel === nerTask && (
                 <ul key={nerTaskItem} className={`link-style-ticked-sublist ${isSubListExpanded ? 'expanded' : ''}`} >
                     <Check size={18} color="blue" key={nerTaskItem} hidden={!nerIsInUseSet.has(nerTaskItem)}></Check>
                 {nerTaskItem}

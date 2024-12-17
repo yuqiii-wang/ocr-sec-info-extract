@@ -20,6 +20,9 @@ index_settings = {
                 "type": "date",
                 "format": "yyyy-MM-dd HH:mm:ss"
             },
+            "is_enabled": {
+                "type": "boolean",
+            },
             "is_approval_required": {
                 "type": "boolean",
             },
@@ -41,16 +44,19 @@ docs = [{
     "query_task": "bbg_bond",
     "label": 0,
     "datetime_created_at": "2024-12-01 00:00:00",
+    "is_enabled": True,
     "is_approval_required": False
 },{
     "query_task": "bbg_mbs",
     "label": 1,
     "datetime_created_at": "2024-12-01 00:00:00",
+    "is_enabled": True,
     "is_approval_required": False
 },{
     "query_task": "cfest_bond",
     "label": 2,
     "datetime_created_at": "2024-12-01 00:00:00",
+    "is_enabled": True,
     "is_approval_required": False
 }]
 

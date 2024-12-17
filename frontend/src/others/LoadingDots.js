@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './css/LoadingDots.css'; // Import the CSS for styling
 
-const LoadingDots = () => {
+const LoadingDots = ({prefixText=""}) => {
   const [dots, setDots] = useState('');
 
   useEffect(() => {
@@ -13,7 +13,7 @@ const LoadingDots = () => {
 
   return (
     <div className="loading-dots">
-      Loading{dots}
+      {prefixText} Loading{dots}
     </div>
   );
 };

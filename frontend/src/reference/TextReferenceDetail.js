@@ -20,12 +20,12 @@ const TextReferenceDetail = ({onDelete}) => {
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}>
             <Col md={7}>
-                {referenceSrcTextResults != "" 
+                {referenceSrcTextResults !== "" 
                     ? (<TextReferenceHighlights text={referenceSrcTextResults} highlights={referenceTextNerPosResults} />)
                     : ("")}
             </Col>
             <Col md={4}>
-                {localReferenceTextNerJsonResults != "" 
+                {localReferenceTextNerJsonResults !== "" 
                     ? (<pre>{localReferenceTextNerJsonResults}</pre>)
                     : (<p>Empty results</p>)}
             </Col>

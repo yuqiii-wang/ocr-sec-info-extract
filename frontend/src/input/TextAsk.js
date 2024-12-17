@@ -33,7 +33,7 @@ const TextAsk = () => {
                 body: JSON.stringify({ "msg": inputValue }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("file upload response is null.");
                 } else if (!response.ok) {
                     throw new Error('file upload response was not ok.');

@@ -29,7 +29,7 @@ const ApprovalModal = ({ show, handleClose }) => {
                     }),
                 })
                 .then(response => {
-                    if (response == undefined) {
+                    if (response === undefined) {
                         throw new Error("Approval config loading response is null.");
                     } else if (!response.ok) {
                         throw new Error('Approval config loading response was not ok.');
@@ -44,7 +44,7 @@ const ApprovalModal = ({ show, handleClose }) => {
                 })
                 .catch((postErr) => {
                     // Handle error response
-                    if (postErr == "") {
+                    if (postErr === "") {
                         postErr = "Approval error.";
                     }
                 });

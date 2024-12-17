@@ -36,7 +36,7 @@ const ConfigNERPage = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config loading response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config loading response was not ok.');
@@ -53,7 +53,7 @@ const ConfigNERPage = () => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Classifier Process Error.";
                 }
                 setLoadConfigClassifierError(postErr);
@@ -77,7 +77,7 @@ const ConfigNERPage = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config training response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config training response was not ok.');
@@ -91,7 +91,7 @@ const ConfigNERPage = () => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
                 setLoadConfigClassifierError(postErr);
@@ -128,7 +128,7 @@ const ConfigNERPage = () => {
                 }),
             })
             .then( response => {
-                if (response == undefined) {
+                if (response === undefined) {
                     throw new Error("classifier config training response is null.");
                 } else if (!response.ok) {
                     throw new Error('classifier config training response was not ok.');
@@ -140,7 +140,7 @@ const ConfigNERPage = () => {
             })
             .catch((postErr) => {
                 // Handle error response
-                if (postErr == "") {
+                if (postErr === "") {
                     postErr = "Image Process Error.";
                 }
                 setLoadConfigClassifierError(postErr);
@@ -179,12 +179,12 @@ const ConfigNERPage = () => {
             >
             {nerTask}
             </li>
-          {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel == nerTask && (
+          {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel === nerTask && (
                 <ul key={nerTaskItem} className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`}
                     onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
                 </ul>
           )))}
-          {selectedNerTaskLabel == nerTask && isSubListExpanded &&(
+          {selectedNerTaskLabel === nerTask && isSubListExpanded &&(
             <ul className="add-new">
                 <li className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} 
                     onClick={() => handleAddNew("AddNew")}>
