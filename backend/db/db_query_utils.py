@@ -1,10 +1,13 @@
 from elasticsearch import Elasticsearch
 from datetime import datetime, timedelta
 import os, uuid, base64
+import logging
 from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
                             TEXT_LABEL_MAP,
                             )
+
+logger = logging.getLogger("app")
 
 # Connect to Elasticsearch
 es = Elasticsearch("http://localhost:9200")
@@ -33,6 +36,23 @@ def query_dataset_by_time_range(start_time:str, end_time:str, return_items=["que
     results = []
     for hit in response['hits']['hits']:
         results.append(hit['_source'])
+    return results
+
+def query_dataset_by_uuids(query_task:str, uuids:list):
+    index_name = "dataset"
+    query_body = {
+        "query": {
+            "terms": {
+                    "uuid": uuids
+                }
+            }
+    }
+    response = es.search(index=index_name, body=query_body)
+
+    results = []
+    for hit in response['hits']['hits']:
+        results.append({**hit['_source'],
+                        "id": hit["_id"]})
     return results
 
 def query_ner_details(query_task:str):
@@ -100,7 +120,60 @@ def get_all_query_tasks():
         return results
     else:
         return []
-    
+
+def query_image(query_task:str, uuid:str=None):
+    index_name = "image_store"
+    match_condition = {
+        "query_task": query_task
+    }
+    if not uuid is None:
+        match_condition["uuid"] = uuid
+        return_size = 100
+    else:
+        return_size = 3
+    query_body = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match": match_condition
+                    }
+                ]
+            }
+        },
+        "size": return_size
+    }
+    response = es.search(index=index_name, body=query_body)
+
+    results = []
+    for hit in response['hits']['hits']:
+        results.append({**hit['_source'],
+                        "id": hit["_id"]})
+    return results
+
+def delete_one_data_sample_by_one_uuid(query_task:str, uuid:str=None):
+    image_store_index_name = "image_store"
+    dataset_index_name = "image_store"
+    query_body = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match": {
+                            "query_task": query_task,
+                            "uuid": uuid
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    response = es.delete_by_query(index=image_store_index_name, body=query_body)
+    logger.info(response)
+    response = es.delete_by_query(index=dataset_index_name, body=query_body)
+    logger.info(response)
+    return {"message": f"Deleted {uuid} under index {query_task}"}
+
 def update_ner_details(ner_detail:dict):
     index_name = "ner"
     response = es.update(
@@ -109,7 +182,7 @@ def update_ner_details(ner_detail:dict):
         doc={"ners": ner_detail["ners"],
                 "query_task": ner_detail["query_task"]}
     )
-    print(response)
+    logger.info(response)
 
 def update_shell_config(shell_config:dict):
     index_name = "shell_config"
@@ -119,7 +192,7 @@ def update_shell_config(shell_config:dict):
         doc={"shell_details": shell_config["shell_details"],
                 "query_task": shell_config["query_task"]}
     )
-    print(response)
+    logger.info(response)
 
 def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     INDEX_NAME = "dataset"
@@ -132,7 +205,7 @@ def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), f
         "requester": ""
     }
     response = es.index(index=INDEX_NAME, document=doc)
-    print("Document indexed:", response)
+    logger.info("Document dataset indexed:", response)
 
 def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
@@ -148,7 +221,7 @@ def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), 
         "in_sample_seq_id": file_idx,
     }
     response = es.index(index=INDEX_NAME, document=doc)
-    print("Document indexed:", response)
+    logger.info("Document image_store indexed:", response)
 
 def merge_queried_dataset_datetime_by_query_task(queried_results:list):
     merged_queried_datetime_results = {}

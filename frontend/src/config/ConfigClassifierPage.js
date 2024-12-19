@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useReducer, useRef } from 'react';
 import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
+import ConfigClassifierDataSampleComponent from './ConfigClassifierDataSampleComponent';
 import "./css/Config.css";
 
 const ConfigClassifierPage = () => {
@@ -11,9 +12,17 @@ const ConfigClassifierPage = () => {
     const [loadConfigClassifierError, setLoadConfigClassifierError] = useState([]);
     const [boxCheckedTaskLabels, setBoxCheckedTaskLabels] = useState([]);
     const [radioCheckedTaskLabel, setRadioCheckedTaskLabel] = useState("");
+    const [isOnShowDataSamples, setIsOnShowDataSamples] = useState(false);
+    const [isClickedShowDataSamples, setIsClickedShowDataSamples] = useState(false);
+    const [isOnLoadingShowDataSamples, setIsOnLoadingShowDataSamples] = useState(false);
+    const [sampleItems, setSampleItems] = useState([]);
 
     const handleSwitchOnShowSubPage = (event) => {
         setNameOnShowSubPage(event.target.value);
+    }
+
+    const handleClickedShowDataSamples = (event) => {
+        setIsClickedShowDataSamples(true);
     }
 
     const setThisBoxChecked = (e, index) => {
@@ -182,24 +191,47 @@ const ConfigClassifierPage = () => {
                     <Col >
                         <div className='flex-container-end'>
                             <div>
-                                <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>
-                                    {isOnClassifierTraining ? (
-                                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                    ) : nameOnShowSubPage === 'Show Training' ? "Train" : "Show"}
-                                </Button>
+                                {nameOnShowSubPage === 'Show Training' ? (
+                                    <Button variant="primary" className="mb-2" onClick={handleTrainingRequest}>
+                                        {isOnClassifierTraining ? (
+                                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                        ) : "Train"}
+                                    </Button>
+                                ) : (
+                                    <Button variant="primary" className="mb-2" onClick={handleClickedShowDataSamples}>
+                                        {isOnLoadingShowDataSamples ? (
+                                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                        ) : "Show"}
+                                    </Button>
+                                )}
+                                
                             </div>
                         </div>
                     </Col>
                 </Col>
                 <Col xs={8}>
-                    {isOnClassifierTraining ? (
+                    {nameOnShowSubPage === 'Show Training' && (isOnClassifierTraining ? (
                         <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                    ) : trainingResults !== ""
-                        ? (<pre>{trainingResults}</pre>)
-                        : nameOnShowSubPage === 'Show Training' ? (<p>Training results will show here.</p>
-                        ) : (
-                            <p>Sample contents will show here.</p>
-                        )}
+                    ) : (trainingResults !== ""
+                    ? (<pre>{trainingResults}</pre>)
+                    : (<p>Training results will show here.</p>)
+                    ))}
+                    {nameOnShowSubPage === 'Show Data Samples' && (isOnLoadingShowDataSamples ? (
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                    ) : ((sampleItems.length > 0 || isClickedShowDataSamples) ? (
+                        <ConfigClassifierDataSampleComponent 
+                                                    isClickedShowDataSamples={isClickedShowDataSamples} 
+                                                    setIsClickedShowDataSamples={setIsClickedShowDataSamples}
+                                                    isOnLoadingShowDataSamples={isOnLoadingShowDataSamples}
+                                                    setIsOnLoadingShowDataSamples={setIsOnLoadingShowDataSamples}
+                                                    sampleItems={sampleItems}
+                                                    setSampleItems={setSampleItems}
+                                                    radioCheckedTaskLabel={radioCheckedTaskLabel}
+                                                    >
+                        </ConfigClassifierDataSampleComponent>
+                    ) : (
+                        <p>Sample contents will show here.</p>)
+                    ))}
                 </Col>
             </Row>
         </Container>

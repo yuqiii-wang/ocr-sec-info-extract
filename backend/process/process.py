@@ -11,7 +11,13 @@ from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
                             TEXT_LABEL_MAP,
                             )
-from backend.db.db_query_utils import query_ner_details, query_shell_config, update_ner_details, update_shell_config
+from backend.db.db_query_utils import (query_ner_details,
+                                    query_shell_config,
+                                    query_image,
+                                    query_dataset_by_uuids,
+                                    delete_one_data_sample_by_one_uuid,
+                                    update_ner_details,
+                                    update_shell_config)
 from backend.process.utils import (iterate_dict, 
                                    parse_ocr_to_box_and_json,
                                    parse_text_query_to_json)
@@ -76,6 +82,25 @@ def load_ocr_results(text_bounding_boxes:list[TextBoundingBox]):
     for text_bounding_box in text_bounding_boxes:
         all_text += " " + text_bounding_box.text
     return all_text
+
+## streaming
+def process_download_files(task_label:str, uuid:str=None):
+    image_results:list[dict] = query_image(task_label, uuid)
+    for image_result in image_results:
+        yield image_result
+
+def process_get_file_texts(task_label:str, uuid:str=None):
+    if len(uuid) == 0:
+        return jsonify({"error": "no uuid"})
+    file_texts:list[dict] = query_dataset_by_uuids(task_label, uuid)
+    return jsonify(file_texts)
+
+def process_delete_one_sample(task_label:str, uuid:str=None):
+    if uuid is None:
+        return jsonify({"error": "no uuid"})
+    delete_response = delete_one_data_sample_by_one_uuid(task_label, uuid)
+    return jsonify(delete_response)
+
 
 def process_ocr(filenames:list[str], resp_content, socketio:SocketIO, task_label=None):
 

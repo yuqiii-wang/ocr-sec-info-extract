@@ -10,7 +10,7 @@ import CodeCard from "./CodeCard";
 
 const CodeDetailComponent = ({ code }) => {
     const { isSolutionConcludeDone, referenceCodeSepOffset, isOnLoadingExecutionLog,
-        referenceShellScriptResults, setIsOnLoadingExecutionLog
+        referenceShellScriptResults, setIsOnLoadingExecutionLog, answerLoading
      } = useContext(GlobalAppContext);
     const { setIsEditingCode, isEditingCode } = useContext(CodeContext);
 
@@ -76,7 +76,7 @@ const CodeDetailComponent = ({ code }) => {
                     <Button
                         variant="primary"
                         type="submit"
-                        disabled={!isSolutionConcludeDone || isOnLoadingExecutionLog ? true : false}
+                        disabled={!isSolutionConcludeDone || isOnLoadingExecutionLog || answerLoading ? true : false}
                         className={!isSolutionConcludeDone ? "code-btn-container" : ""}
                         style={{ display: "flex", marginLeft: "1%", marginRight: "1%" }}
                         onClick={handleEditToggle}>
@@ -90,7 +90,7 @@ const CodeDetailComponent = ({ code }) => {
                     <Button
                         variant="primary"
                         type="submit"
-                        disabled={!isSolutionConcludeDone || isOnLoadingExecutionLog ? true : false}
+                        disabled={!isSolutionConcludeDone || isOnLoadingExecutionLog || answerLoading ? true : false}
                         className={!isSolutionConcludeDone ? "code-btn-container" : ""}
                         style={{ display: "flex", marginLeft: "1%", marginRight: "1%" }}
                         onClick={handleExecutionRequest}

@@ -1,5 +1,12 @@
 import threading
-from flask import Flask, render_template_string, session, request, jsonify, render_template, make_response, Response
+from flask import (Flask,
+                session,
+                request,
+                jsonify,
+                render_template,
+                make_response,
+                stream_with_context,
+                Response)
 from flask_cors import CORS
 import os, json
 from flask_socketio import SocketIO
@@ -9,6 +16,9 @@ import requests
 from backend.process.admin import process_create_admin_user, process_login_admin_user
 from backend.process.process import (process_execute,
                                      process_upload_file,
+                                     process_download_files,
+                                     process_get_file_texts,
+                                     process_delete_one_sample,
                                      process_ocr,
                                      process_generate_shell_scripts,
                                      process_convert_to_merged_ner_jsons,
@@ -105,6 +115,36 @@ def file_upload():
     fileUuid = request.args.get("fileUuid")
     session['session_image_filenames'].append(file.filename)
     resp = make_response(process_upload_file(file, fileUuid))
+    return resp
+
+@app.route('/process/file/download', methods=['POST'])
+def download_files():
+    data = request.get_json()
+    task_label = data.get("taskLabel", None)
+    uuid = data.get("uuid", None)
+    queried_file_list = process_download_files(task_label, uuid)
+    def generate():
+        delimiter = "\n---END---\n"
+        for item in queried_file_list:
+            yield json.dumps(item) + delimiter
+    return Response(stream_with_context(generate()), content_type="application/json")
+
+@app.route('/process/file/text', methods=['POST'])
+def get_file_texts():
+    data = request.get_json()
+    task_label = data.get("taskLabel", None)
+    uuids = data.get("uuids", None)
+    resp_json = process_get_file_texts(task_label, uuids)
+    resp = make_response(resp_json)
+    return resp
+
+@app.route('/process/delete/sample', methods=['POST'])
+def process_delete_one_sample():
+    data = request.get_json()
+    task_label = data.get("taskLabel", None)
+    uuid = data.get("uuid", None)
+    resp_json = process_delete_one_sample(task_label, uuid)
+    resp = make_response(resp_json)
     return resp
 
 @app.route('/process/submit', methods=['POST'])
