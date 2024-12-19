@@ -83,11 +83,17 @@
 
 .transform-rule-wrapper {
     display: flex; /* Use flexbox */
-    justify-content: space-between; /* Center horizontally */
+    justify-content: space-between; /* two items, one on the left, another one on the right end */
 }
 
 .transform-rule-key-val-wrapper {
     display: flex; /* Use flexbox */
-    justify-content: end; /* Center horizontally */
-    align-items: end; /* Center vertically */
+    justify-content: end; /* End horizontally */
+    align-items: end; /* End vertically */
+}
+
+.data-sample-wrapper {
+    display: flex; /* Use flexbox */
+    justify-content: space-between; /* two items, one on the left, another one on the right end */
+    align-items: flex-start;
 }

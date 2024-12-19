@@ -14,9 +14,15 @@ const TextAsk = () => {
 
     const [inputValue, setInputValue] = useState('');
     const [dots, setDots] = useState('');
+    const [isEnabledAsk, setIsEnabledAsk] = useState(false);
 
     const handleChange = (e) => {
         setInputValue(e.target.value);
+        if (e.target.value.length > 3) {
+            setIsEnabledAsk(true);
+        } else {
+            setIsEnabledAsk(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -102,7 +108,7 @@ const TextAsk = () => {
             </Col>
             <Col className="col-1">
                 <Button type="submit" variant="primary" className='input-text-ask-btn'
-                    onClick={handleSubmit}>
+                    onClick={handleSubmit} disabled={!isEnabledAsk}>
                         Ask
                 </Button>
             </Col>

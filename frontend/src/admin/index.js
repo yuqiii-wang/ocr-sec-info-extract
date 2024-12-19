@@ -59,7 +59,7 @@ const AdminLogin = ({ isToShowAdminLogin, setIsToShowAdminLogin }) => {
                 isAdminUserLoginSuccess ? (
                     <Modal show={isToShowAdminLogin} onHide={handleClose}>
                         <Modal.Header closeButton>
-                            <Modal.Title>Admin Tasks</Modal.Title>
+                            <Modal.Title>Admin Management</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
                             <Row className="justify-content-md-center">

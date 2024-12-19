@@ -139,7 +139,7 @@ def get_file_texts():
     return resp
 
 @app.route('/process/delete/sample', methods=['POST'])
-def process_delete_one_sample():
+def delete_one_sample():
     data = request.get_json()
     task_label = data.get("taskLabel", None)
     uuid = data.get("uuid", None)

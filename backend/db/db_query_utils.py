@@ -6,6 +6,7 @@ from backend.config import (LABEL_TEXT_MAP,
                             LOCAL_INPUT_IMAGE_DIR,
                             TEXT_LABEL_MAP,
                             )
+import random
 
 logger = logging.getLogger("app")
 
@@ -123,26 +124,33 @@ def get_all_query_tasks():
 
 def query_image(query_task:str, uuid:str=None):
     index_name = "image_store"
-    match_condition = {
-        "query_task": query_task
-    }
+    match_conditions = [{"match": {"query_task": query_task} }]
     if not uuid is None:
-        match_condition["uuid"] = uuid
+        match_conditions.append({"match": {"uuid": uuid} })
         return_size = 100
-    else:
+        query_body = {
+            "query": {
+                "bool": {
+                    "must": match_conditions
+                }
+            },
+            "size": return_size
+        }
+    else: # to randomly select items
         return_size = 3
-    query_body = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "match": match_condition
+        query_body = {
+            "query": {
+                "function_score": {
+                    "query": {"match": {"query_task": query_task} },
+                    "random_score": {
+                        "field": "uuid",
+                        "seed": random.randint(1, 999999)
                     }
-                ]
-            }
-        },
-        "size": return_size
-    }
+                }
+            },
+            "size": return_size
+        }
+    
     response = es.search(index=index_name, body=query_body)
 
     results = []
@@ -153,25 +161,37 @@ def query_image(query_task:str, uuid:str=None):
 
 def delete_one_data_sample_by_one_uuid(query_task:str, uuid:str=None):
     image_store_index_name = "image_store"
-    dataset_index_name = "image_store"
+    dataset_index_name = "dataset"
+    match_conditions = [{"match": {"query_task": query_task} },
+                        {"match": {"uuid": uuid} },]
     query_body = {
         "query": {
             "bool": {
-                "must": [
-                    {
-                        "match": {
-                            "query_task": query_task,
-                            "uuid": uuid
-                        }
-                    }
-                ]
+                "must": match_conditions
             }
         }
     }
-    response = es.delete_by_query(index=image_store_index_name, body=query_body)
-    logger.info(response)
-    response = es.delete_by_query(index=dataset_index_name, body=query_body)
-    logger.info(response)
+    response = es.search(index=image_store_index_name, body=query_body)
+    image_found_results = []
+    for hit in response['hits']['hits']:
+        image_found_results.append({**hit['_source'],
+                        "id": hit["_id"]})
+    for image_found_result in image_found_results:
+        image_doc_seq_no, image_doc_primary_term = get_document_version(image_store_index_name, image_found_result["id"])
+        response = es.delete(index=image_store_index_name, id=image_found_result["id"],
+                            if_seq_no=image_doc_seq_no, if_primary_term=image_doc_primary_term)
+        logger.info(response)
+    
+    response = es.search(index=dataset_index_name, body=query_body)
+    text_found_results = []
+    for hit in response['hits']['hits']:
+        text_found_results.append({**hit['_source'],
+                        "id": hit["_id"]})
+    for text_found_result in text_found_results:
+        text_doc_seq_no, text_doc_primary_term = get_document_version(dataset_index_name, text_found_result["id"])
+        response = es.delete(index=dataset_index_name, id=text_found_result["id"],
+                            if_seq_no=text_doc_seq_no, if_primary_term=text_doc_primary_term)
+        logger.info(response)
     return {"message": f"Deleted {uuid} under index {query_task}"}
 
 def update_ner_details(ner_detail:dict):
@@ -205,7 +225,7 @@ def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), f
         "requester": ""
     }
     response = es.index(index=INDEX_NAME, document=doc)
-    logger.info("Document dataset indexed:", response)
+    logger.info(f"Document dataset indexed for {query_task}")
 
 def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)
@@ -221,7 +241,7 @@ def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), 
         "in_sample_seq_id": file_idx,
     }
     response = es.index(index=INDEX_NAME, document=doc)
-    logger.info("Document image_store indexed:", response)
+    logger.info(f"Document image_store indexed for {query_task}")
 
 def merge_queried_dataset_datetime_by_query_task(queried_results:list):
     merged_queried_datetime_results = {}
@@ -235,3 +255,19 @@ def merge_queried_dataset_datetime_by_query_task(queried_results:list):
         this_query_item_list.append(queried_result["datetime"])
         merged_queried_datetime_results[queried_result["query_task"]] = this_query_item_list
     return merged_queried_datetime_results
+
+
+def get_document_version(index, doc_id):
+    try:
+        # Retrieve the document
+        response = es.get(index=index, id=doc_id)
+        seq_no = response['_seq_no']
+        primary_term = response['_primary_term']
+        print(f"Document found. seqNo: {seq_no}, primaryTerm: {primary_term}")
+        return seq_no, primary_term
+    except NotFoundError:
+        print(f"Document with ID '{doc_id}' not found in index '{index}'.")
+        return None, None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None, None

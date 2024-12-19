@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, useRef } from 'react';
-import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Button, Form, Modal } from 'react-bootstrap';
 import ConfigClassifierDataSampleComponent from './ConfigClassifierDataSampleComponent';
 import "./css/Config.css";
 
@@ -16,6 +16,7 @@ const ConfigClassifierPage = () => {
     const [isClickedShowDataSamples, setIsClickedShowDataSamples] = useState(false);
     const [isOnLoadingShowDataSamples, setIsOnLoadingShowDataSamples] = useState(false);
     const [sampleItems, setSampleItems] = useState([]);
+    const [isOnAddNew, setIsOnAddNew] = useState(false);
 
     const handleSwitchOnShowSubPage = (event) => {
         setNameOnShowSubPage(event.target.value);
@@ -121,6 +122,14 @@ const ConfigClassifierPage = () => {
         }
     }
 
+    const handleClickedAddNew = () => {
+        setIsOnAddNew(true);
+    }
+
+    const handleClickedAddNewClose = () => {
+        setIsOnAddNew(false);
+    }
+
     return (
         <Container fluid>
             <Row className="mb-3">
@@ -182,10 +191,15 @@ const ConfigClassifierPage = () => {
                                             </div>
                                         )
                                     }
-
                                     <div key={`${index}-task-label`}><p>&#160;&#160;&#160;&#160;{key}</p></div>
                                 </div>
                             ))}
+                            <ul className="add-new">
+                                <li className="link-style"
+                                    onClick={handleClickedAddNew} >
+                                        Add New
+                                </li>
+                            </ul>
                         </Form.Group>
                     </Form>
                     <Col >
@@ -234,6 +248,18 @@ const ConfigClassifierPage = () => {
                     ))}
                 </Col>
             </Row>
+            <Modal show={isOnAddNew} onHide={handleClickedAddNewClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add Query Task</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row className="justify-content-md-center">
+                        <Col md={6}>
+                            "To be continued"
+                        </Col>
+                    </Row>
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 };

@@ -7,12 +7,13 @@ import InputOrCodeDisplayWrapper from "./InputOrCodeDisplay";
 import AuditChartByTimeCategory from "./audit/AuditChartByTimeCategory";
 import ConfigIndexComponent from "./config/Index";
 import AboutPage from "./about/About";
+import FreshStartPage from "./input/FreshStartPage";
 import React, {  useContext, useEffect } from "react";
 import { GlobalAppContext } from "./GlobalAppContext";
 
 function App() {
 
-    const { isOnHomePage,
+    const { isFreshStart, isOnHomePage,
         isOnAuditPage, isOnAboutPage,
         isOnConfigClassifierPage,
         isOnConfigNERPage,
@@ -75,11 +76,14 @@ function App() {
                 <AboutPage></AboutPage>
               </div>
             
-                <div hidden={!isOnHomePage}>
+            {isFreshStart ? (<div hidden={!isOnHomePage}>
+                    <FreshStartPage></FreshStartPage>
+                </div>) : (<div hidden={!isOnHomePage}>
                     <ReferenceComponent></ReferenceComponent>
                     <ComponentSepLine></ComponentSepLine>
                     <InputOrCodeDisplayWrapper></InputOrCodeDisplayWrapper>
-                </div>
+                </div>)
+            }
         </React.Fragment>);
 }
 

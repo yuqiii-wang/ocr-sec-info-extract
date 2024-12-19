@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
+import { Container, Row, Col, Image, Button } from 'react-bootstrap';
 import "./css/Config.css";
 
 const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsClickedShowDataSamples,
@@ -8,6 +8,9 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
                                             radioCheckedTaskLabel}) => {
 
     const [imageTexts, setImageTexts] =useState({});
+    const [imageUploadDatetimeMap, setImageUploadDatetimeMap] =useState({});
+    const [isOnHover, setIsOnHover] =useState(false);
+    const [onHoverItemKey, setOnHoverItemKey] =useState("");
 
     useEffect(async () => {
         if (isClickedShowDataSamples) {
@@ -61,6 +64,9 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
     };
 
     const fetchImageText = async () => {
+        if (sampleItems.length == 0) {
+            return;
+        }
         try {
           const response = await fetch("/process/file/text", {
             method: "POST",
@@ -74,25 +80,84 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
           });
           const fileTexts = await response.json();
           for (let fileText of fileTexts) {
-            console.log(fileText.uuid);
             setImageTexts((prev) => ({ ...prev, [fileText.uuid+fileText.in_sample_seq_id]: fileText.content }));
+            setImageUploadDatetimeMap((prev) => ({ ...prev, [fileText.uuid+fileText.in_sample_seq_id]: fileText.datetime }));
           }
         } catch (error) {
-          console.error("Error fetching text info:", error);
+          console.error("Error fetchImageText:", error);
         }
     };
+
+    const fetchDeleteImageAndText = (taskLabel, uuid) => {
+        try {
+            const response = fetch("/process/delete/sample", {
+                method: 'POST',
+                body: JSON.stringify({"taskLabel": taskLabel,
+                                    "uuid": uuid
+                }),
+                mode: "cors",
+                headers: new Headers({
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }),
+            })
+            .then( response => {
+                if (response === undefined) {
+                    throw new Error("ocr json conversion response is null.");
+                } else if (!response.ok) {
+                    throw new Error('ocr json conversion response was not ok.');
+                }
+                return response.json();
+            })
+            .then( async (data) => {
+                if (data.error !== undefined) {
+                    console.log(data.error);
+                }
+                setTimeout(() => setIsClickedShowDataSamples(true), 1000);
+            })
+            .catch((postErr) => {
+                // Handle error response
+                if (postErr === "") {
+                    postErr = "Image Process Error.";
+                }
+            });
+        } catch (error) {
+            ;
+        } finally {
+            ;
+        }
+    }
+
+    const handleHover = (isThisOnHover, itemKey) => {
+        setIsOnHover(isThisOnHover);
+        setOnHoverItemKey(itemKey);
+    }
 
   return (
     <div>
       <ul>
         {sampleItems.map((item) => (
           <li key={item.uuid+item.in_sample_seq_id}>
-            <p>UUID: {item.uuid}</p>
-            <img
-              src={`data:image/png;base64,${item.image_base64}`}
-              alt={`UUID-${item.uuid}`}
-              style={{ maxWidth: "300px", maxHeight: "300px" }}
-            />
+            <p>Sample uploaded at: &#160;&#160;
+                {imageUploadDatetimeMap[item.uuid+item.in_sample_seq_id] && imageUploadDatetimeMap[item.uuid+item.in_sample_seq_id] }
+            </p>
+            <div onMouseEnter={(e) => { handleHover(true, item.uuid+item.in_sample_seq_id); }}
+                onMouseLeave={(e) => { handleHover(false, item.uuid+item.in_sample_seq_id); }}
+                className='data-sample-wrapper'>
+                <Image
+                    src={`data:image/png;base64,${item.image_base64}`}
+                    alt={`UUID-${item.uuid}`}
+                    style={{"maxHeight": "30rem",
+                            "maxWidth": "30rem"
+                    }}
+                />
+                {onHoverItemKey === item.uuid+item.in_sample_seq_id && isOnHover && (<Button
+                    variant="danger" type="submit"
+                    onClick={(e) => fetchDeleteImageAndText(radioCheckedTaskLabel, item.uuid)}
+                >
+                    Delete
+                </Button>)}
+            </div>
             {imageTexts[item.uuid+item.in_sample_seq_id] && <p>{imageTexts[item.uuid+item.in_sample_seq_id]}</p>}
           </li>
         ))}

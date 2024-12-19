@@ -5,6 +5,7 @@ const GlobalAppContext = createContext();
 
 
 function GlobalAppContextManager({ children }) {
+    const [isFreshStart, setIsFreshStart] = useState(false);
     const [answerLoading, setAnswerLoading] = useState(false);
     const [isMainAskDone, setIsMainAskDone] = useState(false);
     const [isSolutionRunning, setIsSolutionRunning] = useState(false);
@@ -41,7 +42,8 @@ function GlobalAppContextManager({ children }) {
     const [isOnConfigApprovalPage, setIsOnConfigApprovalPage] = useState(false);
 
     return (
-      <GlobalAppContext.Provider value={{answerLoading, setAnswerLoading,
+      <GlobalAppContext.Provider value={{isFreshStart, setIsFreshStart,
+                                        answerLoading, setAnswerLoading,
                                         isMainAskDone, setIsMainAskDone,
                                         isSolutionShowDone, setIsSolutionShowDone,
                                         isSolutionRunning, setIsSolutionRunning,
