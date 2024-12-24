@@ -12,7 +12,6 @@ const ConfigClassifierPage = () => {
     const [loadConfigClassifierError, setLoadConfigClassifierError] = useState([]);
     const [boxCheckedTaskLabels, setBoxCheckedTaskLabels] = useState([]);
     const [radioCheckedTaskLabel, setRadioCheckedTaskLabel] = useState("");
-    const [isOnShowDataSamples, setIsOnShowDataSamples] = useState(false);
     const [isClickedShowDataSamples, setIsClickedShowDataSamples] = useState(false);
     const [isOnLoadingShowDataSamples, setIsOnLoadingShowDataSamples] = useState(false);
     const [sampleItems, setSampleItems] = useState([]);
@@ -194,12 +193,12 @@ const ConfigClassifierPage = () => {
                                     <div key={`${index}-task-label`}><p>&#160;&#160;&#160;&#160;{key}</p></div>
                                 </div>
                             ))}
-                            <ul className="add-new">
+                            {nameOnShowSubPage === "Show Training" && (<ul className="add-new">
                                 <li className="link-style"
                                     onClick={handleClickedAddNew} >
                                         Add New
                                 </li>
-                            </ul>
+                            </ul>)}
                         </Form.Group>
                     </Form>
                     <Col >

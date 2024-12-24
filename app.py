@@ -14,6 +14,7 @@ from backend.config import setup_logger
 from flask_bcrypt import Bcrypt
 import requests
 from backend.process.admin import process_create_admin_user, process_login_admin_user
+from backend.db.db_healthcheck import elasticsearch_health_check, es_health_status, es_health_status_lock
 from backend.process.process import (process_execute,
                                      process_upload_file,
                                      process_download_files,
@@ -34,6 +35,8 @@ from backend.process.process import (process_execute,
                                      load_ner_task_scripts,
                                      save_ner_task_scripts
                                      )
+
+ELASTICSEARCH_HEALTH_URL = "http://localhost:9200/_cluster/health"
 
 # Create a Flask application instance
 app = Flask(__name__, 
@@ -253,6 +256,12 @@ def login_admin_user():
     data = request.get_json()
     return process_login_admin_user(bcrypt, data)
 
+# internal re-direct
+@app.route("/check/elasticsearch-db-health", methods=["GET"])
+def get_elasticsearch_health():
+    with es_health_status_lock:  # Lock access to health_status
+        return jsonify(es_health_status)
+
 # Route nginx proxy to render Kibana
 @app.route('/flask/kibana/<path:path>', methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 def render_kibana(path):
@@ -267,26 +276,6 @@ def render_kibana(path):
         # Ensure the `kbn-xsrf` header is included for non-GET requests
         if request.method != 'GET' and 'kbn-xsrf' not in headers:
             headers['kbn-xsrf'] = 'flask-proxy'
-
-        # Stream data to Kibana
-        # status_code = -1
-        # def generate_req_chunks():
-        #     with requests.request(
-        #         method=request.method,
-        #         url=kibana_url,
-        #         headers=headers,
-        #         data=request.stream,  # Stream the request data to the proxied server
-        #         cookies=request.cookies,
-        #         stream=True  # Enable streaming for the response
-        #     ) as resp:
-        #         status_code = resp.status_code
-        #         # Stream chunks back to the client
-        #         for chunk in resp.iter_content(chunk_size=8192):
-        #             if chunk:
-        #                 yield chunk
-        # combined_content = b""
-        # for chunk in generate_req_chunks():
-        #     combined_content += chunk
 
         resp = requests.request(
             method=request.method,
@@ -314,4 +303,7 @@ def render_kibana(path):
 
 
 if __name__ == "__main__":
+    health_check_thread = threading.Thread(target=elasticsearch_health_check, daemon=True)
+    health_check_thread.start()
+
     socketio.run(app, debug=True, host="0.0.0.0", port=5000)

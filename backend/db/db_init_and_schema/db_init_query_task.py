@@ -13,6 +13,9 @@ index_settings = {
             "query_task": {
                 "type": "keyword",
             },
+            "metadata_keywords": {
+                "type": "keyword",
+            },
             "label": {
                 "type": "integer",
             },

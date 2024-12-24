@@ -3,7 +3,6 @@ import { Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import { Check } from 'react-bootstrap-icons';
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import ErrorBar from '../others/ErrorBar';
 import { QuestionCircle } from 'react-bootstrap-icons';
 import ConfigHandlerComponent from './ConfigHandlerComponent';
 import "./css/Config.css";

@@ -40,6 +40,7 @@ function GlobalAppContextManager({ children }) {
     const [isOnConfigNERPage, setIsOnConfigNERPage] = useState(false);
     const [isOnConfigHandlerPage, setIsOnConfigHandlerPage] = useState(false);
     const [isOnConfigApprovalPage, setIsOnConfigApprovalPage] = useState(false);
+    const [dbHealthCheckErrorMsg, setDbHealthCheckErrorMsg] = useState("");
 
     return (
       <GlobalAppContext.Provider value={{isFreshStart, setIsFreshStart,
@@ -76,7 +77,8 @@ function GlobalAppContextManager({ children }) {
                                         isOnConfigClassifierPage, setIsOnConfigClassifierPage,
                                         isOnConfigNERPage, setIsOnConfigNERPage,
                                         isOnConfigHandlerPage, setIsOnConfigHandlerPage,
-                                        isOnConfigApprovalPage, setIsOnConfigApprovalPage
+                                        isOnConfigApprovalPage, setIsOnConfigApprovalPage,
+                                        dbHealthCheckErrorMsg, setDbHealthCheckErrorMsg
                                         }}>
         {children}
       </GlobalAppContext.Provider>
