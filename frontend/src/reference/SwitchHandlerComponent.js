@@ -10,15 +10,16 @@ const SwitchHandlerComponent = ({taskHandlerLabels, loadedTaskHandlerLabel}) => 
     const { setAnswerLoading,
         thisFileUuids, uploadedFilenames,
         setApprovalTemplateId, 
-        setIsMainAskDone,
+        setIsMainAskDone, thisSessionUuid,
         setTaskLabel, setReferenceImageResults, setIsSolutionShowDone,
-         setReferenceOCRJsonResults,
-        inputError, setInputError } = useContext(GlobalAppContext);
+        setReferenceOCRJsonResults,
+        setInputError } = useContext(GlobalAppContext);
 
 
     const handleOnSelect = async (eventKey) => {
         if (eventKey !== loadedTaskHandlerLabel) {
             await processSubmitRequest(eventKey);
+            await updatePrevImageAndTextSample(eventKey);
         }
     }
 
@@ -82,6 +83,46 @@ const SwitchHandlerComponent = ({taskHandlerLabels, loadedTaskHandlerLabel}) => 
             ;
         }
     };
+
+
+    const updatePrevImageAndTextSample = async (newTaskHandlerLabel) => {
+        console.log(newTaskHandlerLabel);
+        try {
+            const response = fetch("/process/update/sample", {
+                method: 'POST',
+                body: JSON.stringify({"oldTaskLabel": loadedTaskHandlerLabel,
+                                    "newTaskLabel": newTaskHandlerLabel,
+                                    "uuid": thisSessionUuid
+                }),
+                mode: "cors",
+                headers: new Headers({
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }),
+            })
+            .then( response => {
+                if (response === undefined) {
+                    throw new Error("/process/update/sample response not defined");
+                } else if (!response.ok) {
+                    throw new Error('/process/update/sample response not ok');
+                }
+                return response.json();
+            })
+            .then( data => {
+                console.log(data);
+            })
+            .catch((postErr) => {
+                // Handle error response
+                if (postErr === "") {
+                    postErr = "Image Process Error.";
+                }
+            });
+        } catch (error) {
+            ;
+        } finally {
+            ;
+        }
+    }
 
     return (
         <DropdownButton id="dropdown-basic-button"

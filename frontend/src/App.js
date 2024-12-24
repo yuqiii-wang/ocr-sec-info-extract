@@ -17,7 +17,7 @@ function App() {
     const { isFreshStart, isOnHomePage,
         isOnAuditPage, isOnAboutPage,
         isOnConfigClassifierPage,
-        isOnConfigNERPage,
+        isOnConfigNERPage, inputError,
         isOnConfigHandlerPage,
         setThisSessionUuid,
         dbHealthCheckErrorMsg, setDbHealthCheckErrorMsg

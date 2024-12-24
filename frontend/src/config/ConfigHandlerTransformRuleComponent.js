@@ -15,6 +15,7 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
     const [thisTransformName, setThisTransformName] = useState("");
     const [thisTransformJsonValue, setThisTransformJsonValue] = useState("");
     const [remainedNerTaskItemLabels, setRemainedNerTaskItemLabels] = useState([]);
+    const [isOnHover, setIsOnHover] =useState(false);
 
     // only on first time mount
     useEffect(() => {
@@ -83,7 +84,7 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
             }
             index += 1;
         };
-        let tmpTransformItemLambdaNames = transformItemLambdaNames;
+        let tmpTransformItemLambdaNames = [...transformItemLambdaNames];
         tmpTransformItemLambdaNames[index] = eKeyLambdaName;
         setTransformItemLambdaNames(tmpTransformItemLambdaNames);
 
@@ -126,7 +127,7 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
     }
 
     const handleAddNewTransform = (eKeyNerName) => {
-        let tmpTransformItems = transformItems;
+        let tmpTransformItems = {...transformItems};
         tmpTransformItems[eKeyNerName] = {"static_mapping": {}};
         setNerNames([...nerNames, eKeyNerName]);
         setTransformItemLambdaNames([...transformItemLambdaNames, "static_mapping"]);
@@ -135,6 +136,34 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
         setThisTransformJsonValue(JSON.stringify({}, null, 2));
         setTransformItems(tmpTransformItems);
     }
+
+    const handleHover = (isNowOnHover) => {
+        if (isEnabledEditing) {
+            setIsOnHover(isNowOnHover);
+        } else {
+            setIsOnHover(false);
+        }
+    }
+
+    const handleDeleteTransform = () => {
+        const oldTransformItems = {...transformItems};
+        setTransformItems(oldTransformItems => {
+            // Create a new object without the specified key
+            const { [thisNerName]: _, ...rest } = oldTransformItems;
+            return rest;
+        });
+        let index = 0;
+        for (let tmpNerName of nerNames) {
+            if (tmpNerName === thisNerName) {
+                break;
+            }
+            index += 1;
+        };
+        setTransformItemLambdaNames([...transformItemLambdaNames.slice(0,index), ...transformItemLambdaNames.slice(index+1)]);
+        setNerNames(nerNames.filter(nerName => nerName !== thisNerName));
+        setTimeout(() => setIsSetupTransformItems(true), 100);
+    }
+
 
     const validateDatetime = () => {
         if (thisTransformName !== "datetime") {
@@ -163,17 +192,32 @@ const ConfigHandlerTransformRuleComponent = ({ transformItems, setTransformItems
 
     return (
         <div>
-        <Row>
+        <Row   onMouseEnter={(e) => { handleHover(true); }}
+               onMouseLeave={(e) => { handleHover(false); }} >
             <Col md={thisNerNameDisplayColSize} >
-            <DropdownButton
-                id="dropdown-basic-button"
-                title={thisNerName}
-                onSelect={(eKey) => handleUpdateNerName(eKey)}
-            >
-                {Object.entries(transformItems).map(([nerName, transformLambda], index) => (
-                    <Dropdown.Item eventKey={nerName} key={nerName} >{nerName}</Dropdown.Item>
-                ))}
-            </DropdownButton>
+                <Row >
+                <Col md={12} >
+                    <DropdownButton
+                        id="dropdown-basic-button"
+                        title={thisNerName}
+                        onSelect={(eKey) => handleUpdateNerName(eKey)}
+                    >
+                        {Object.entries(transformItems).map(([nerName, transformLambda], index) => (
+                            <Dropdown.Item eventKey={nerName} key={nerName} >{nerName}</Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                    </Col>
+                </Row>
+                <Row>
+                <Col md={12} >
+                {isOnHover ? (<Button style={{"marginTop": "1%"}}
+                        variant="danger" type="button"
+                        onClick={handleDeleteTransform}
+                    >
+                        Delete
+                    </Button>) : ""}
+                    </Col>
+                </Row>
             </Col>
             <Col md={thisLambdaNameDisplayColSize} >
                 <Form.Group >

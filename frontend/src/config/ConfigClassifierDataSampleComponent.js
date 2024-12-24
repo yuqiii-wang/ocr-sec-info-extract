@@ -7,6 +7,7 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
                                             sampleItems, setSampleItems,
                                             radioCheckedTaskLabel}) => {
 
+    const [alreadyLoadedUuids, setAlreadyLoadedUuids] =useState([]);
     const [imageTexts, setImageTexts] =useState({});
     const [imageUploadDatetimeMap, setImageUploadDatetimeMap] =useState({});
     const [isOnHover, setIsOnHover] =useState(false);
@@ -14,8 +15,6 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
 
     useEffect(async () => {
         if (isClickedShowDataSamples) {
-            setSampleItems([]);
-            setImageTexts({});
             setIsClickedShowDataSamples(false);
             await fetchFileDownload();
             setIsOnLoadingShowDataSamples(false);
@@ -25,12 +24,18 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
     useEffect(async () => {
         await fetchImageText();
     }, [sampleItems]);
+
+    const cleanseDeletedSampleItem = (uuid) => {
+        setSampleItems(sampleItems.filter(sampleItem => sampleItem.uuid !== uuid));
+    }
   
     const fetchFileDownload = async () => {
         setIsOnLoadingShowDataSamples(true);
         const response = await fetch("/process/file/download", {
                     method: 'POST',
-                    body: JSON.stringify({"taskLabel": radioCheckedTaskLabel,}),
+                    body: JSON.stringify({"taskLabel": radioCheckedTaskLabel,
+                                        "uuidsToExclude": alreadyLoadedUuids
+                    }),
                     mode: "cors",
                     headers: new Headers({
                         'Accept': 'application/json',
@@ -53,12 +58,12 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
             buffer = parts.pop(); // Keep the last incomplete part in the buffer
     
             for (const part of parts) {
-            try {
-                const item = JSON.parse(part);
-                setSampleItems((prevItems) => [...prevItems, item]); // Update state incrementally
-            } catch (error) {
-                console.error("Error parsing JSON:", error);
-            }
+                try {
+                    const item = JSON.parse(part);
+                    setSampleItems((prevItems) => [...prevItems, item]); // Update state incrementally
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                }
             }
         }
     };
@@ -74,7 +79,7 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             }),
-            body: JSON.stringify({ "taskLabel": "bbg_bond",
+            body: JSON.stringify({ "taskLabel": radioCheckedTaskLabel,
                                     "uuids": sampleItems.map(item => item.uuid)
              }),
           });
@@ -82,6 +87,13 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
           for (let fileText of fileTexts) {
             setImageTexts((prev) => ({ ...prev, [fileText.uuid+fileText.in_sample_seq_id]: fileText.content }));
             setImageUploadDatetimeMap((prev) => ({ ...prev, [fileText.uuid+fileText.in_sample_seq_id]: fileText.datetime }));
+            setAlreadyLoadedUuids((prev) => {
+                                    if (prev.includes(fileText.uuid)) {
+                                        return prev;
+                                    } else {
+                                        return [...prev, fileText.uuid];
+                                    }
+                                });
           }
         } catch (error) {
           console.error("Error fetchImageText:", error);
@@ -109,11 +121,11 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
                 }
                 return response.json();
             })
-            .then( async (data) => {
+            .then( data => {
                 if (data.error !== undefined) {
                     console.log(data.error);
                 }
-                setTimeout(() => setIsClickedShowDataSamples(true), 1000);
+                cleanseDeletedSampleItem(uuid);
             })
             .catch((postErr) => {
                 // Handle error response
@@ -136,9 +148,12 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
   return (
     <div>
       <ul>
-        {sampleItems.map((item) => (
-          <li key={item.uuid+item.in_sample_seq_id}>
-            <p>Sample uploaded at: &#160;&#160;
+        {sampleItems.map((item, index) => {
+        if (radioCheckedTaskLabel === item.query_task) return (
+          <li key={item.uuid+item.in_sample_seq_id+index}>
+            <p>UUID: &#160;&#160; {item.uuid}</p>
+            <p>Label: &#160;&#160; {item.query_task}</p>
+            <p>Uploaded at: &#160;&#160;
                 {imageUploadDatetimeMap[item.uuid+item.in_sample_seq_id] && imageUploadDatetimeMap[item.uuid+item.in_sample_seq_id] }
             </p>
             <div onMouseEnter={(e) => { handleHover(true, item.uuid+item.in_sample_seq_id); }}
@@ -160,7 +175,7 @@ const ConfigClassifierDataSampleComponent = ({isClickedShowDataSamples, setIsCli
             </div>
             {imageTexts[item.uuid+item.in_sample_seq_id] && <p>{imageTexts[item.uuid+item.in_sample_seq_id]}</p>}
           </li>
-        ))}
+        )})}
       </ul>
     </div>
   );

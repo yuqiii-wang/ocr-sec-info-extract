@@ -16,6 +16,7 @@ from backend.db.db_query_utils import (query_ner_details,
                                     query_image,
                                     query_dataset_by_uuids,
                                     delete_one_data_sample_by_one_uuid,
+                                    update_data_sample_query_task_by_uuid,
                                     update_ner_details,
                                     update_shell_config)
 from backend.process.utils import (iterate_dict, 
@@ -84,8 +85,8 @@ def load_ocr_results(text_bounding_boxes:list[TextBoundingBox]):
     return all_text
 
 ## streaming
-def process_download_files(task_label:str, uuid:str=None):
-    image_results:list[dict] = query_image(task_label, uuid)
+def process_download_files(task_label:str, uuid:str=None, uuids_to_exclude:list=[]):
+    image_results:list[dict] = query_image(task_label, uuid, uuids_to_exclude)
     for image_result in image_results:
         yield image_result
 
@@ -100,6 +101,12 @@ def process_delete_one_sample(task_label:str, uuid:str=None):
         return jsonify({"error": "no uuid"})
     delete_response = delete_one_data_sample_by_one_uuid(task_label, uuid)
     return jsonify(delete_response)
+
+def process_update_one_sample_query_task(old_task_label:str, new_task_label:str, uuid:str=None):
+    if uuid is None:
+        return jsonify({"error": "no uuid"})
+    update_response = update_data_sample_query_task_by_uuid(old_task_label, new_task_label, uuid)
+    return jsonify(update_response)
 
 
 def process_ocr(filenames:list[str], resp_content, socketio:SocketIO, task_label=None):
@@ -123,7 +130,7 @@ def process_ocr(filenames:list[str], resp_content, socketio:SocketIO, task_label
         found_item_jsons.append(found_item_json)
         image_output_paths.append(image_output_path)
 
-        progress = int((file_idx+1 / len(filenames)) * 100)
+        progress = int((float(file_idx+1) / len(filenames)) * 100)
         socketio.emit('ocr_progress', {'progress': progress, 'index':file_idx+1, 'total': len(filenames)})
 
     zip_buffer = io.BytesIO()
@@ -229,7 +236,8 @@ def train_classifier(training_labels:list):
 
 def load_ner_task_scripts(ner_task):
     ner_task_script_config = query_shell_config(ner_task)
-    return jsonify(ner_task_script_config["shell_details"])
+    shell_details = ner_task_script_config["shell_details"]
+    return jsonify(shell_details)
 
 def save_ner_task_scripts(ner_task:str, new_ner_task_script_config:dict):
     ner_task_script_config = query_shell_config(ner_task)
@@ -239,7 +247,7 @@ def save_ner_task_scripts(ner_task:str, new_ner_task_script_config:dict):
         })
     ner_task_script_config["shell_details"] = new_ner_task_script_config
     update_shell_config(ner_task_script_config)
-    return jsonify(ner_task_script_config)
+    return jsonify(new_ner_task_script_config)
 
 def load_audit_all():
     return jsonify({"message": "ok"})

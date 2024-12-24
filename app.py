@@ -20,6 +20,7 @@ from backend.process.process import (process_execute,
                                      process_download_files,
                                      process_get_file_texts,
                                      process_delete_one_sample,
+                                     process_update_one_sample_query_task,
                                      process_ocr,
                                      process_generate_shell_scripts,
                                      process_convert_to_merged_ner_jsons,
@@ -44,6 +45,7 @@ app = Flask(__name__,
             static_folder='frontend/build/static')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MB limit
 CORS(app, resources={r'/process/submit': {"origins": "http://localhost:3000"},
+                        r'/process/update/sample': {"origins": "http://localhost:3000"},
                         r'/process/file/upload': {"origins": "http://localhost:3000"},
                         r'/process/file/remove': {"origins": "http://localhost:3000"},
                         r'/process/execute': {"origins": "http://localhost:3000"},
@@ -125,7 +127,8 @@ def download_files():
     data = request.get_json()
     task_label = data.get("taskLabel", None)
     uuid = data.get("uuid", None)
-    queried_file_list = process_download_files(task_label, uuid)
+    uuids_to_exclude = data.get("uuidsToExclude", None)
+    queried_file_list = process_download_files(task_label, uuid, uuids_to_exclude)
     def generate():
         delimiter = "\n---END---\n"
         for item in queried_file_list:
@@ -147,6 +150,16 @@ def delete_one_sample():
     task_label = data.get("taskLabel", None)
     uuid = data.get("uuid", None)
     resp_json = process_delete_one_sample(task_label, uuid)
+    resp = make_response(resp_json)
+    return resp
+
+@app.route('/process/update/sample', methods=['POST'])
+def update_one_sample():
+    data = request.get_json()
+    old_task_label = data.get("oldTaskLabel", None)
+    new_task_label = data.get("newTaskLabel", None)
+    uuid = data.get("uuid", None)
+    resp_json = process_update_one_sample_query_task(old_task_label, new_task_label, uuid)
     resp = make_response(resp_json)
     return resp
 
@@ -306,4 +319,4 @@ if __name__ == "__main__":
     health_check_thread = threading.Thread(target=elasticsearch_health_check, daemon=True)
     health_check_thread.start()
 
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000)
+    socketio.run(app, debug=True, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)

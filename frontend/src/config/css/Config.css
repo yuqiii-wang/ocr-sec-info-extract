@@ -86,6 +86,11 @@
     justify-content: space-between; /* two items, one on the left, another one on the right end */
 }
 
+.transform-rule-item-col {
+    display: flex; /* Use flexbox */
+    justify-content: space-between; /* two items, one on the left, another one on the right end */
+}
+
 .transform-rule-key-val-wrapper {
     display: flex; /* Use flexbox */
     justify-content: end; /* End horizontally */

@@ -58,16 +58,11 @@ def query_dataset_by_uuids(query_task:str, uuids:list):
 
 def query_ner_details(query_task:str):
     index_name = "ner"
+    match_conditions = [{"match": {"query_task": query_task} }]
     query_body = {
         "query": {
             "bool": {
-                "must": [
-                    {
-                        "match": {
-                            "query_task": query_task
-                        }
-                    }
-                ]
+                "must": match_conditions
             }
         }
     }
@@ -85,16 +80,11 @@ def query_ner_details(query_task:str):
 
 def query_shell_config(query_task:str):
     index_name = "shell_config"
+    match_conditions = [{"match": {"query_task": query_task} }]
     query_body = {
         "query": {
             "bool": {
-                "must": [
-                    {
-                        "match": {
-                            "query_task": query_task
-                        }
-                    }
-                ]
+                "must": match_conditions
             }
         }
     }
@@ -122,12 +112,12 @@ def get_all_query_tasks():
     else:
         return []
 
-def query_image(query_task:str, uuid:str=None):
+def query_image(query_task:str, uuid:str=None, uuids_to_exclude:list=[]):
     index_name = "image_store"
     match_conditions = [{"match": {"query_task": query_task} }]
+    return_size = 100
     if not uuid is None:
         match_conditions.append({"match": {"uuid": uuid} })
-        return_size = 100
         query_body = {
             "query": {
                 "bool": {
@@ -136,8 +126,8 @@ def query_image(query_task:str, uuid:str=None):
             },
             "size": return_size
         }
-    else: # to randomly select items
-        return_size = 3
+    else: # randomly got a uuid then get this
+        match_uuid_exclusion_conditions = []
         query_body = {
             "query": {
                 "function_score": {
@@ -146,6 +136,25 @@ def query_image(query_task:str, uuid:str=None):
                         "field": "uuid",
                         "seed": random.randint(1, 999999)
                     }
+                }
+            },
+            "size": 1
+        }
+        response = es.search(index=index_name, body=query_body)
+        found_rand_uuid = response['hits']['hits'][0]['_source']['uuid']
+        if len(uuids_to_exclude) > 0:
+            research_count = 0
+            while research_count < 5 and found_rand_uuid in uuids_to_exclude:
+                research_count += 1
+                response = es.search(index=index_name, body=query_body)
+                found_rand_uuid = response['hits']['hits'][0]['_source']['uuid']
+            match_uuid_exclusion_conditions.append({"terms": {"uuid": uuids_to_exclude} })
+        match_conditions.append({"match": {"uuid": found_rand_uuid} })
+        query_body = {
+            "query": {
+                "bool": {
+                    "must": match_conditions,
+                    "must_not": match_uuid_exclusion_conditions
                 }
             },
             "size": return_size
@@ -196,23 +205,49 @@ def delete_one_data_sample_by_one_uuid(query_task:str, uuid:str=None):
 
 def update_ner_details(ner_detail:dict):
     index_name = "ner"
-    response = es.update(
+    response = es.index(
         index=index_name,
         id=ner_detail["id"],
-        doc={"ners": ner_detail["ners"],
+        document={"ners": ner_detail["ners"],
                 "query_task": ner_detail["query_task"]}
     )
     logger.info(response)
 
 def update_shell_config(shell_config:dict):
     index_name = "shell_config"
-    response = es.update(
+    response = es.index(
         index=index_name,
         id=shell_config["id"],
-        doc={"shell_details": shell_config["shell_details"],
+        document={"shell_details": shell_config["shell_details"],
                 "query_task": shell_config["query_task"]}
     )
     logger.info(response)
+
+def update_data_sample_query_task_by_uuid(old_query_task:str, new_query_task:str, uuid:str):
+    image_store_index_name = "image_store"
+    dataset_index_name = "dataset"
+    match_conditions = [{"match": {"query_task": old_query_task} },
+                        {"match": {"uuid": uuid} },]
+    query_body = {
+        "query": {
+            "bool": {
+                "must": match_conditions
+            }
+        }
+    }
+    for index_name in [image_store_index_name, dataset_index_name]:
+        search_response = es.search(index=index_name, body=query_body)
+        for hit in search_response['hits']['hits']:
+            src = hit["_source"]
+            src["query_task"] = new_query_task
+            update_response = es.update(
+                index=index_name,
+                id=hit["_id"],
+                doc=src
+            )
+            logger.info(f"update_data_sample_query_task_by_uuid: {old_query_task} to {new_query_task}")
+            logger.info(update_response)
+    return {"message": f"Updated {uuid} from {old_query_task} to {new_query_task}"}
 
 def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     INDEX_NAME = "dataset"
@@ -226,6 +261,7 @@ def insert_doc_to_dataset(content:str, query_task:str, uuid=str(uuid.uuid4()), f
     }
     response = es.index(index=INDEX_NAME, document=doc)
     logger.info(f"Document dataset indexed for {query_task}")
+    logger.info(response)
 
 def insert_image_to_store(filename:str, query_task:str, uuid=str(uuid.uuid4()), file_idx=0):
     file_path = os.path.join(LOCAL_INPUT_IMAGE_DIR, filename)

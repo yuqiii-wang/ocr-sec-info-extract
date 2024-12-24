@@ -122,7 +122,7 @@ const ConfigHandlerComponent = ({nerTaskItemLabels, selectedNerTaskLabel,
     }
 
     const filterTransformItems = () => {
-        const tmpTransformItems = transformItems;
+        const tmpTransformItems = {...transformItems};
         const resultTransformItems = {};
         Object.entries(tmpTransformItems).forEach(([transformItemName, transformItemLambdas], index) => {
             resultTransformItems[transformItemName] = Object.fromEntries(
@@ -152,6 +152,7 @@ const ConfigHandlerComponent = ({nerTaskItemLabels, selectedNerTaskLabel,
             "transform_lambda": filteredTransform
         };
         try {
+            console.log(nertaskScriptConfigs);
             const response = fetch("/config/save/ner/task/scripts", {
                 method: 'POST',
                 body: JSON.stringify({"nertask": nertask,

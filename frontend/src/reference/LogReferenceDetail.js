@@ -24,7 +24,7 @@ const LogReferenceDetail = () => {
         if (!isOnLoadingExecutionLog) {
             return;
         }
-        const socket = io('http://localhost:5000');  // URL of your Flask backend
+        const socket = io(`${window.location.origin}`);  // URL of your Flask backend
 
         socket.on('connect', () => {
             console.log('Connected to WebSocket server');

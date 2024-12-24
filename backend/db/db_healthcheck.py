@@ -1,11 +1,14 @@
 import requests
 import time
 from threading import Lock
+from elasticsearch import Elasticsearch
 
 
 # Elasticsearch health check URL
 ELASTICSEARCH_HEALTH_URL = "http://localhost:9200/_cluster/health"
 es_health_status = {"status": "unknown", "error": None}
+
+es = Elasticsearch("http://localhost:9200")
 
 es_health_status_lock = Lock()
 
@@ -29,3 +32,7 @@ def elasticsearch_health_check():
                 es_health_status["error"] = "Connection Refused."
 
         time.sleep(10)  # Check every 10 seconds
+
+# update uuid for data samples if found same uuid and in-sample seq id
+def elasticsearch_cleanse_uuid():
+    pass

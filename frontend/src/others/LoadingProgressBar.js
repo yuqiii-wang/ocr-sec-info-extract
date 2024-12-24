@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 const ProgressBarComponent = ({subscribedTopic="progress_update"}) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('');
-  const socket = io('http://localhost:5000'); // WebSocket server URL
+  const socket = io(`${window.location.origin}`); // WebSocket server URL
 
   useEffect(() => {
     // Listen for WebSocket progress updates

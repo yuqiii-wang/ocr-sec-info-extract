@@ -28,9 +28,6 @@ const InputComponent = () => {
     const processSubmitRequest = async (event) => {
 
         try {
-            if (thisFileUuids === "" ) {
-                setInputError("Not found a file to submit for OCR process.");
-            }
             setAnswerLoading(true);
             const response = fetch("/process/submit", {
                 method: 'POST',
