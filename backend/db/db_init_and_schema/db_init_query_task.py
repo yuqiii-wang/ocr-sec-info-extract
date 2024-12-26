@@ -16,6 +16,9 @@ index_settings = {
             "metadata_keywords": {
                 "type": "keyword",
             },
+            "metadata_config_labels": {
+                "type": "keyword",
+            },
             "label": {
                 "type": "integer",
             },
@@ -26,16 +29,13 @@ index_settings = {
             "is_enabled": {
                 "type": "boolean",
             },
-            "is_approval_required": {
-                "type": "boolean",
-            },
         }
     }
 }
 
 # Create the index with the defined settings and mappings
 if not es.indices.exists(index=INDEX_NAME):
-    response = es.indices.create(index=INDEX_NAME, body=index_settings)
+    response = es.indices.create(indeyx=INDEX_NAME, body=index_settings)
     print("Index created:", response)
 else:
     print("Index shell_config already exists!")
@@ -48,19 +48,19 @@ docs = [{
     "label": 0,
     "datetime_created_at": "2024-12-01 00:00:00",
     "is_enabled": True,
-    "is_approval_required": False
+    "metadata_config_labels": ["is_ocr_task"]
 },{
     "query_task": "bbg_mbs",
     "label": 1,
     "datetime_created_at": "2024-12-01 00:00:00",
     "is_enabled": True,
-    "is_approval_required": False
+    "metadata_config_labels": ["is_ocr_task"]
 },{
     "query_task": "cfest_bond",
     "label": 2,
     "datetime_created_at": "2024-12-01 00:00:00",
     "is_enabled": True,
-    "is_approval_required": False
+    "metadata_config_labels": ["is_ocr_task", "is_ocr_enabled_color_clustering"]
 }]
 
 for doc in docs:

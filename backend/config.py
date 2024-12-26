@@ -1,19 +1,17 @@
 import os
+from backend.db.db_query_utils import get_all_query_tasks
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCAL_INPUT_IMAGE_DIR=os.path.join(current_dir, "local_files", "input_images")
 LOCAL_OCR_IMAGE_DIR=os.path.join(current_dir, "local_files", "ocr_images")
 LOCAL_OCR_TMP_IMAGE_DIR=os.path.join(current_dir, "local_files", "tmp_images")
 
+all_query_tasks = get_all_query_tasks()
 
-TEXT_LABEL_MAP = {
-    "bbg_bond": 0,
-    "bbg_mbs":  1,
-    "cfest_bond":  2
-}
-
+TEXT_LABEL_MAP = {task["query_task"]: task["label"] for task in all_query_tasks}
 LABEL_TEXT_MAP = {v : k for k, v in TEXT_LABEL_MAP.items()}
-
+TEXT_CONFIG_MAP = {task["query_task"]: task["metadata_config_labels"] for task in all_query_tasks}
+TEXT_ENABLE_MAP = {task["query_task"]: task["is_enabled"] for task in all_query_tasks}
 
 if not os.path.exists(LOCAL_INPUT_IMAGE_DIR):
     os.makedirs(LOCAL_INPUT_IMAGE_DIR)

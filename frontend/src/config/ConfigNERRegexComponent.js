@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown, DropdownButton, Button, Row, Col, Form } from 'react-bootstrap';
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -6,14 +6,15 @@ import ErrorBar from '../others/ErrorBar';
 import { QuestionCircle } from 'react-bootstrap-icons';
 
 
-const ConfigNERRegexComponent = ({nerTaskLabels,
-                        selectedNerTaskLabel, 
-                        selectedNerItemLabel, 
-                        selectedNerItemDetails,
-                    }) => {
+const ConfigNERRegexComponent = ({ nerTaskLabels,
+    selectedTaskLabel,
+    selectedNerItemLabel,
+    selectedNerItemDetails,
+}) => {
 
     const [isOnSwitchHandler, setIsOnSwitchHandler] = useState(false);
     const [isOnEditing, setIsOnEditing] = useState(false);
+    const [isOnHoverNerName, setIsOnHoverNerName] = useState(false);
     const [nerItemName, setNerItemName] = useState("");
     const [isValidTransformedNerItemDetailJson, setIsValidTransformedNerItemDetailJson] = useState(true);
     const [transformedNerItemDetailJson, setTransformedNerItemDetailJson] = useState("");
@@ -33,7 +34,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
 
     const validateTransformedNerItemDetailJson = () => {
         let isValid = true;
-        let transformedNerItemDetailJsonObj = { };
+        let transformedNerItemDetailJsonObj = {};
         const regex_escape = /[\\]/g;
         try {
             let transformedNerItemDetailJsonStr = transformedNerItemDetailJson.replace(regex_escape, "\\\\");
@@ -43,7 +44,7 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
             setIsValidTransformedNerItemDetailJson(false);
             return false;
         }
-        
+
         if (Object.keys(transformedNerItemDetailJsonObj).length !== validKeys.size) {
             setIsValidTransformedNerItemDetailJson(false);
             return false;
@@ -67,6 +68,10 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
         setTransformedNerItemDetailJson(e.target.value);
     }
 
+    const handleDeleteNerRegex = () => {
+
+    }
+
     const handleSaveNerRequest = () => {
         if (nerItemName === undefined || nerItemName === "AddNew" || nerItemName === "") {
             return;
@@ -75,33 +80,34 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
             const regex_escape = /[\\]/g;
             const response = fetch("/config/save/ner", {
                 method: 'POST',
-                body: JSON.stringify({ "nerTask": selectedNerTaskLabel,
-                                    "nerTaskItem": nerItemName,
-                                    "nerTaskItemDetails": transformedNerItemDetailJson.replace(regex_escape, "\\\\")
-                 }),
+                body: JSON.stringify({
+                    "nerTask": selectedTaskLabel,
+                    "nerTaskItem": nerItemName,
+                    "nerTaskItemDetails": transformedNerItemDetailJson.replace(regex_escape, "\\\\")
+                }),
                 mode: "cors",
                 headers: new Headers({
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 }),
             })
-            .then( response => {
-                if (response === undefined) {
-                    throw new Error("classifier config training response is null.");
-                } else if (!response.ok) {
-                    throw new Error('classifier config training response was not ok.');
-                }
-                return response.json();
-            })
-            .then( data => {
+                .then(response => {
+                    if (response === undefined) {
+                        throw new Error("classifier config training response is null.");
+                    } else if (!response.ok) {
+                        throw new Error('classifier config training response was not ok.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
 
-            })
-            .catch((postErr) => {
-                // Handle error response
-                if (postErr === "") {
-                    postErr = "Image Process Error.";
-                }
-            });
+                })
+                .catch((postErr) => {
+                    // Handle error response
+                    if (postErr === "") {
+                        postErr = "Image Process Error.";
+                    }
+                });
         } catch (error) {
             ;
         } finally {
@@ -113,7 +119,11 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
         const regex = /[ \&]/;
         return !regex.test(nerItemName);
     };
-    
+
+    const handleHover = (isNowOnHover) => {
+        setIsOnHoverNerName(isNowOnHover);
+    }
+
     useEffect(() => {
         if (selectedNerItemLabel === "AddNew") {
             setNerItemName("");
@@ -129,79 +139,97 @@ const ConfigNERRegexComponent = ({nerTaskLabels,
         <React.Fragment>
             <h6>NER task: </h6>
             <DropdownButton id="dropdown-basic-button"
-                title={selectedNerTaskLabel} onClick={toggleIsOnSwitchHandler}>
-                    {nerTaskLabels.map((nerTaskLabel) => (
-                        <Dropdown.Item href="" key={nerTaskLabel}>{nerTaskLabel}</Dropdown.Item>
-                    ))}
+                title={selectedTaskLabel} onClick={toggleIsOnSwitchHandler}>
+                {nerTaskLabels.map((nerTaskLabel) => (
+                    <Dropdown.Item href="" key={nerTaskLabel}>{nerTaskLabel}</Dropdown.Item>
+                ))}
             </DropdownButton>
-            <br/>
+            <br />
             <Form>
-                <Row className="mb-3">
-                    <Col md="4">
-                        <Form.Group as={Col} controlId="formNERName">
-                        <h6>NER Name</h6>
-                            <Form.Control
-                                value={nerItemName}
-                                as="textarea"
-                                rows={1}
-                                disabled={!isOnEditing}
-                                isInvalid={!validateNerItemNameInput()}
-                                onChange={handleEditNerItemNameChange}
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                Input should not contain spaces.
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                    </Col>
-                </Row>
-                {selectedNerItemLabel && 
-
-                <Row className="mb-3">
+                <Row className="mb-3" onMouseEnter={(e) => { handleHover(true); }}
+                    onMouseLeave={(e) => { handleHover(false); }}>
                     <Col md="8">
                         <Form.Group as={Col} controlId="formNERName">
-                        <Form.Label>Regex to recognize NER
-                            <OverlayTrigger
-                                placement="top"
-                                overlay={<Tooltip id="tooltip-info">
-                                    <div className='tooltip-content'>
-                                    <p>full_regex searches matched text from whole msg.</p>
-                                    <p>key_regex searches pattern from full_regex found items, and remove itself.</p>
-                                    <p>val_regex searches pattern from full_regex found items with key_regex text removed.</p>
-                                            </div>
-                                    </Tooltip>}
-                            >
-                                <Button variant="link">
-                                    <QuestionCircle size={24} />
-                                </Button>
-                            </OverlayTrigger>
-                            </Form.Label>
-                            <Form.Control
-                                value={transformedNerItemDetailJson}
-                                as="textarea"
-                                rows={9}
-                                disabled={!isOnEditing}
-                                onChange={handleEditChange}
-                            />
+                            <h6>NER Name</h6>
+                            <Row>
+                                <Col >
+                                    <Form.Control
+                                        value={nerItemName}
+                                        as="textarea"
+                                        rows={1}
+                                        disabled={!isOnEditing}
+                                        isInvalid={!validateNerItemNameInput()}
+                                        onChange={handleEditNerItemNameChange}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Input should not contain spaces.
+                                    </Form.Control.Feedback>
+                                </Col>
+                                <Col >
+                                    {/* {isOnHoverNerName && isOnEditing && (
+                                        <Button
+                                            variant="danger" type="button"
+                                            onClick={handleDeleteNerRegex}
+                                        >
+                                            Delete
+                                        </Button>)
+                                    } */}
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
-                    <Col md="4" className='ner-regex-btn-container'>
-                    {!isOnEditing? (
-                        <Button variant='primary' onClick={toggleIsEditing}>
-                            Edit
-                        </Button>) : (
-                            <Button variant='primary' onClick={() => {
-                                                                    const isValid = validateTransformedNerItemDetailJson();
-                                                                    isValid ? setIsOnEditing(false) : setIsOnEditing(true);
-                                                                    isValid && handleSaveNerRequest();}
-                            }>
-                            Save
-                        </Button>
-                        )}
+                    <Col md="6" className="d-flex align-items-end">
+
                     </Col>
                 </Row>
-                        }
+                {selectedNerItemLabel &&
+                    <Row className="mb-3">
+                        <Col md="8">
+                            <Form.Group as={Col} controlId="formNERName">
+                                <Form.Label>Regex to recognize NER
+                                    <OverlayTrigger
+                                        placement="top"
+                                        overlay={<Tooltip id="tooltip-info">
+                                            <div className='tooltip-content'>
+                                                <p>full_regex searches matched text from whole msg.</p>
+                                                <p>key_regex searches pattern from full_regex found items, and remove itself.</p>
+                                                <p>val_regex searches pattern from full_regex found items with key_regex text removed.</p>
+                                            </div>
+                                        </Tooltip>}
+                                    >
+                                        <Button variant="link">
+                                            <QuestionCircle size={24} />
+                                        </Button>
+                                    </OverlayTrigger>
+                                </Form.Label>
+                                <Form.Control
+                                    value={transformedNerItemDetailJson}
+                                    as="textarea"
+                                    rows={9}
+                                    disabled={!isOnEditing}
+                                    onChange={handleEditChange}
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md="4" className='ner-regex-btn-container'>
+                            {!isOnEditing ? (
+                                <Button variant='primary' onClick={toggleIsEditing}>
+                                    Edit
+                                </Button>) : (
+                                <Button variant='primary' onClick={() => {
+                                    const isValid = validateTransformedNerItemDetailJson();
+                                    isValid ? setIsOnEditing(false) : setIsOnEditing(true);
+                                    isValid && handleSaveNerRequest();
+                                }
+                                }>
+                                    Save
+                                </Button>
+                            )}
+                        </Col>
+                    </Row>
+                }
             </Form>
-            {!isValidTransformedNerItemDetailJson && 
+            {!isValidTransformedNerItemDetailJson &&
                 <ErrorBar message="Invalid Json of Regex and Transform Rules"></ErrorBar>
             }
         </React.Fragment>

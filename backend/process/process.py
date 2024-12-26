@@ -7,10 +7,11 @@ from logging import getLogger
 from flask_socketio import SocketIO, emit
 from backend.classifier.utils import store_ocr_text_and_image, store_msg_text
 from backend.audit.audit import load_audit_by_time
+from backend.env import LOCAL_INPUT_IMAGE_DIR
 from backend.config import (LABEL_TEXT_MAP,
-                            LOCAL_INPUT_IMAGE_DIR,
                             TEXT_LABEL_MAP,
-                            )
+                            TEXT_CONFIG_MAP
+                            )                      
 from backend.db.db_query_utils import (query_ner_details,
                                     query_shell_config,
                                     query_image,
@@ -21,10 +22,11 @@ from backend.db.db_query_utils import (query_ner_details,
                                     update_shell_config)
 from backend.process.utils import (iterate_dict, 
                                    parse_ocr_to_box_and_json,
+                                   parse_ocr_by_checking_empty_key,
                                    parse_text_query_to_json)
 from backend.OCREngine import OCREngine
 from backend.classifier.classifier import DT_Classifier, train_dt_model
-from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import ImageSegByColor
+from backend.parser_dispatchers.ocr_parsers.image_seg_by_color import OCRByColorClustering
 from backend.parser_dispatchers.ocr_parsers.text_bounding_box import TextBoundingBox
 from backend.shell_script_generator.shell_script_generator import (generate_shell_scripts, 
                                                     convert_to_merged_ner_jsons,
@@ -33,7 +35,7 @@ from backend.shell_script_executor.bsi_sec_setup import load_dummy_log
 
 ocr_engine = OCREngine()
 dt_classifier = DT_Classifier()
-imageSegByColor_engine = ImageSegByColor(ocr_engine)
+ocrByColorClustering = OCRByColorClustering(ocr_engine)
 
 logger = getLogger("app")
 
@@ -126,6 +128,9 @@ def process_ocr(filenames:list[str], resp_content, socketio:SocketIO, task_label
         logger.info(f"Loaded task handler is {task_label}")
         task_ner_details = query_ner_details(task_label)
         found_bounding_boxes, found_item_json = parse_ocr_to_box_and_json(text_bounding_boxes, task_ner_details["ners"])
+        if "is_ocr_enabled_color_clustering" in TEXT_CONFIG_MAP[task_label]:
+            parse_ocr_by_checking_empty_key(found_bounding_boxes, found_item_json,
+                                    task_ner_details["ners"], file_path)
         image_output_path = ocr_engine.draw_ocr(filename, found_bounding_boxes)
         found_item_jsons.append(found_item_json)
         image_output_paths.append(image_output_path)

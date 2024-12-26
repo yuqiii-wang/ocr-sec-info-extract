@@ -2,10 +2,7 @@ from elasticsearch import Elasticsearch
 from datetime import datetime, timedelta
 import os, uuid, base64
 import logging
-from backend.config import (LABEL_TEXT_MAP,
-                            LOCAL_INPUT_IMAGE_DIR,
-                            TEXT_LABEL_MAP,
-                            )
+from backend.env import LOCAL_INPUT_IMAGE_DIR
 import random
 
 logger = logging.getLogger("app")

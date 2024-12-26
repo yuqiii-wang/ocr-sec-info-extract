@@ -10,6 +10,8 @@ class OCREngine:
 
     def __init__(self):
         self.paddle_ocr = PaddleOCR(use_angle_cls=True, lang='en')
+        # self.detector = PaddleOCR(use_angle_cls=False, lang='en', det=True, rec=False)  # Detection only
+        # self.recognizer = PaddleOCR(use_angle_cls=True, lang='en', det=False, rec=True)  # Recognition only
 
     def draw_ocr(self, filename:str, bounding_boxes:list[TextBoundingBox]) -> str:
         

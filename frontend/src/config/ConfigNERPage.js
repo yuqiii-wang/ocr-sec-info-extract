@@ -7,11 +7,10 @@ const ConfigNERPage = () => {
 
     const [nerTaskLabels, setNerTaskLabels] = useState([]);
     const [nerTaskItemLabels, setNerTaskItemLabels] = useState([]);
-    const [isOnLoadingNerDetails, setIsOnLoadingNerDetails] = useState(false);
     const [isSubListExpanded, setIsSubListExpanded] = useState(false);
     const [loadConfigClassifierError, setLoadConfigClassifierError] = useState([]);
     const [selectedComponent, setSelectedComponent] = useState('A');
-    const [selectedNerTaskLabel, setSelectedNerTaskLabel] = useState('');
+    const [selectedTaskLabel, setSelectedTaskLabel] = useState('');
     const [selectedNerItemLabel, setSelectedNerItemLabel] = useState('');
     const [selectedNerItemDetails, setSelectedNerItemDetails] = useState({});
 
@@ -67,7 +66,7 @@ const ConfigNERPage = () => {
 
     const handleGetNerTaskItemsRequest = (nertask) => {
         try {
-            setSelectedNerTaskLabel(nertask);
+            setSelectedTaskLabel(nertask);
             const response = fetch("/config/load/ner?" + "nertask=" + nertask, {
                 method: 'GET',
                 mode: "cors",
@@ -117,7 +116,7 @@ const ConfigNERPage = () => {
 
     const handleGetNerTaskItemDetailsRequest = (nertask, neritem) => {
         try {
-            setSelectedNerTaskLabel(nertask);
+            setSelectedTaskLabel(nertask);
             setSelectedNerItemLabel(neritem);
             const response = fetch("/config/load/ner?" + "nertask=" + nertask + "&neritem=" + neritem, {
                 method: 'GET',
@@ -165,7 +164,7 @@ const ConfigNERPage = () => {
         <div className='flex-container'>
             <p>NER tasks:</p>
             <ArrowClockwise className='ner-refresh-btn' onClick={() => {
-                handleGetNerTaskItemsRequest(selectedNerTaskLabel)}}></ArrowClockwise>
+                handleGetNerTaskItemsRequest(selectedTaskLabel)}}></ArrowClockwise>
             <p></p>
         </div>
           </Row>
@@ -179,12 +178,12 @@ const ConfigNERPage = () => {
             >
             {nerTask}
             </li>
-          {nerTaskItemLabels.map((nerTaskItem) => (selectedNerTaskLabel === nerTask && (
+          {nerTaskItemLabels.map((nerTaskItem) => (selectedTaskLabel === nerTask && (
                 <ul key={nerTaskItem} className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`}
                     onClick={() => handleGetNerTaskItemDetailsRequest(nerTask, nerTaskItem)}>{nerTaskItem}
                 </ul>
           )))}
-          {selectedNerTaskLabel === nerTask && isSubListExpanded &&(
+          {selectedTaskLabel === nerTask && isSubListExpanded &&(
             <ul className="add-new">
                 <li className={`link-style link-style-sublist ${isSubListExpanded ? 'expanded' : ''}`} 
                     onClick={() => handleAddNew("AddNew")}>
@@ -222,7 +221,7 @@ const ConfigNERPage = () => {
         ) : selectedComponent === 'A' ? (
             <ConfigNERRegexComponent
                 nerTaskLabels={nerTaskLabels}
-                selectedNerTaskLabel={selectedNerTaskLabel}
+                selectedTaskLabel={selectedTaskLabel}
                 selectedNerItemLabel={selectedNerItemLabel}
                 selectedNerItemDetails={selectedNerItemDetails}>
             </ConfigNERRegexComponent>

@@ -214,7 +214,7 @@ const ConfigClassifierPage = () => {
                                     <Button variant="primary" className="mb-2" onClick={handleClickedShowDataSamples}>
                                         {isOnLoadingShowDataSamples ? (
                                             <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                        ) : "Show"}
+                                        ) : sampleItems.length > 0 ? "More" : "Show"}
                                     </Button>
                                 )}
                                 

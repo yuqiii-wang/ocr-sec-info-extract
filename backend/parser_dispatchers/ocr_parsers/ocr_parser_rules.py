@@ -43,10 +43,11 @@ def parse_ocr_by_rules(bounding_boxes:list[TextBoundingBox], ner_item_details:di
                     loaded_bounding_box_val_idx = -1
                     val_this_text_match = re.search(ner_item_detail["val_regex"], bounding_box_this_text)
                     val_next_text_match = re.search(ner_item_detail["val_regex"], bounding_box_next_text)
-                    if not val_this_text_match is None:
-                        loaded_bounding_box_val_idx = idx if idx != loaded_bounding_box_key_idx else -1
-                    elif not val_next_text_match is None:
-                        loaded_bounding_box_val_idx = (idx+1) % len(bounding_boxes) if (idx+1) % len(bounding_boxes) != loaded_bounding_box_key_idx else -1
+                    if loaded_bounding_box_key_idx != -1:
+                        if not val_next_text_match is None:
+                            loaded_bounding_box_val_idx = (idx+1) % len(bounding_boxes)
+                        elif not val_this_text_match is None:
+                            loaded_bounding_box_val_idx = idx
                     if loaded_bounding_box_val_idx != -1:
                         found_bounding_boxes.append(bounding_boxes[loaded_bounding_box_val_idx])
                     if loaded_bounding_box_key_idx != -1:
@@ -74,3 +75,4 @@ def parse_ocr_by_rules(bounding_boxes:list[TextBoundingBox], ner_item_details:di
                     val_match = re.search(ner_item_detail["val_regex"], found_text)
                     found_items[rule_key] = val_match.group()
     return found_bounding_boxes, found_items
+
